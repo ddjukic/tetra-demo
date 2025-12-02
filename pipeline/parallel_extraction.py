@@ -487,7 +487,6 @@ async def extract_relationships_parallel(
                 "error": str(result),
                 "error_type": type(result).__name__,
             })
-            report.get_phase("relationship_mining")
             phase = report.phase_metrics.get("relationship_mining")
             if phase:
                 phase.add_error(f"PMID {pmid}: {result}")

@@ -142,7 +142,9 @@ async def run_pipeline(seed_terms: list[str], max_papers: int, research_focus: s
             report=report,
         )
         st.code(query_result.query, language="text")
-        st.caption(f"Query rationale: {query_result.rationale[:200]}..." if len(query_result.rationale) > 200 else f"Query rationale: {query_result.rationale}")
+        if query_result.strategy_explanation:
+            explanation = query_result.strategy_explanation
+            st.caption(f"Query strategy: {explanation[:200]}..." if len(explanation) > 200 else f"Query strategy: {explanation}")
         status.update(label="Query constructed", state="complete")
 
     # Phase 3: PubMed fetch + NER
