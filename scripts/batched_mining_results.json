@@ -1,0 +1,86 @@
+[
+  {
+    "n": 20,
+    "analysis": {
+      "total_abstracts": 20,
+      "total_tokens": 4803,
+      "mean_tokens": 240.2,
+      "min_tokens": 20,
+      "max_tokens": 476,
+      "recommended_chunks": 3,
+      "tokens_per_chunk": 1601.0
+    },
+    "statistics": {
+      "total_abstracts": 20,
+      "total_tokens_input": 4803,
+      "chunks_created": 3,
+      "chunks_processed": 3,
+      "relationships_raw": 81,
+      "relationships_extracted": 78,
+      "tokens_used": 14495,
+      "prompt_tokens": 6669,
+      "completion_tokens": 7826,
+      "duration_seconds": 25.6,
+      "throughput_abstracts_per_sec": 0.8
+    },
+    "relationships_count": 78,
+    "duration": 25.602412939071655,
+    "errors_count": 0
+  },
+  {
+    "n": 50,
+    "analysis": {
+      "total_abstracts": 50,
+      "total_tokens": 13679,
+      "mean_tokens": 273.6,
+      "min_tokens": 20,
+      "max_tokens": 775,
+      "recommended_chunks": 3,
+      "tokens_per_chunk": 4559.7
+    },
+    "statistics": {
+      "total_abstracts": 50,
+      "total_tokens_input": 13679,
+      "chunks_created": 3,
+      "chunks_processed": 3,
+      "relationships_raw": 145,
+      "relationships_extracted": 141,
+      "tokens_used": 31275,
+      "prompt_tokens": 16859,
+      "completion_tokens": 14416,
+      "duration_seconds": 48.67,
+      "throughput_abstracts_per_sec": 1.0
+    },
+    "relationships_count": 141,
+    "duration": 48.6678740978241,
+    "errors_count": 0
+  },
+  {
+    "n": 100,
+    "analysis": {
+      "total_abstracts": 100,
+      "total_tokens": 27850,
+      "mean_tokens": 278.5,
+      "min_tokens": 20,
+      "max_tokens": 775,
+      "recommended_chunks": 6,
+      "tokens_per_chunk": 4641.7
+    },
+    "statistics": {
+      "total_abstracts": 100,
+      "total_tokens_input": 27850,
+      "chunks_created": 6,
+      "chunks_processed": 6,
+      "relationships_raw": 253,
+      "relationships_extracted": 244,
+      "tokens_used": 59048,
+      "prompt_tokens": 34184,
+      "completion_tokens": 24864,
+      "duration_seconds": 48.62,
+      "throughput_abstracts_per_sec": 2.1
+    },
+    "relationships_count": 244,
+    "duration": 48.61706495285034,
+    "errors_count": 0
+  }
+]

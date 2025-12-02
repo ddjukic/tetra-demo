@@ -2,9 +2,11 @@
 
 ## 2024-12-02 22:58 UTC - Architecture Optimizations
 
-### 1. Ensemble Node2Vec with Multiple p/q Parameters
+### 1. Ensemble Node2Vec with Multiple p/q Parameters - COMPLETED
 
 **Problem:** Currently only one node2vec model trained with a single set of p & q parameters.
+
+**Status:** IMPLEMENTED (2025-12-03)
 
 **Background:**
 - `p` (return parameter): Controls likelihood of returning to previous node
@@ -14,34 +16,39 @@
   - q > 1: BFS-like, captures **homophily** (local neighborhood clustering)
   - q < 1: DFS-like, captures **structural equivalence** (global roles like hubs)
 
-**Optimization:**
-1. Train at least 2-3 node2vec models with different p/q settings:
-   - Model A: p=1, q=0.5 (DFS-like, structural equivalence)
-   - Model B: p=1, q=2.0 (BFS-like, homophily)
-   - Model C: p=0.5, q=1.0 (balanced)
+**Implementation:**
+- Created `ml/ensemble_predictor.py` with `EnsembleLinkPredictor`
+- Trained 2 additional node2vec models with different p/q parameters
 
-2. Create ensemble scoring:
-   ```python
-   def ensemble_predict(node1, node2, models, weights=None):
-       scores = [model.predict_proba(node1, node2) for model in models]
-       # Weighted average or voting
-       return aggregate(scores, weights)
-   ```
+**Training Results:**
 
-3. Agent-guided interpretation:
-   - Agent analyzes which model's prediction is more confident
-   - Interprets based on graph structure (homophilic vs structural)
-   - Provides reasoning: "Model A (structural) suggests these proteins share hub-like roles..."
+| Model | p | q | Behavior | ROC-AUC | Avg Precision |
+|-------|---|---|----------|---------|---------------|
+| Structural | 1.0 | 0.5 | DFS-like, captures hub roles | 0.9866 | 0.9860 |
+| Homophily | 1.0 | 2.0 | BFS-like, captures local clusters | 0.9890 | 0.9883 |
+| Original | 1.0 | 1.0 | Balanced | 0.9888 | 0.9881 |
 
-4. Add homophily estimation algorithm:
-   ```python
-   def estimate_homophily(graph, attribute='type'):
-       """
-       Calculate edge homophily ratio.
-       H = (edges connecting same-type nodes) / (total edges)
-       H > 0.5 suggests homophily, H < 0.5 suggests heterophily
-       """
-   ```
+**Key Features:**
+1. EnsembleLinkPredictor class with weighted/majority voting
+2. estimate_graph_homophily() function for structural analysis
+3. interpret_disagreement() for explaining model consensus/divergence
+4. Automatic model loading from models/ directory
+
+**Files Created:**
+- `/Users/dejandukic/dejan_dev/tetra/tetra_v1/ml/ensemble_predictor.py`
+- `/Users/dejandukic/dejan_dev/tetra/tetra_v1/models/link_predictor_structural.pkl`
+- `/Users/dejandukic/dejan_dev/tetra/tetra_v1/models/link_predictor_homophily.pkl`
+
+**Usage:**
+```python
+from ml.ensemble_predictor import EnsembleLinkPredictor
+
+ensemble = EnsembleLinkPredictor()
+result = ensemble.predict_single("BRCA1", "TP53")
+# result['ensemble_score'] - weighted average score
+# result['predictions'] - individual model predictions
+# result['interpretation'] - explanation of agreement/disagreement
+```
 
 **Note on Node2Vec + GNN compatibility:**
 - Random walk embeddings "emulate" conv-GNN aggregation
@@ -50,98 +57,64 @@
 - If adding GNN later, use raw features (expression, GO terms) not Node2Vec embeddings
 - GAT (attention-based) may add value over Node2Vec; vanilla GCN won't
 
-**Priority:** Medium
-**Effort:** 2-3 days
+**Priority:** COMPLETED
+**Effort:** 1 day
 
 ---
 
-### 2. Batched Abstract Mining (Token-Aware Chunking)
+### 2. Batched Abstract Mining (Token-Aware Chunking) - COMPLETED
 
 **Problem:** Currently 1 LLM invocation per abstract - inefficient and hits rate limits.
 
-**Current state:**
-- ~50 abstracts → 50 API calls
-- Redundant context (NER entities repeated in every prompt)
-- High latency, rate limit risk
-- Not DRY
+**Status:** IMPLEMENTED (2025-12-03)
 
-**Optimization:**
-1. Batch abstracts by token count:
-   - Target: ~10K tokens per agent call (conservative)
-   - Or: ~32K tokens per call (aggressive, like v0 design)
-   - Minimum 3 parallel agents even if all fit in one prompt
+**Implementation:**
+- Created `pipeline/batched_mining.py` with `BatchedMiningOrchestrator`
+- Created `scripts/test_batched_mining.py` for scale testing
 
-2. Token-aware chunking algorithm:
-   ```python
-   def chunk_abstracts_by_tokens(articles, target_tokens=10000, min_chunks=3):
-       """
-       Group abstracts into chunks targeting ~target_tokens each.
-       Ensure at least min_chunks for parallelization.
-       """
-       chunks = []
-       current_chunk = []
-       current_tokens = 0
+**Key Features:**
+1. Token-aware chunking with configurable target (~5K tokens per chunk)
+2. Minimum 3 chunks enforced for parallelization
+3. Structured JSON output with Gemini response_schema
+4. Exponential backoff retry on rate limits (429, 503)
+5. Evidence sentences preserved verbatim from abstracts
+6. Relationship deduplication by (source, target, type)
 
-       for article in articles:
-           article_tokens = count_tokens(article['abstract'])
-           if current_tokens + article_tokens > target_tokens and current_chunk:
-               chunks.append(current_chunk)
-               current_chunk = []
-               current_tokens = 0
-           current_chunk.append(article)
-           current_tokens += article_tokens
+**Test Results (2025-12-03, orexin sleep regulation query):**
 
-       if current_chunk:
-           chunks.append(current_chunk)
+| Abstracts | Chunks | Tokens Used | Relationships | Duration | Throughput |
+|-----------|--------|-------------|---------------|----------|------------|
+| 20        | 3      | 14,495      | 78            | 25.6s    | 0.8/s      |
+| 50        | 3      | 31,275      | 141           | 48.7s    | 1.0/s      |
+| 100       | 6      | 59,048      | 244           | 48.6s    | 2.1/s      |
 
-       # Ensure minimum chunks for parallelization
-       while len(chunks) < min_chunks:
-           # Split largest chunk
-           ...
+**Key Observations:**
+- Throughput scales with parallelization: 2.6x improvement from 20 to 100 abstracts
+- Duration stays constant (~50s) due to parallel chunk processing
+- Relationship extraction quality is good (meaningful orexin/sleep/narcolepsy edges)
+- Token efficiency: ~280 tokens per abstract average
 
-       return chunks
-   ```
+**Files Created:**
+- `/Users/dejandukic/dejan_dev/tetra/tetra_v1/pipeline/batched_mining.py`
+- `/Users/dejandukic/dejan_dev/tetra/tetra_v1/scripts/test_batched_mining.py`
 
-3. Shared entity context:
-   - Extract unique entities across ALL abstracts first
-   - Pass entity list once per chunk (not per abstract)
-   - Reduces prompt tokens significantly
+**Usage:**
+```python
+from pipeline.batched_mining import BatchedMiningOrchestrator, BatchedMiningConfig
 
-4. Parallel execution with semaphore:
-   ```python
-   async def mine_relationships_batched(articles, annotations, config):
-       chunks = chunk_abstracts_by_tokens(articles, target_tokens=10000)
-       unique_entities = extract_unique_entities(annotations)
+config = BatchedMiningConfig(
+    target_tokens_per_chunk=5000,
+    min_chunks=3,
+    max_concurrent=5,
+)
+orchestrator = BatchedMiningOrchestrator(config)
+result = await orchestrator.run(articles, annotations)
+# result['relationships'] - list of ExtractedRelationship
+# result['statistics'] - mining metrics
+```
 
-       semaphore = asyncio.Semaphore(config.mining_max_concurrent)
-       tasks = [
-           extract_from_chunk(chunk, unique_entities, semaphore)
-           for chunk in chunks
-       ]
-       results = await asyncio.gather(*tasks)
-       return merge_results(results)
-   ```
-
-**Statistics collected (2025-12-02):**
-- [x] Fetched 200 orexin papers (2010-2024) - 194 with abstracts
-
-**Token Distribution (cl100k_base encoding):**
-| Metric | Characters | Tokens |
-|--------|------------|--------|
-| Min    | 117        | 23     |
-| Max    | 3,581      | 901    |
-| Mean   | 1,304      | 273    |
-| Median | 1,305      | 262    |
-| **Total** | —       | **52,980** |
-
-**Batching Recommendation:**
-- At 10K tokens/batch: ~6 batches needed (conservative)
-- At 32K tokens/batch: ~2 batches needed (aggressive)
-- **Recommendation:** Use 10K tokens/batch with min 3 parallel workers
-- All 50 abstracts (~13K tokens) could fit in 2 batches
-
-**Priority:** High (performance critical)
-**Effort:** 1-2 days
+**Priority:** COMPLETED
+**Effort:** 1 day
 
 ---
 
@@ -188,3 +161,7 @@
 - [ ] Add PUBMED_API_KEY validation in frontend
 - [ ] Improve type hints in app.py
 - [ ] Add error handling for StringClient initialization
+- [ ] Integrate batched_mining.py into parallel_extraction.py pipeline
+- [ ] Add tiktoken as optional dependency for accurate token counting
+- [ ] Consider increasing target_tokens_per_chunk to 10K-15K for better efficiency
+- [ ] Add Langfuse tracing to batched mining operations
