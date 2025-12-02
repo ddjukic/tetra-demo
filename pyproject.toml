@@ -33,6 +33,7 @@ dependencies = [
     # Utilities
     "python-dotenv>=1.0.0",
     "tqdm>=4.66.0",
+    "tiktoken>=0.7.0",
 
     # Observability & Tracing
     "opentelemetry-sdk>=1.28.0",
