@@ -1,0 +1,864 @@
+"""
+Tetra v1 - Scientific Knowledge Graph Agent Frontend
+
+Streamlit application for interacting with the knowledge graph agent.
+Features:
+- Build knowledge graphs from seed proteins via multi-agent pipeline
+- Interactive chat interface with GraphRAG Q&A agent
+- Knowledge graph visualization using PyVis
+- Graph statistics and entity exploration
+
+Usage:
+    uv run streamlit run frontend/app.py --server.port 8501
+"""
+
+import asyncio
+import os
+import sys
+import tempfile
+import uuid
+from pathlib import Path
+from typing import Any
+
+import streamlit as st
+import streamlit.components.v1 as components
+
+# Add project root to path for imports
+_project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(_project_root))
+
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv(_project_root / ".env")
+
+
+# =============================================================================
+# Page Configuration
+# =============================================================================
+
+st.set_page_config(
+    page_title="Tetra v1 - Scientific Knowledge Graph Agent",
+    page_icon="🧬",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+
+# =============================================================================
+# Async Helper
+# =============================================================================
+
+def run_async(coro):
+    """Run async function in Streamlit."""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
+
+
+# =============================================================================
+# Resource Initialization (Cached)
+# =============================================================================
+
+@st.cache_resource(show_spinner="Loading link predictor model...")
+def load_link_predictor():
+    """Load the pre-trained link predictor model."""
+    from ml.link_predictor import LinkPredictor
+
+    model_path = _project_root / "models" / "link_predictor_v2.pkl"
+
+    if not model_path.exists():
+        st.warning(f"Link predictor model not found at {model_path}")
+        return None
+
+    try:
+        predictor = LinkPredictor.load(str(model_path))
+        return predictor
+    except Exception as e:
+        st.error(f"Failed to load link predictor: {e}")
+        return None
+
+
+@st.cache_resource(show_spinner="Initializing demo knowledge graph...")
+def get_demo_knowledge_graph():
+    """Get or create a demo knowledge graph instance."""
+    from models.knowledge_graph import KnowledgeGraph
+    return KnowledgeGraph()
+
+
+# =============================================================================
+# Pipeline Execution
+# =============================================================================
+
+async def run_pipeline(seed_terms: list[str], max_papers: int, research_focus: str | None = None):
+    """
+    Run the full knowledge graph pipeline.
+
+    Args:
+        seed_terms: List of seed proteins/genes to expand
+        max_papers: Maximum number of PubMed papers to fetch
+        research_focus: Optional research context for query construction
+
+    Returns:
+        Tuple of (MergeResult, PipelineReport)
+    """
+    from pipeline import (
+        PipelineConfig,
+        PipelineReport,
+        expand_string_network,
+        construct_pubmed_query,
+        run_parallel_extraction,
+        merge_to_knowledge_graph,
+        annotations_list_to_dict,
+    )
+    from clients.pubmed_client import PubMedClient
+    from agent.graph_agent import set_active_graph
+
+    # Create configuration
+    config = PipelineConfig(
+        pubmed_max_results=max_papers,
+        langfuse_session_id=str(uuid.uuid4()),
+    )
+
+    # Create pipeline report
+    report = PipelineReport.create()
+
+    # Phase 1: STRING expansion
+    with st.status("Phase 1: Expanding protein network via STRING...", expanded=True) as status:
+        st.write(f"Seed proteins: {', '.join(seed_terms)}")
+        string_result = await expand_string_network(seed_terms, config, report)
+        st.write(f"Found {len(string_result.expanded_proteins)} proteins")
+        st.write(f"Retrieved {len(string_result.interactions)} interactions")
+        status.update(label=f"STRING expansion complete: {len(string_result.expanded_proteins)} proteins", state="complete")
+
+    # Phase 2: Query construction
+    with st.status("Phase 2: Constructing PubMed query...", expanded=True) as status:
+        query_result = await construct_pubmed_query(
+            proteins=string_result.expanded_proteins,
+            research_focus=research_focus or "protein interactions",
+            config=config,
+            report=report,
+        )
+        st.code(query_result.query, language="text")
+        st.caption(f"Query rationale: {query_result.rationale[:200]}..." if len(query_result.rationale) > 200 else f"Query rationale: {query_result.rationale}")
+        status.update(label="Query constructed", state="complete")
+
+    # Phase 3: PubMed fetch + NER
+    with st.status("Phase 3: Fetching papers and annotations...", expanded=True) as status:
+        api_key = os.environ.get("PUBMED_API_KEY")
+        client = PubMedClient(api_key=api_key)
+
+        try:
+            # Search for PMIDs
+            pmids = await client.search(query_result.query, max_results=config.pubmed_max_results)
+            st.write(f"Found {len(pmids)} matching papers")
+
+            if pmids:
+                # Fetch abstracts
+                articles = await client.fetch_abstracts(pmids)
+                st.write(f"Fetched {len(articles)} abstracts")
+
+                # Get NER annotations
+                annotations = await client.get_pubtator_annotations(pmids)
+                st.write(f"Retrieved {len(annotations)} entity annotations")
+            else:
+                articles = []
+                annotations = []
+                st.warning("No papers found for this query")
+        finally:
+            await client.close()
+
+        status.update(label=f"Fetched {len(articles)} papers with {len(annotations)} annotations", state="complete")
+
+    if not articles:
+        st.error("No papers found. Try different seed terms or broader research focus.")
+        return None, report
+
+    # Phase 4: Parallel extraction
+    with st.status("Phase 4: Extracting relationships (this may take a minute)...", expanded=True) as status:
+        # Convert annotations list to dict
+        annotations_dict = annotations_list_to_dict(annotations)
+
+        extraction_result = await run_parallel_extraction(
+            articles=articles,
+            annotations=annotations_dict,
+            config=config,
+            report=report,
+        )
+        st.write(f"Found {len(extraction_result.cooccurrence_edges)} co-occurrences")
+        st.write(f"Extracted {len(extraction_result.llm_relationships)} LLM relationships")
+        status.update(label=f"Extraction complete: {len(extraction_result.llm_relationships)} relationships", state="complete")
+
+    # Phase 5: Merge to graph
+    with st.status("Phase 5: Building knowledge graph...", expanded=True) as status:
+        merge_result = await merge_to_knowledge_graph(
+            string_result=string_result,
+            extraction_result=extraction_result,
+            pubmed_articles=articles,
+            config=config,
+            report=report,
+            annotations=annotations_dict,
+        )
+        st.write(f"Created {merge_result.nodes_created} nodes")
+        st.write(f"Created {merge_result.edges_created} edges")
+        st.write(f"Deduplicated {merge_result.edges_deduplicated} duplicate edges")
+        status.update(label=f"Graph built: {merge_result.nodes_created} nodes, {merge_result.edges_created} edges", state="complete")
+
+    # Set graph for Q&A agent
+    set_active_graph(merge_result.graph)
+
+    # Finalize report
+    report.finalize()
+
+    return merge_result, report
+
+
+# =============================================================================
+# Graph Visualization
+# =============================================================================
+
+def render_graph(graph_data: dict[str, Any], height: str = "600px") -> str:
+    """
+    Render knowledge graph as interactive HTML using PyVis.
+
+    Args:
+        graph_data: Dictionary with 'entities' and 'relationships' keys
+        height: Height of the visualization
+
+    Returns:
+        HTML string for rendering
+    """
+    from pyvis.network import Network
+
+    # Create network
+    net = Network(
+        height=height,
+        width="100%",
+        bgcolor="#ffffff",
+        font_color="#333333",
+        directed=True
+    )
+
+    # Configure physics
+    net.set_options("""
+    {
+        "physics": {
+            "enabled": true,
+            "barnesHut": {
+                "gravitationalConstant": -8000,
+                "centralGravity": 0.3,
+                "springLength": 150,
+                "springConstant": 0.04,
+                "damping": 0.09
+            }
+        },
+        "nodes": {
+            "font": {"size": 14}
+        },
+        "edges": {
+            "font": {"size": 10},
+            "arrows": {"to": {"enabled": true, "scaleFactor": 0.5}}
+        },
+        "interaction": {
+            "hover": true,
+            "tooltipDelay": 200
+        }
+    }
+    """)
+
+    # Entity type colors
+    type_colors = {
+        "protein": "#4CAF50",
+        "gene": "#2196F3",
+        "disease": "#F44336",
+        "chemical": "#FF9800",
+        "pathway": "#9C27B0",
+        "unknown": "#9E9E9E"
+    }
+
+    # Add nodes
+    entities = graph_data.get("entities", {})
+    for entity_id, entity_data in entities.items():
+        entity_type = entity_data.get("type", "unknown")
+        name = entity_data.get("name", entity_id)
+        color = type_colors.get(entity_type, type_colors["unknown"])
+
+        net.add_node(
+            entity_id,
+            label=name,
+            title=f"{name}\nType: {entity_type}",
+            color=color,
+            size=20
+        )
+
+    # Add edges
+    relationships = graph_data.get("relationships", {})
+    for rel_key, rel_data in relationships.items():
+        # Parse the key (source|target|type)
+        parts = rel_key.split("|")
+        if len(parts) >= 2:
+            source = parts[0]
+            target = parts[1]
+            rel_type = parts[2] if len(parts) > 2 else "associated_with"
+
+            ml_score = rel_data.get("ml_score")
+            evidence_count = len(rel_data.get("evidence", []))
+
+            # Edge title for hover
+            title = f"{rel_type}"
+            if ml_score:
+                title += f"\nML Score: {ml_score:.2f}"
+            if evidence_count:
+                title += f"\nEvidence: {evidence_count} sources"
+
+            # Edge color based on evidence
+            if ml_score and not evidence_count:
+                edge_color = "#FFC107"  # Predicted (yellow)
+            elif evidence_count > 0:
+                edge_color = "#4CAF50"  # Literature-backed (green)
+            else:
+                edge_color = "#9E9E9E"  # Unknown (gray)
+
+            net.add_edge(
+                source,
+                target,
+                title=title,
+                label=rel_type[:10] if rel_type else "",
+                color=edge_color
+            )
+
+    # Generate HTML
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".html", mode="w") as f:
+        net.save_graph(f.name)
+        with open(f.name, "r") as html_file:
+            html_content = html_file.read()
+        os.unlink(f.name)
+        return html_content
+
+
+# =============================================================================
+# Session State Initialization
+# =============================================================================
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+
+
+# =============================================================================
+# Sidebar
+# =============================================================================
+
+with st.sidebar:
+    st.title("Tetra v1")
+    st.markdown("**Scientific Knowledge Graph Agent**")
+
+    st.divider()
+
+    # System Status
+    st.subheader("System Status")
+
+    # Check API keys
+    google_api_key = os.environ.get("GOOGLE_API_KEY")
+    if google_api_key:
+        st.success("Google API Key: Configured")
+    else:
+        st.error("Google API Key: Missing")
+        st.info("Set GOOGLE_API_KEY in your .env file")
+
+    pubmed_api_key = os.environ.get("PUBMED_API_KEY")
+    if pubmed_api_key:
+        st.success("PubMed API Key: Configured")
+    else:
+        st.warning("PubMed API Key: Optional (recommended)")
+
+    # Load resources
+    link_predictor = load_link_predictor()
+    if link_predictor:
+        st.success("Link Predictor: Loaded")
+        st.caption(f"Proteins: {len(link_predictor.gene_to_string_id):,}")
+    else:
+        st.warning("Link Predictor: Not loaded")
+
+    st.divider()
+
+    # Graph Statistics
+    st.subheader("Knowledge Graph")
+
+    if "knowledge_graph" in st.session_state and st.session_state.knowledge_graph:
+        graph = st.session_state.knowledge_graph
+        summary = graph.to_summary()
+        col1, col2 = st.columns(2)
+        col1.metric("Nodes", summary.get("node_count", 0))
+        col2.metric("Edges", summary.get("relationship_count", 0))
+
+        # Entity types
+        entity_types = summary.get("entity_types", {})
+        if entity_types:
+            st.caption("Entity Types:")
+            for etype, count in entity_types.items():
+                st.text(f"  {etype}: {count}")
+
+        # ML predictions
+        ml_edges = summary.get("ml_predicted_edges", 0)
+        novel = summary.get("novel_predictions", 0)
+        if ml_edges > 0:
+            st.metric("ML-Predicted Edges", ml_edges)
+            st.metric("Novel Predictions", novel)
+    else:
+        st.info("No graph built yet. Use the Research tab to build one.")
+
+    st.divider()
+
+    # Quick Actions
+    st.subheader("Quick Actions")
+
+    if st.button("Clear Chat History", use_container_width=True):
+        st.session_state.messages = []
+        st.session_state.session_id = str(uuid.uuid4())
+        if "agent_manager" in st.session_state:
+            del st.session_state.agent_manager
+        st.rerun()
+
+    if st.button("Reset Knowledge Graph", use_container_width=True):
+        if "knowledge_graph" in st.session_state:
+            del st.session_state.knowledge_graph
+        if "pipeline_report" in st.session_state:
+            del st.session_state.pipeline_report
+        if "agent_manager" in st.session_state:
+            del st.session_state.agent_manager
+        # Clear graph cache
+        from agent.graph_agent import clear_graph_cache
+        clear_graph_cache()
+        st.rerun()
+
+    st.divider()
+
+    # Legend
+    st.subheader("Legend")
+    st.markdown("""
+    **Node Colors:**
+    - Green: Protein
+    - Blue: Gene
+    - Red: Disease
+    - Orange: Chemical
+    - Purple: Pathway
+
+    **Edge Colors:**
+    - Green: Literature-backed
+    - Yellow: ML-predicted
+    - Gray: Unknown
+    """)
+
+
+# =============================================================================
+# Main Content
+# =============================================================================
+
+st.title("Tetra v1 - Scientific Knowledge Graph Agent")
+
+# Create tabs
+tab_research, tab_chat, tab_graph, tab_explore = st.tabs(["Research", "Chat", "Graph View", "Explore"])
+
+
+# =============================================================================
+# Tab 0: Research - Build Knowledge Graph
+# =============================================================================
+
+with tab_research:
+    st.subheader("Build Knowledge Graph")
+    st.markdown("""
+    Enter seed proteins/genes to build a knowledge graph from scientific literature.
+    The pipeline will:
+    1. Expand the protein network using STRING database
+    2. Construct an optimized PubMed query
+    3. Fetch papers and extract biomedical entities
+    4. Mine relationships using co-occurrence and LLM analysis
+    5. Build a unified knowledge graph
+    """)
+
+    # Input form
+    col1, col2 = st.columns([3, 1])
+
+    with col1:
+        seed_terms = st.text_input(
+            "Seed Proteins/Genes",
+            placeholder="e.g., HCRTR1, HCRTR2, orexin",
+            help="Enter protein names or gene symbols separated by commas"
+        )
+
+    with col2:
+        max_papers = st.number_input(
+            "Max Papers",
+            min_value=10,
+            max_value=200,
+            value=50,
+            step=10,
+            help="Number of papers to fetch (default 50)"
+        )
+
+    research_focus = st.text_input(
+        "Research Focus (optional)",
+        placeholder="e.g., metabolic regulation, sleep disorders",
+        help="Describe the research context for better query construction"
+    )
+
+    # Query syntax help
+    with st.expander("PubMed Query Syntax Help", expanded=False):
+        st.markdown("""
+        **Boolean Operators:**
+        - `AND` - both terms required: `BRCA1 AND breast cancer`
+        - `OR` - either term: `HCRTR1 OR HCRTR2`
+        - `NOT` - exclude term: `cancer NOT lung`
+        - Parentheses for grouping: `(HCRTR1 OR HCRTR2) AND sleep`
+
+        **Field Tags:**
+        - `[Title/Abstract]` - search in title/abstract: `orexin[Title/Abstract]`
+        - `[MeSH Terms]` - MeSH vocabulary: `"breast neoplasms"[MeSH Terms]`
+        - `[pdat]` - publication date: `2020:2024[pdat]`
+
+        **Species Filter (use MeSH, NOT [Organism]):**
+        - Human studies: `humans[MeSH Terms]`
+        - Mouse studies: `mice[MeSH Terms]`
+
+        **Examples:**
+        ```
+        orexin AND humans[MeSH Terms] AND 2020:2024[pdat]
+        BRCA1 AND breast cancer AND review[pt]
+        (HCRTR1 OR HCRTR2) AND sleep disorders
+        ```
+        """)
+
+    # Build button
+    build_disabled = not seed_terms or not google_api_key
+    if not google_api_key:
+        st.warning("Google API Key required for pipeline execution. Set GOOGLE_API_KEY in .env file.")
+
+    if st.button("Build Knowledge Graph", type="primary", use_container_width=True, disabled=build_disabled):
+        seed_list = [s.strip() for s in seed_terms.split(",") if s.strip()]
+
+        if not seed_list:
+            st.error("Please enter at least one seed protein/gene.")
+        else:
+            st.info(f"Starting pipeline with seeds: {', '.join(seed_list)}")
+
+            try:
+                merge_result, report = run_async(run_pipeline(
+                    seed_terms=seed_list,
+                    max_papers=max_papers,
+                    research_focus=research_focus if research_focus else None,
+                ))
+
+                if merge_result:
+                    # Store in session state
+                    st.session_state.knowledge_graph = merge_result.graph
+                    st.session_state.pipeline_report = report
+
+                    # Clear agent manager to reinitialize with new graph
+                    if "agent_manager" in st.session_state:
+                        del st.session_state.agent_manager
+
+                    st.success(f"Knowledge graph built successfully!")
+
+                    # Show summary
+                    st.subheader("Pipeline Summary")
+                    st.text(report.summary_text())
+
+                    # Show token usage
+                    with st.expander("Token Usage & Cost"):
+                        report_dict = report.to_dict()
+                        if "phase_metrics" in report_dict:
+                            st.json(report_dict["phase_metrics"])
+
+                        if "total_cost" in report_dict:
+                            st.metric("Total Estimated Cost", f"${report_dict['total_cost']:.4f}")
+
+                    st.info("Navigate to the **Chat** tab to query your knowledge graph!")
+
+            except Exception as e:
+                st.error(f"Pipeline failed: {str(e)}")
+                import traceback
+                with st.expander("Error Details"):
+                    st.code(traceback.format_exc())
+
+    # Show existing graph summary if available
+    if "pipeline_report" in st.session_state:
+        st.divider()
+        st.subheader("Last Pipeline Run")
+        st.text(st.session_state.pipeline_report.summary_text())
+
+        with st.expander("Detailed Metrics"):
+            report_dict = st.session_state.pipeline_report.to_dict()
+            if "phase_metrics" in report_dict:
+                st.json(report_dict["phase_metrics"])
+
+
+# =============================================================================
+# Tab 1: Chat Interface
+# =============================================================================
+
+with tab_chat:
+    if "knowledge_graph" not in st.session_state:
+        st.info("Build a knowledge graph first using the Research tab.")
+        st.markdown("""
+        **Example workflows:**
+
+        1. Go to the **Research** tab
+        2. Enter seed proteins (e.g., `BRCA1, TP53, MDM2`)
+        3. Optionally specify a research focus (e.g., `DNA damage response`)
+        4. Click **Build Knowledge Graph**
+        5. Return here to query your graph!
+
+        **Sample queries you can ask:**
+        - "What are the most important proteins in this network?"
+        - "Find the path between BRCA1 and TP53"
+        - "What evidence supports the BRCA1-MDM2 interaction?"
+        - "Detect communities in the network"
+        - "Run DIAMOnD starting from BRCA1, BRCA2"
+        """)
+    else:
+        # Initialize agent manager if not exists
+        if "agent_manager" not in st.session_state:
+            from agent.graph_agent import GraphAgentManager
+            st.session_state.agent_manager = GraphAgentManager(
+                graph=st.session_state.knowledge_graph,
+                model="gemini-2.5-flash"
+            )
+
+        st.markdown("""
+        Ask questions about your knowledge graph. The agent can:
+        - Explore graph structure and find paths
+        - Compute centrality and detect communities
+        - Run drug discovery algorithms (DIAMOnD, proximity, synergy)
+        - Generate hypotheses for predicted interactions
+        """)
+
+        # Display chat history
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+                # Show tool calls if available
+                if message.get("tool_calls"):
+                    with st.expander("Tools Used"):
+                        for tc in message["tool_calls"]:
+                            st.code(f"{tc['name']}({tc.get('args', {})})")
+
+        # Chat input
+        if prompt := st.chat_input("Ask about your knowledge graph..."):
+            # Add user message
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+
+            # Get agent response
+            with st.chat_message("assistant"):
+                with st.spinner("Thinking..."):
+                    try:
+                        result = run_async(
+                            st.session_state.agent_manager.query(
+                                user_id="streamlit_user",
+                                session_id=st.session_state.session_id,
+                                query=prompt,
+                            )
+                        )
+
+                        st.markdown(result["response"])
+
+                        if result.get("tool_calls"):
+                            with st.expander("Tools Used"):
+                                for tc in result["tool_calls"]:
+                                    st.code(f"{tc['name']}({tc.get('args', {})})")
+
+                        # Store message with tool calls
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": result["response"],
+                            "tool_calls": result.get("tool_calls", []),
+                        })
+
+                    except Exception as e:
+                        error_msg = f"Error: {str(e)}"
+                        st.error(error_msg)
+                        st.session_state.messages.append({
+                            "role": "assistant",
+                            "content": error_msg,
+                        })
+
+
+# =============================================================================
+# Tab 2: Graph Visualization
+# =============================================================================
+
+with tab_graph:
+    st.subheader("Knowledge Graph Visualization")
+
+    # Check for pipeline-built graph first, then demo
+    active_graph = None
+    if "knowledge_graph" in st.session_state and st.session_state.knowledge_graph:
+        active_graph = st.session_state.knowledge_graph
+        st.info("Showing knowledge graph built from pipeline")
+    else:
+        demo_graph = get_demo_knowledge_graph()
+        if demo_graph.graph.number_of_nodes() > 0:
+            active_graph = demo_graph
+            st.info("Showing demo graph")
+
+    if active_graph:
+        graph_data = active_graph.to_dict()
+        node_count = len(graph_data.get("entities", {}))
+    else:
+        graph_data = {"entities": {}, "relationships": {}}
+        node_count = 0
+
+    if node_count == 0:
+        st.info("The knowledge graph is empty. Use the Research tab to build a graph or load a demo.")
+
+        # Demo graph option
+        if st.button("Load Demo Graph"):
+            from models.knowledge_graph import KnowledgeGraph, RelationshipType
+
+            demo_graph = get_demo_knowledge_graph()
+
+            # Add some demo entities
+            demo_graph.add_entity("BRCA1", "protein", "BRCA1")
+            demo_graph.add_entity("BRCA2", "protein", "BRCA2")
+            demo_graph.add_entity("TP53", "protein", "TP53")
+            demo_graph.add_entity("breast_cancer", "disease", "Breast Cancer")
+
+            # Add some relationships
+            demo_graph.add_relationship("BRCA1", "BRCA2", RelationshipType.INTERACTS_WITH)
+            demo_graph.add_relationship("BRCA1", "TP53", RelationshipType.ACTIVATES)
+            demo_graph.add_relationship("BRCA1", "breast_cancer", RelationshipType.ASSOCIATED_WITH)
+            demo_graph.add_relationship("TP53", "breast_cancer", RelationshipType.ASSOCIATED_WITH)
+
+            st.rerun()
+    else:
+        # Render graph
+        try:
+            html_content = render_graph(graph_data, height="600px")
+            components.html(html_content, height=620, scrolling=True)
+        except Exception as e:
+            st.error(f"Error rendering graph: {e}")
+
+        # Graph stats below visualization
+        st.divider()
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Nodes", node_count)
+        col2.metric("Relationships", len(graph_data.get("relationships", {})))
+
+        # Get novel predictions from active graph
+        active_summary = active_graph.to_summary() if active_graph else {}
+        col3.metric("Novel Predictions", active_summary.get("novel_predictions", 0))
+
+
+# =============================================================================
+# Tab 3: Explore
+# =============================================================================
+
+with tab_explore:
+    st.subheader("Explore Entities")
+
+    # Use pipeline graph if available
+    explore_graph = None
+    if "knowledge_graph" in st.session_state and st.session_state.knowledge_graph:
+        explore_graph = st.session_state.knowledge_graph
+    else:
+        explore_graph = get_demo_knowledge_graph()
+
+    entities = list(explore_graph.entities.keys()) if explore_graph else []
+
+    if not entities:
+        st.info("No entities in the graph yet. Use the Research tab to build a knowledge graph.")
+    else:
+        selected_entity = st.selectbox("Select an entity to explore", entities)
+
+        if selected_entity:
+            entity_data = explore_graph.entities.get(selected_entity, {})
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown(f"**Name:** {entity_data.get('name', selected_entity)}")
+                st.markdown(f"**Type:** {entity_data.get('type', 'unknown')}")
+
+            # Show neighbors
+            neighbors = explore_graph.get_neighbors(selected_entity, max_neighbors=20)
+
+            if neighbors:
+                st.subheader("Interactions")
+
+                for neighbor_id, rel_data in neighbors:
+                    direction = rel_data.get("direction", "unknown")
+                    rel_type = rel_data.get("relation_type", "interacts_with")
+                    ml_score = rel_data.get("ml_score")
+                    evidence_count = len(rel_data.get("evidence", []))
+
+                    if direction == "outgoing":
+                        arrow = "->"
+                    else:
+                        arrow = "<-"
+
+                    info_parts = []
+                    if ml_score:
+                        info_parts.append(f"ML: {ml_score:.2f}")
+                    if evidence_count:
+                        info_parts.append(f"Evidence: {evidence_count}")
+
+                    info_str = f" ({', '.join(info_parts)})" if info_parts else ""
+
+                    st.markdown(f"- {selected_entity} {arrow} **{neighbor_id}** [{rel_type}]{info_str}")
+            else:
+                st.info("No interactions found for this entity.")
+
+    st.divider()
+
+    # ML Prediction Tool
+    st.subheader("Predict Interaction")
+
+    if link_predictor:
+        col1, col2 = st.columns(2)
+        with col1:
+            protein1 = st.text_input("Protein 1 (e.g., BRCA1)", key="pred_protein1")
+        with col2:
+            protein2 = st.text_input("Protein 2 (e.g., TP53)", key="pred_protein2")
+
+        if st.button("Predict", disabled=not (protein1 and protein2)):
+            if protein1 and protein2:
+                with st.spinner("Predicting..."):
+                    result = link_predictor.predict([(protein1, protein2)])
+                    if result:
+                        pred = result[0]
+                        if pred.get("error"):
+                            st.error(pred["error"])
+                        else:
+                            ml_score = pred.get("ml_score", 0.0)
+                            in_string = pred.get("in_string", False)
+
+                            col1, col2 = st.columns(2)
+                            col1.metric("ML Prediction Score", f"{ml_score:.3f}")
+                            col2.metric("In STRING Database", "Yes" if in_string else "No")
+
+                            if ml_score > 0.7:
+                                st.success("High confidence prediction!")
+                            elif ml_score > 0.5:
+                                st.info("Moderate confidence prediction.")
+                            else:
+                                st.warning("Low confidence prediction.")
+    else:
+        st.warning("Link predictor not available.")
+
+
+# =============================================================================
+# Footer
+# =============================================================================
+
+st.divider()
+st.markdown("""
+<div style='text-align: center; color: gray; font-size: 12px;'>
+    Tetra v1 - Scientific Knowledge Graph Agent | Powered by Google ADK (Gemini) & Multi-Agent Pipeline
+</div>
+""", unsafe_allow_html=True)

@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  tetra-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tetra-kg-agent
+    ports:
+      - "8501:8501"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - NCBI_API_KEY=${NCBI_API_KEY:-}
+    volumes:
+      # Mount models directory for hot-swapping models
+      - ./models:/app/models:ro
+      # Mount data directory for STRING data (optional, for retraining)
+      - ./data:/app/data:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Optional: CLI service for interactive usage
+  tetra-cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tetra-cli
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - NCBI_API_KEY=${NCBI_API_KEY:-}
+    volumes:
+      - ./models:/app/models:ro
+      - ./data:/app/data:ro
+    profiles:
+      - cli
+    command: ["uv", "run", "python", "main.py", "--interactive"]
+    stdin_open: true
+    tty: true
