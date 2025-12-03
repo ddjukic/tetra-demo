@@ -1,0 +1,22 @@
+{
+  "relationships": [],
+  "valid_relationships": [],
+  "validation_results": [],
+  "statistics": {
+    "total_abstracts": 15,
+    "total_chunks": 3,
+    "chunks_processed": 3,
+    "total_relationships": 0,
+    "valid_relationships": 0,
+    "invalid_relationships": 0,
+    "pmid_failures": 0,
+    "evidence_failures": 0,
+    "validation_rate": 0.0,
+    "total_prompt_tokens": 7142,
+    "total_completion_tokens": 6144,
+    "total_latency_ms": 5696.338891983032,
+    "wall_clock_ms": 2109.135866165161,
+    "throughput_tok_per_sec": 2332.3752768113177
+  },
+  "errors": []
+}

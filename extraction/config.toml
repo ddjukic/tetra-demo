@@ -1,0 +1,147 @@
+# Extraction Pipeline Configuration
+# All parameters for LLM-based relationship extraction
+
+[DEFAULT]
+# Default extractor to use when not specified
+EXTRACTOR = "cerebras"
+
+[EXTRACTORS.cerebras]
+# Cerebras via OpenRouter - fastest inference (~2000 tok/s)
+MODEL = "openrouter/openai/gpt-oss-120b"
+TEMPERATURE = 0.1
+MAX_TOKENS = 2048
+TIMEOUT = 60
+MAX_CONCURRENT = 10
+
+# Provider routing - force Cerebras for GPT-OSS models
+[EXTRACTORS.cerebras.PROVIDER]
+ORDER = ["Cerebras"]
+ALLOW_FALLBACKS = false
+
+# Pricing per 1M tokens (USD)
+[EXTRACTORS.cerebras.PRICING]
+INPUT = 0.25
+OUTPUT = 0.69
+
+[EXTRACTORS.gemini]
+# Gemini 2.5 Flash - good balance of speed and quality
+MODEL = "gemini/gemini-2.5-flash"
+TEMPERATURE = 0.1
+MAX_TOKENS = 2048
+TIMEOUT = 120
+MAX_CONCURRENT = 10
+
+[EXTRACTORS.gemini.PRICING]
+INPUT = 0.075
+OUTPUT = 0.30
+
+[EXTRACTORS.gemini_pro]
+# Gemini 1.5 Pro - higher quality, slower
+MODEL = "gemini/gemini-1.5-pro"
+TEMPERATURE = 0.1
+MAX_TOKENS = 2048
+TIMEOUT = 180
+MAX_CONCURRENT = 5
+
+[EXTRACTORS.gemini_pro.PRICING]
+INPUT = 1.25
+OUTPUT = 5.00
+
+# Relationship schema for structured output
+[SCHEMA]
+NAME = "relationship_extraction"
+STRICT = true
+
+[SCHEMA.RELATIONSHIPS]
+# Valid relationship types for biomedical extraction
+TYPES = [
+    "ACTIVATES",
+    "INHIBITS",
+    "ASSOCIATED_WITH",
+    "REGULATES",
+    "BINDS_TO",
+    "COOCCURS_WITH",
+]
+
+[SCHEMA.FIELDS]
+# Required fields for each relationship
+ENTITY1 = { TYPE = "string", REQUIRED = true }
+ENTITY2 = { TYPE = "string", REQUIRED = true }
+RELATIONSHIP = { TYPE = "string", REQUIRED = true }
+CONFIDENCE = { TYPE = "number", REQUIRED = true }
+EVIDENCE_TEXT = { TYPE = "string", REQUIRED = true }
+PMID = { TYPE = "string", REQUIRED = true }
+
+# Batched mining configuration
+[BATCHED]
+TARGET_TOKENS_PER_CHUNK = 5000
+MIN_CHUNKS = 3
+MAX_CONCURRENT = 5
+MAX_RETRIES = 3
+RETRY_DELAY_MS = 1000
+MIN_CONFIDENCE = 0.5
+MAX_TOKENS = 8192  # Higher than extractor default for multi-abstract output
+
+# Prompt configuration
+[PROMPT]
+SYSTEM = """You are a biomedical relationship extraction system. Extract relationships between entity pairs from scientific abstracts.
+
+For each entity pair, determine if a relationship exists and classify it as one of:
+- ACTIVATES: Entity1 activates/stimulates/enhances Entity2
+- INHIBITS: Entity1 inhibits/blocks/suppresses Entity2
+- ASSOCIATED_WITH: Entity1 is associated with Entity2 (correlation)
+- REGULATES: Entity1 regulates Entity2 (direction unclear)
+- BINDS_TO: Entity1 physically binds to Entity2
+- COOCCURS_WITH: Entities co-occur but no clear relationship
+
+Only extract relationships explicitly supported by the text. Assign confidence 0.0-1.0 based on evidence strength."""
+
+USER_TEMPLATE = """Abstract:
+{abstract}
+
+Entity pairs to analyze:
+{entity_pairs}
+
+Extract relationships as JSON with this exact structure:
+{{"relationships": [
+  {{"entity1": "...", "entity2": "...", "relationship": "...", "confidence": 0.0-1.0, "evidence_text": "..."}}
+]}}
+
+If no relationship exists for a pair, omit it. Return empty array if no relationships found."""
+
+# Batch processing settings (for pair-based extraction)
+[BATCH]
+DEFAULT_CONCURRENT = 10
+RETRY_ATTEMPTS = 2
+RETRY_DELAY_MS = 1000
+
+# Batched mining prompts (for chunked abstract processing)
+[BATCHED_PROMPT]
+SYSTEM = """You are a biomedical relationship extraction expert.
+
+Extract semantic relationships between biomedical entities from PubMed abstracts.
+
+For each relationship found, provide:
+1. source_entity: The source entity
+2. target_entity: The target entity
+3. relationship: One of the specified types
+4. confidence: 0.0-1.0 based on evidence strength
+5. evidence_text: The EXACT sentence from the abstract (verbatim quote)
+6. pmid: The PubMed ID of the source paper
+
+Rules:
+- Only extract relationships EXPLICITLY stated or strongly implied
+- Evidence must be VERBATIM quotes from the text
+- Include the PMID for each relationship
+- If no relationships found, return empty array"""
+
+USER_TEMPLATE = """## ENTITIES TO LOOK FOR
+{entities}
+
+## RELATIONSHIP TYPES
+{relationship_types}
+
+## ABSTRACTS TO ANALYZE
+{abstracts}
+
+Return a JSON object with "relationships" array. Each relationship must include the PMID."""

@@ -1,0 +1,41 @@
+{
+  "timestamp": "2025-12-03T14:26:59.587981",
+  "results": [
+    {
+      "extractor_name": "Gemini 2.5 Flash",
+      "model": "gemini/gemini-2.5-flash",
+      "total_abstracts": 93,
+      "successful_extractions": 93,
+      "failed_extractions": 0,
+      "total_relationships": 9,
+      "total_prompt_tokens": 70447,
+      "total_completion_tokens": 127246,
+      "total_tokens": 197693,
+      "wall_clock_time_ms": 63911.29803657532,
+      "total_api_latency_ms": 610932.3084354401,
+      "throughput_tokens_per_second": 323.59231500831834,
+      "completion_throughput_tokens_per_second": 208.28166761366597,
+      "avg_latency_ms": 6569.164606832689,
+      "total_cost_usd": 0.04345732500000001,
+      "timestamp": "2025-12-03T14:24:19.142600"
+    },
+    {
+      "extractor_name": "LiteLLM openrouter/openai/gpt-oss-120b",
+      "model": "openrouter/openai/gpt-oss-120b",
+      "total_abstracts": 93,
+      "successful_extractions": 93,
+      "failed_extractions": 0,
+      "total_relationships": 152,
+      "total_prompt_tokens": 75763,
+      "total_completion_tokens": 116112,
+      "total_tokens": 191875,
+      "wall_clock_time_ms": 160442.7330493927,
+      "total_api_latency_ms": 823031.4652919769,
+      "throughput_tokens_per_second": 233.1320345473436,
+      "completion_throughput_tokens_per_second": 141.0784458390158,
+      "avg_latency_ms": 8849.800702064267,
+      "total_cost_usd": 0.09905802999999998,
+      "timestamp": "2025-12-03T14:26:59.587550"
+    }
+  ]
+}

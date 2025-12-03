@@ -537,7 +537,138 @@ Based on analysis of the orexin signaling system:
 
 ---
 
-## 10. Future Enhancements (Post-Demo)
+## 10. Batched Extraction & Provenance Validation
+
+### 10.1 Architecture
+
+The batched extraction pipeline (`extraction/batched_litellm_miner.py`) processes multiple abstracts per LLM call for efficiency:
+
+```
+Articles + Annotations
+        │
+        ▼
+┌─────────────────────────────────────────┐
+│     Token-Aware Chunking (~5K tokens)   │
+│     - Greedy bin-packing                │
+│     - Min 3 chunks for parallelization  │
+└─────────────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────────────┐
+│     Parallel LLM Extraction             │
+│     - [PMID: X] markers in prompt       │
+│     - Structured JSON output            │
+│     - Entity list (not pairs)           │
+└─────────────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────────────┐
+│     Provenance Validation               │
+│     - PMID attribution check            │
+│     - Evidence sentence matching        │
+└─────────────────────────────────────────┘
+```
+
+### 10.2 Provenance Validation
+
+Each extracted relationship undergoes two validation checks:
+
+| Check | Method | Threshold |
+|-------|--------|-----------|
+| **PMID Attribution** | Verify PMID exists in chunk's PMID list | Exact match |
+| **Evidence Matching** | Fuzzy match evidence text against abstract | 0.7 similarity |
+
+**Validation Result Fields:**
+- `pmid_valid`: Boolean - PMID attribution correct
+- `evidence_valid`: Boolean - Evidence found in abstract
+- `evidence_similarity`: Float 0.0-1.0 - Match quality
+
+### 10.3 Known Issue: Evidence Paraphrasing
+
+**Problem:** LLMs sometimes paraphrase or summarize evidence rather than quoting verbatim, even when explicitly instructed to provide exact quotes.
+
+**Observed Behavior - Context Scaling Study:**
+
+| Scale | Abstracts/Chunk | PMID Accuracy | Evidence Verbatim | Paraphrased |
+|-------|-----------------|---------------|-------------------|-------------|
+| Small (15 abs) | ~5 | 100% | 87.8% | 12.2% |
+| Large (100 abs) Run 1 | ~17 | 100% | 68.4% | 31.6% |
+| Large (100 abs) Run 2 | ~17 | 100% | 53.9% | 46.1% |
+| Large (100 abs) Run 3 | ~17 | 100% | 63.6% | 36.4% |
+| **Large Average** | ~17 | **100%** | **62.0%** | **38.0%** |
+
+**Key Finding:** Evidence paraphrasing increases ~3x (12% → 38%) when chunk size increases from ~5 to ~17 abstracts, while PMID attribution remains perfect.
+
+**Example Failures:**
+```
+Evidence returned: "TAK-861 ... activates OX2R with a half-maximal e..."
+Similarity score: 0.44 (below 0.7 threshold)
+Actual text was paraphrased/summarized by model
+```
+
+**Impact:**
+- **Attribution is reliable** - PMID linkage can be trusted at any scale
+- **Evidence quality degrades with context size** - More abstracts per chunk → more paraphrasing
+- **Chunk size is an optimization parameter** - Smaller chunks improve verbatim extraction
+
+**Potential Mitigations (Not Yet Implemented):**
+1. **Lower threshold** - Accept 0.5+ similarity for "good enough" evidence
+2. **Two-pass extraction** - First extract relationships, then retrieve exact quotes
+3. **Sentence-level retrieval** - Use embedding similarity to find best matching sentence
+4. **Stronger prompting** - XML tags, examples of verbatim extraction
+5. **Post-hoc correction agent** - Second LLM pass to fix paraphrased evidence
+
+**Current Recommendation:**
+- Use `evidence_similarity` score to rank confidence
+- Flag low-similarity evidence for manual review
+- Trust PMID attribution; treat evidence as "supporting context" not "exact quote"
+
+### 10.4 Chunk Size Optimization
+
+Based on the scaling study finding that smaller chunks improve verbatim extraction, we tested different chunk sizes:
+
+| Chunk Size | Tokens | Abstracts/Chunk | Chunks | Validation Rate | Evidence Failures |
+|------------|--------|-----------------|--------|-----------------|-------------------|
+| Large (default) | 5000 | ~15-17 | 6 | 62.0% | ~37 |
+| Medium | 3200 | ~10-12 | 9 | 71.4% | 40 |
+| Small | 2500 | ~8-9 | 11 | **75.5%** | 34 |
+
+**Key Findings:**
+1. **Smaller chunks = higher validation rate** (75.5% at 2500 vs 62% at 5000 tokens)
+2. **More relationships extracted** with smaller chunks (139-140 vs 98 avg)
+3. **PMID attribution remains 100% accurate** across all chunk sizes
+4. **Trade-off: More API calls** with smaller chunks (11 vs 6 chunks)
+
+**Evidence Statistics Per Abstract (100 abstracts):**
+
+| Chunk Size | Rels per PMID | Evidence per PMID |
+|------------|---------------|-------------------|
+| 2500 tokens | 2.04 ± 1.49 | 1.62 ± 0.90 |
+| 3200 tokens | 2.06 ± 1.43 | 1.63 ± 1.24 |
+
+**Recommended Settings:**
+- Use `--chunk-tokens 2500` for highest validation rate
+- Wall clock time is similar (~7s) due to more parallel chunks
+- Override via `BatchedLiteLLMMiner(chunk_tokens=2500)`
+
+### 10.5 Configuration
+
+Batched extraction settings in `extraction/config.toml`:
+
+```toml
+[BATCHED]
+TARGET_TOKENS_PER_CHUNK = 5000
+MIN_CHUNKS = 3
+MAX_CONCURRENT = 5
+MAX_RETRIES = 3
+RETRY_DELAY_MS = 1000
+MIN_CONFIDENCE = 0.5
+MAX_TOKENS = 8192  # Higher for multi-abstract output
+```
+
+---
+
+## 11. Future Enhancements (Post-Demo)
 
 1. **Entity Resolution** - UMLS/UniProt canonical IDs
 2. **GNN Upgrade** - GraphSAGE for better predictions

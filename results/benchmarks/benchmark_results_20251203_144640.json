@@ -1,0 +1,41 @@
+{
+  "timestamp": "2025-12-03T14:46:40.370492",
+  "results": [
+    {
+      "extractor_name": "cerebras",
+      "model": "openrouter/openai/gpt-oss-120b",
+      "total_abstracts": 17,
+      "successful_extractions": 17,
+      "failed_extractions": 0,
+      "total_relationships": 21,
+      "total_prompt_tokens": 21926,
+      "total_completion_tokens": 26913,
+      "total_tokens": 48839,
+      "wall_clock_time_ms": 18005.451917648315,
+      "total_api_latency_ms": 52610.54873466492,
+      "throughput_tokens_per_second": 928.3119293492589,
+      "completion_throughput_tokens_per_second": 511.55140266132815,
+      "avg_latency_ms": 3094.738160862642,
+      "total_cost_usd": 0.024051470000000002,
+      "timestamp": "2025-12-03T14:46:21.376407"
+    },
+    {
+      "extractor_name": "gemini",
+      "model": "gemini/gemini-2.5-flash",
+      "total_abstracts": 17,
+      "successful_extractions": 17,
+      "failed_extractions": 0,
+      "total_relationships": 23,
+      "total_prompt_tokens": 17584,
+      "total_completion_tokens": 29242,
+      "total_tokens": 46826,
+      "wall_clock_time_ms": 18993.319749832153,
+      "total_api_latency_ms": 138031.23021125793,
+      "throughput_tokens_per_second": 339.2420681054021,
+      "completion_throughput_tokens_per_second": 211.8506076867161,
+      "avg_latency_ms": 8119.484130073996,
+      "total_cost_usd": 0.0100914,
+      "timestamp": "2025-12-03T14:46:40.370179"
+    }
+  ]
+}

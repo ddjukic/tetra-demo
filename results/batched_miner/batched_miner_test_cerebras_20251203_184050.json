@@ -1,0 +1,4045 @@
+{
+  "relationships": [
+    {
+      "entity1": "Almorexant",
+      "entity2": "orexin system",
+      "relationship": "inhibits",
+      "evidence_text": "Almorexant is now mainly used as a commercial specific inhibitor of the orexin system in animal studies due to safety issues.",
+      "confidence": 0.96,
+      "pmid": "35972717"
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R.",
+      "confidence": 0.95,
+      "pmid": "34052813"
+    },
+    {
+      "entity1": "Orexin-B",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R.",
+      "confidence": 0.95,
+      "pmid": "34052813"
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "OX1R",
+      "relationship": "activates",
+      "evidence_text": "Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2Rs.",
+      "confidence": 0.94,
+      "pmid": "31782044"
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2Rs.",
+      "confidence": 0.94,
+      "pmid": "31782044"
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "Overall, it was concluded that OXA exerts neuroprotective effect during CIRI ... by Inhibiting OX1R-mediated NF-\u03baB, MAPK/ERK and MAPK/p38 signaling pathways.",
+      "confidence": 0.96,
+      "pmid": "34358627"
+    },
+    {
+      "entity1": "Danavorexton",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "We discovered a parenteral orexin receptor 2 (OX2R) agonist, danavorexton, and an orally available OX2R agonist, TAK-994; both improving NT1 phenotypes in mouse models and individuals with NT1.",
+      "confidence": 0.95,
+      "pmid": "39242684"
+    },
+    {
+      "entity1": "TAK-861",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "TAK-861 ... activates OX2R with a half-maximal effective concentration of 2.5\u00a0nM and promotes wakefulness at 1\u00a0mg/kg in mice and monkeys.",
+      "confidence": 0.96,
+      "pmid": "39242684"
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "orexin receptor 2",
+      "relationship": "activates",
+      "evidence_text": "TAK-994, an oral orexin receptor 2-selective agonist",
+      "confidence": 0.95,
+      "pmid": "37494485"
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "hepatic adverse events",
+      "relationship": "associated_with",
+      "evidence_text": "The phase 2 trial and an extension trial were terminated early owing to hepatic adverse events.",
+      "confidence": 0.9,
+      "pmid": "37494485"
+    },
+    {
+      "entity1": "HCRTR1",
+      "entity2": "lactate production",
+      "relationship": "inhibits",
+      "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production",
+      "confidence": 0.95,
+      "pmid": "39119889"
+    },
+    {
+      "entity1": "HCRTR1",
+      "entity2": "brain-derived neurotrophic factor (BDNF)",
+      "relationship": "inhibits",
+      "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced ... BDNF expression",
+      "confidence": 0.95,
+      "pmid": "39119889"
+    },
+    {
+      "entity1": "HCRTR1",
+      "entity2": "adult hippocampal neuroplasticity",
+      "relationship": "inhibits",
+      "evidence_text": "Excessive hypocretin-1 ... reduced ... neuroplasticity, and cognitive impairment in CUMS model.",
+      "confidence": 0.9,
+      "pmid": "39119889"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "Orexin-A",
+      "relationship": "inhibits",
+      "evidence_text": "MSZRD significantly downregulated the serum Orexin\u2011A content in insomnia mice",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "MSZRD significantly downregulated ... hypothalamic OX2R expression",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "5\u2011HT",
+      "relationship": "activates",
+      "evidence_text": "MSZRD effectively increased the content of 5\u2011HT ... in the hypothalamus of insomnia mice",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "5\u2011HTR1A",
+      "relationship": "activates",
+      "evidence_text": "MSZRD effectively increased ... 5\u2011HTR1A protein in the hypothalamus of insomnia mice",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "DA",
+      "relationship": "inhibits",
+      "evidence_text": "MSZRD ... downregulated the content of DA ... in insomnia mice",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "NE",
+      "relationship": "inhibits",
+      "evidence_text": "MSZRD ... downregulated the content of ... NE ... in insomnia mice",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "CRH",
+      "relationship": "inhibits",
+      "evidence_text": "MSZRD ... decreased the levels of ... CRH related hormones in HPA axis",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "ACTH",
+      "relationship": "inhibits",
+      "evidence_text": "MSZRD ... decreased the levels of ... ACTH related hormones in HPA axis",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "CORT",
+      "relationship": "inhibits",
+      "evidence_text": "MSZRD ... decreased the levels of ... CORT related hormones in HPA axis",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "GABA",
+      "relationship": "activates",
+      "evidence_text": "serum GABA concentration was increased by treatment with MSZRD",
+      "confidence": 0.9,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "almorexant",
+      "entity2": "orexin receptor 1",
+      "relationship": "inhibits",
+      "evidence_text": "almorexant, a dual orexin receptor antagonist (DORA)",
+      "confidence": 0.95,
+      "pmid": "39047304"
+    },
+    {
+      "entity1": "almorexant",
+      "entity2": "orexin receptor 2",
+      "relationship": "inhibits",
+      "evidence_text": "almorexant, a dual orexin receptor antagonist (DORA)",
+      "confidence": 0.95,
+      "pmid": "39047304"
+    },
+    {
+      "entity1": "almorexant",
+      "entity2": "A\u03b2 deposition",
+      "relationship": "inhibits",
+      "evidence_text": "The application of almorexant can ... reduce cognitive impairment and A\u03b2 deposition",
+      "confidence": 0.9,
+      "pmid": "39047304"
+    },
+    {
+      "entity1": "almorexant",
+      "entity2": "Aquaporin-4",
+      "relationship": "regulates",
+      "evidence_text": "which is related to the improvement in Aquaporin-4 polarity",
+      "confidence": 0.9,
+      "pmid": "39047304"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX1R",
+      "relationship": "activates",
+      "evidence_text": "Orexin enhances learning and memory as well as reward, stress, seizures, and epilepsy, partly through OX1Rs.",
+      "confidence": 0.9,
+      "pmid": "35180935"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX2R",
+      "relationship": "regulates",
+      "evidence_text": "while either aggravating or alleviating those phenomena via OX2Rs.",
+      "confidence": 0.8,
+      "pmid": "35180935"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX1R",
+      "relationship": "activates",
+      "evidence_text": "orexins are neuropeptides produced in the hypothalamus that stimulate a specific type of G-Protein coupled receptors (GPCR) called orexin receptors.",
+      "confidence": 0.9,
+      "pmid": "34464995"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "orexins are neuropeptides produced in the hypothalamus that stimulate a specific type of G-Protein coupled receptors (GPCR) called orexin receptors.",
+      "confidence": 0.9,
+      "pmid": "34464995"
+    },
+    {
+      "entity1": "OX1R",
+      "entity2": "5-HT1AR",
+      "relationship": "associated_with",
+      "evidence_text": "we found that 5-HT1AR and OX1R form constitutive heterodimers.",
+      "confidence": 0.95,
+      "pmid": "35338110"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "The orexin receptor antagonist suvorexant, which specifically block the endogenous waking system.",
+      "confidence": 0.85,
+      "pmid": "30905886"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "The orexin receptor antagonist suvorexant, which specifically block the endogenous waking system.",
+      "confidence": 0.85,
+      "pmid": "30905886"
+    },
+    {
+      "entity1": "OX1R",
+      "entity2": "glucose",
+      "relationship": "regulates",
+      "evidence_text": "Inactivation of orexin receptor type 1 in serotonin transporter-expressing cells of mice reduced insulin sensitivity in diet\u2011induced obesity, mainly by decreasing glucose utilization.",
+      "confidence": 0.9,
+      "pmid": "34475397"
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "glucose",
+      "relationship": "regulates",
+      "evidence_text": "Selective inactivation of orexin receptor type 2 improved glucose tolerance and insulin sensitivity in obese mice.",
+      "confidence": 0.9,
+      "pmid": "34475397"
+    },
+    {
+      "entity1": "Orexin receptors",
+      "entity2": "hypertension",
+      "relationship": "activates",
+      "evidence_text": "pharmacological blockade of orexin receptors reduces blood pressure in SHRs.",
+      "confidence": 0.85,
+      "pmid": "28349223"
+    },
+    {
+      "entity1": "OX1R",
+      "entity2": "hypertension",
+      "relationship": "activates",
+      "evidence_text": "upregulation of the orexin receptor 1 increases firing of hypothalamic paraventricular nucleus neurons, augments SNA, and contributes to hypertension.",
+      "confidence": 0.85,
+      "pmid": "28349223"
+    },
+    {
+      "entity1": "20d",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "20d and 28d showed full agonist activity against OX.",
+      "confidence": 0.9,
+      "pmid": "36690040"
+    },
+    {
+      "entity1": "28d",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "20d and 28d showed full agonist activity against OX.",
+      "confidence": 0.9,
+      "pmid": "36690040"
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "TAK-994, a novel OX2R\u2011selective agonist.",
+      "confidence": 0.9,
+      "pmid": "37001988"
+    },
+    {
+      "entity1": "Almorexant",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "investigated ORAs have included the DORA almorexant.",
+      "confidence": 0.8,
+      "pmid": "36436175"
+    },
+    {
+      "entity1": "Almorexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "investigated ORAs have included the DORA almorexant.",
+      "confidence": 0.8,
+      "pmid": "36436175"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "Collectively, these results demonstrate that DORAs potently increase NREM and REM sleep in mice via blockade of orexin signaling, and higher doses can cause cataplexy when co-administered with a likely rewarding stimulus.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Collectively, these results demonstrate that DORAs potently increase NREM and REM sleep in mice via blockade of orexin signaling, and higher doses can cause cataplexy when co-administered with a likely rewarding stimulus.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Almorexant",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "Almorexant produced similar results.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Almorexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Almorexant produced similar results.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "NREM sleep",
+      "relationship": "activates",
+      "evidence_text": "In WT mice, lemborexant at 10 and 30 mg/kg quickly induced NREM sleep in a dose-dependent fashion.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Almorexant",
+      "entity2": "NREM sleep",
+      "relationship": "activates",
+      "evidence_text": "Almorexant produced similar results.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "cataplexy",
+      "relationship": "activates",
+      "evidence_text": "when mice were given chocolate as a rewarding stimulus, lemborexant dose-dependently increased cataplexy.",
+      "confidence": 0.8,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Almorexant",
+      "entity2": "cataplexy",
+      "relationship": "activates",
+      "evidence_text": "Almorexant produced similar results.",
+      "confidence": 0.8,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "ORN0829",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "Here, we present the design, synthesis, and SAR of dual orexin 1 and 2 receptor antagonists...",
+      "confidence": 0.9,
+      "pmid": "32482533"
+    },
+    {
+      "entity1": "ORN0829",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Here, we present the design, synthesis, and SAR of dual orexin 1 and 2 receptor antagonists...",
+      "confidence": 0.9,
+      "pmid": "32482533"
+    },
+    {
+      "entity1": "ORN0829",
+      "entity2": "Sleep",
+      "relationship": "activates",
+      "evidence_text": "Compound (-)-3h exhibited potent sleep-promoting effects at a po dose of 1 mg/kg in a rat polysomnogram study.",
+      "confidence": 0.9,
+      "pmid": "32482533"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "inactive phase rapid eye movement (REM) sleep enhancement with the dual orexin receptor antagonist suvorexant (50 mg\u00b7kg",
+      "confidence": 0.9,
+      "pmid": "37553894"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "REM sleep",
+      "relationship": "activates",
+      "evidence_text": "inactive phase rapid eye movement (REM) sleep enhancement with the dual orexin receptor antagonist suvorexant (50 mg\u00b7kg",
+      "confidence": 0.9,
+      "pmid": "37553894"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "NREM sleep",
+      "relationship": "activates",
+      "evidence_text": "normalising hyperarousal by increasing both NREM and REM sleep via OX",
+      "confidence": 0.9,
+      "pmid": "37553894"
+    },
+    {
+      "entity1": "OXB",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "Both OXA and OXB peptides bind to two G-coupled receptors, orexin-1 (OX1R) and orexin-2 (OX2R) receptor, though with different binding affinity.",
+      "confidence": 0.95,
+      "pmid": "29496265"
+    },
+    {
+      "entity1": "OXA",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "Both OXA and OXB peptides bind to two G-coupled receptors, orexin-1 (OX1R) and orexin-2 (OX2R) receptor, though with different binding affinity.",
+      "confidence": 0.95,
+      "pmid": "29496265"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "PTSD",
+      "relationship": "activates",
+      "evidence_text": "This review focuses on the importance of the orexin neural system as a novel mechanism related to the pathophysiology of PTSD.",
+      "confidence": 0.85,
+      "pmid": "35618150"
+    },
+    {
+      "entity1": "naphthalene",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "Design and synthesis of novel orexin 2 receptor agonists based on naphthalene skeleton.",
+      "confidence": 0.85,
+      "pmid": "35007725"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "neurodegenerative diseases",
+      "relationship": "associated_with",
+      "evidence_text": "we discuss and update the main preclinical and human studies involving the orexin system with several psychiatric and neurodegenerative diseases.",
+      "confidence": 0.8,
+      "pmid": "37015302"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "neuropsychiatric diseases",
+      "relationship": "associated_with",
+      "evidence_text": "we discuss and update the main preclinical and human studies involving the orexin system with several psychiatric and neurodegenerative diseases.",
+      "confidence": 0.8,
+      "pmid": "37015302"
+    },
+    {
+      "entity1": "Orexin-1 receptor",
+      "entity2": "Depression",
+      "relationship": "inhibits",
+      "evidence_text": "Chronic orexin-1 receptor blockage attenuates depressive behaviors and provokes PSD-95 expression in a rat model of depression.",
+      "confidence": 0.9,
+      "pmid": "36154849"
+    },
+    {
+      "entity1": "Orexin-1 receptor",
+      "entity2": "PSD-95",
+      "relationship": "activates",
+      "evidence_text": "Chronic orexin-1 receptor blockage attenuates depressive behaviors and provokes PSD-95 expression in a rat model of depression.",
+      "confidence": 0.9,
+      "pmid": "36154849"
+    },
+    {
+      "entity1": "Orexin receptor",
+      "entity2": "Anxiety",
+      "relationship": "inhibits",
+      "evidence_text": "acute but not chronic stress, led to increased anxiety and immobility behavior which were both impeded by blocking the orexin receptor (OXR).",
+      "confidence": 0.9,
+      "pmid": "30458283"
+    },
+    {
+      "entity1": "Orexin receptor",
+      "entity2": "social learning",
+      "relationship": "inhibits",
+      "evidence_text": "the acute but not chronic stress ... was reversed following the blockade of both OXRs.",
+      "confidence": 0.9,
+      "pmid": "30458283"
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "evidence_text": "The hypothalamic neuropeptides, orexin-A and orexin-B, act through G-protein-coupled receptors (orexin-1 and orexin-2 receptors).",
+      "confidence": 0.95,
+      "pmid": "34052807"
+    },
+    {
+      "entity1": "Orexin-B",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "The hypothalamic neuropeptides, orexin-A and orexin-B, act through G-protein-coupled receptors (orexin-1 and orexin-2 receptors).",
+      "confidence": 0.95,
+      "pmid": "34052807"
+    },
+    {
+      "entity1": "Danavorexton",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "orexin 2 receptor-selective agonist danavorexton improves narcolepsy phenotype in a mouse model and in human patients.",
+      "confidence": 0.95,
+      "pmid": "35994639"
+    },
+    {
+      "entity1": "Danavorexton",
+      "entity2": "cataplexy",
+      "relationship": "inhibits",
+      "evidence_text": "Danavorexton reduced sleep/wakefulness fragmentation and cataplexy-like episodes during the active phase.",
+      "confidence": 0.9,
+      "pmid": "35994639"
+    },
+    {
+      "entity1": "Orexin A",
+      "entity2": "Sleep",
+      "relationship": "regulates",
+      "evidence_text": "Generally, the primary role of orexins is to act as excitatory neurotransmitters and regulate the sleep process.",
+      "confidence": 0.8,
+      "pmid": "30423961"
+    },
+    {
+      "entity1": "Orexin B",
+      "entity2": "Sleep",
+      "relationship": "regulates",
+      "evidence_text": "Generally, the primary role of orexins is to act as excitatory neurotransmitters and regulate the sleep process.",
+      "confidence": 0.8,
+      "pmid": "30423961"
+    },
+    {
+      "entity1": "Orexins",
+      "entity2": "Narcolepsy",
+      "relationship": "inhibits",
+      "evidence_text": "Lack of orexins may lead to sleep disorder narcolepsy in mice, dogs, and humans.",
+      "confidence": 0.7,
+      "pmid": "30423961"
+    },
+    {
+      "entity1": "Orexin system",
+      "entity2": "Arousal",
+      "relationship": "associated_with",
+      "evidence_text": "The orexin system plays a relevant role in various physiological functions, including arousal, feeding, reward, and thermogenesis.",
+      "confidence": 0.8,
+      "pmid": "37054895"
+    },
+    {
+      "entity1": "AM251",
+      "entity2": "CB1R",
+      "relationship": "inhibits",
+      "evidence_text": "AM251 (18\u00a0nmol/4 \u03bcl), as a selective CB1R antagonist, ...",
+      "confidence": 0.9,
+      "pmid": "35313383"
+    },
+    {
+      "entity1": "TCS-OX2-29",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "TCS-OX2-29 (50\u00a0nmol/4 \u03bcl), as a selective OX2R antagonist, ...",
+      "confidence": 0.9,
+      "pmid": "35313383"
+    },
+    {
+      "entity1": "OXB",
+      "entity2": "Spermatogenesis",
+      "relationship": "regulates",
+      "evidence_text": "The results suggest the expression of OXB and OX2R in mouse testis and their possible regulatory role in spermatogenesis and steroidogenesis.",
+      "confidence": 0.8,
+      "pmid": "36841281"
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "Spermatogenesis",
+      "relationship": "regulates",
+      "evidence_text": "The results suggest the expression of OXB and OX2R in mouse testis and their possible regulatory role in spermatogenesis and steroidogenesis.",
+      "confidence": 0.8,
+      "pmid": "36841281"
+    },
+    {
+      "entity1": "Orexin A",
+      "entity2": "Sleep",
+      "relationship": "regulates",
+      "evidence_text": "Recent evidence suggests the central orexin system, particularly orexins A and B and their receptors, have a key regulatory role for sleep in animal and human models.",
+      "confidence": 0.85,
+      "pmid": "36148653"
+    },
+    {
+      "entity1": "Orexin B",
+      "entity2": "Sleep",
+      "relationship": "regulates",
+      "evidence_text": "Recent evidence suggests the central orexin system, particularly orexins A and B and their receptors, have a key regulatory role for sleep in animal and human models.",
+      "confidence": 0.85,
+      "pmid": "36148653"
+    },
+    {
+      "entity1": "Orexin A",
+      "entity2": "Sympathetic activity",
+      "relationship": "regulates",
+      "evidence_text": "Recent evidence suggests the central orexin system, particularly orexins A and B and their receptors, have a key regulatory role for ... sympathetic regulation.",
+      "confidence": 0.8,
+      "pmid": "36148653"
+    },
+    {
+      "entity1": "OX1R",
+      "entity2": "Apoptosis",
+      "relationship": "activates",
+      "evidence_text": "its ability to trigger mitochondrial apoptosis in tumoral cells",
+      "confidence": 0.85,
+      "pmid": "35966051"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Cancers",
+      "relationship": "associated_with",
+      "evidence_text": "Orexins and their receptors are involved in pathologies including ... cancers.",
+      "confidence": 0.8,
+      "pmid": "35966051"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Blood pressure",
+      "relationship": "activates",
+      "evidence_text": "Multiple studies show that orexinergic stimulation results in increased blood pressure and heart rate.",
+      "confidence": 0.85,
+      "pmid": "29992504"
+    },
+    {
+      "entity1": "TCS-OX2-29",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "TCS OX2 29 (TCS), a potent selective antagonist of OX2 receptors, would have positive effects ...",
+      "confidence": 0.9,
+      "pmid": "39402852"
+    },
+    {
+      "entity1": "OX1R",
+      "entity2": "Reward",
+      "relationship": "associated_with",
+      "evidence_text": "OX1R ... is implicated in multiple functions, such as reward, emotions, and autonomic regulation.",
+      "confidence": 0.8,
+      "pmid": "37189339"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "monoaminergic neurons",
+      "relationship": "activates",
+      "evidence_text": "Orexin neurons are thought to act primarily on monoaminergic neurons to maintain arousal and vigilance.",
+      "confidence": 0.8,
+      "pmid": "34052806"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "dopaminergic system",
+      "relationship": "associated_with",
+      "evidence_text": "Orexin also has close interactions with the dopaminergic system, and many studies have suggested roles of orexin signaling in the reward system and roles for orexins in drug addiction.",
+      "confidence": 0.75,
+      "pmid": "34052806"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "drug addiction",
+      "relationship": "associated_with",
+      "evidence_text": "Orexin also has close interactions with the dopaminergic system, and many studies have suggested roles of orexin signaling in the reward system and roles for orexins in drug addiction.",
+      "confidence": 0.7,
+      "pmid": "34052806"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "evidence_text": "Suvorexant, a dual orexin receptor antagonist (DORA) is approved for the treatment of primary insomnia.",
+      "confidence": 0.9,
+      "pmid": "31066976"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "Suvorexant, a dual orexin receptor antagonist (DORA) is approved for the treatment of primary insomnia.",
+      "confidence": 0.9,
+      "pmid": "31066976"
+    },
+    {
+      "entity1": "Estradiol",
+      "entity2": "orexin",
+      "relationship": "regulates",
+      "evidence_text": "The female menstrual or estrous cycle and its associated fluctuations in circulating estradiol (E2), progesterone, and other gonadal hormones alter orexin or hypocretin peptide production and receptor activity.",
+      "confidence": 0.85,
+      "pmid": "36571628"
+    },
+    {
+      "entity1": "SB-334867",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "orexin-1 receptor antagonist SB-334867",
+      "confidence": 0.9,
+      "pmid": "36480169"
+    },
+    {
+      "entity1": "SB-334867",
+      "entity2": "orexin-B",
+      "relationship": "cooccurs_with",
+      "evidence_text": "The results suggested that the combination of orexin-1 receptor antagonist SB-334867 and orexin-B with morphine significantly increased the analgesic effect compared to morphine-tolerant rats.",
+      "confidence": 0.8,
+      "pmid": "36480169"
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "D2R",
+      "relationship": "activates",
+      "evidence_text": "Orexin-A up-regulates dopamine D2 receptor and mRNA in the nucleus accumbens Shell.",
+      "confidence": 0.9,
+      "pmid": "33170427"
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "A\u03b2 deposition",
+      "relationship": "inhibits",
+      "evidence_text": "OX2R blockade ... reduced A\u03b2 pathology ... in 3xTg-AD mice.",
+      "confidence": 0.85,
+      "pmid": "38682858"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "evidence_text": "Lemborexant is a dual antagonist acting on both two orexin receptors, the orexin 1 (OX1R) and 2 receptor (OX2R), with stronger inhibitory effects on OX2R.",
+      "confidence": 0.95,
+      "pmid": "33642529"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "Lemborexant is a dual antagonist acting on both two orexin receptors, the orexin 1 (OX1R) and 2 receptor (OX2R), with stronger inhibitory effects on OX2R.",
+      "confidence": 0.95,
+      "pmid": "33642529"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Lemborexant is a dual antagonist acting on both two orexin receptors, the orexin 1 (OX1R) and 2 receptor (OX2R), with stronger inhibitory effects on OX2R.",
+      "confidence": 0.95,
+      "pmid": "33642529"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Narcolepsy type 1",
+      "relationship": "associated_with",
+      "evidence_text": "Narcolepsy type 1 (NT1) ... NT1 symptoms are due to hypocretin deficiency.",
+      "confidence": 0.9,
+      "pmid": "39241492"
+    },
+    {
+      "entity1": "Orexin deficiency",
+      "entity2": "narcolepsy",
+      "relationship": "associated_with",
+      "evidence_text": "Orexin deficiency causes sleep/wake-state instability, resulting in narcolepsy.",
+      "confidence": 0.95,
+      "pmid": "29289556"
+    },
+    {
+      "entity1": "Hyper-activation of the orexin system",
+      "entity2": "insomnia",
+      "relationship": "associated_with",
+      "evidence_text": "Hyper-activation of the orexin system also causes sleep disturbances, such as insomnia, and hence, suvorexant, an orexin receptor antagonist, has been clinically used to treat insomnia.",
+      "confidence": 0.93,
+      "pmid": "29289556"
+    },
+    {
+      "entity1": "suvorexant",
+      "entity2": "orexin receptor",
+      "relationship": "binds_to",
+      "evidence_text": "suvorexant, an orexin receptor antagonist, has been clinically used to treat insomnia.",
+      "confidence": 0.96,
+      "pmid": "29289556"
+    },
+    {
+      "entity1": "CVN766",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "CVN766, a potent orexin 1 receptor antagonist that has greater than 1000-fold selectivity for the orexin 1 receptor over the orexin 2 receptor.",
+      "confidence": 0.97,
+      "pmid": "38295907"
+    },
+    {
+      "entity1": "CVN766",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "evidence_text": "CVN766, a potent orexin 1 receptor antagonist that has greater than 1000-fold selectivity for the orexin 1 receptor over the orexin 2 receptor.",
+      "confidence": 0.96,
+      "pmid": "38295907"
+    },
+    {
+      "entity1": "orexin B",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "Supradural orexin B induced migraine-like pain behaviors, photophobia and increased TNC ERK phosphorylation exclusively in males.",
+      "confidence": 0.95,
+      "pmid": "39233656"
+    },
+    {
+      "entity1": "orexin B",
+      "entity2": "ERK",
+      "relationship": "activates",
+      "evidence_text": "Supradural orexin B induced ... increased TNC ERK phosphorylation exclusively in males.",
+      "confidence": 0.92,
+      "pmid": "39233656"
+    },
+    {
+      "entity1": "suvorexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Blockade of orexin signaling with supradural suvorexant, a dual orexin receptor antagonist, prevented, but did not reverse, migraine-like pain in males induced by supradural IM cocktail.",
+      "confidence": 0.94,
+      "pmid": "39233656"
+    },
+    {
+      "entity1": "EMPA",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "EMPA is an OX2R-selective antagonist used for autoradiography of OX2R protein distribution.",
+      "confidence": 0.9,
+      "pmid": "35589803"
+    },
+    {
+      "entity1": "OxR1",
+      "entity2": "odor-attractive behavior",
+      "relationship": "regulates",
+      "evidence_text": "When odor-food reward associated mice underwent OxR1 antagonist injection in the amOT, their odor-attractive behavior was suppressed and odor-aversive behavior was conversely induced.",
+      "confidence": 0.93,
+      "pmid": "39725686"
+    },
+    {
+      "entity1": "OxR1 antagonist",
+      "entity2": "OxR1",
+      "relationship": "inhibits",
+      "evidence_text": "When odor-food reward associated mice underwent OxR1 antagonist injection in the amOT, their odor-attractive behavior was suppressed...",
+      "confidence": 0.94,
+      "pmid": "39725686"
+    },
+    {
+      "entity1": "orexin system",
+      "entity2": "cocaine abuse",
+      "relationship": "activates",
+      "evidence_text": "hcrt/ox transmission was found to facilitate motivated responding for intravenous cocaine.",
+      "confidence": 0.95,
+      "pmid": "30796894"
+    },
+    {
+      "entity1": "suvorexant",
+      "entity2": "cocaine-associated behaviors",
+      "relationship": "inhibits",
+      "evidence_text": "blocking hcrt/ox transmission using systemic or site-directed pharmacological antagonists markedly reduced motivated drug-taking as well as drug-seeking in tests of relapse.",
+      "confidence": 0.94,
+      "pmid": "30796894"
+    },
+    {
+      "entity1": "5-HT1AR",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "we firstly demonstrated the heterodimer formation of 5-HT1AR and OX2R.",
+      "confidence": 0.93,
+      "pmid": "30481562"
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "ERK",
+      "relationship": "inhibits",
+      "evidence_text": "heterodimer decreased the levels of phosphorylation of extracellular signal-regulated kinase (ERK).",
+      "confidence": 0.9,
+      "pmid": "30481562"
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "CREB",
+      "relationship": "inhibits",
+      "evidence_text": "heterodimer decreased the levels of phosphorylation of ... cAMP-response element-binding protein (CREB).",
+      "confidence": 0.9,
+      "pmid": "30481562"
+    },
+    {
+      "entity1": "TCS 1102",
+      "entity2": "orexin receptors",
+      "relationship": "inhibits",
+      "evidence_text": "the highly potent and commercially available dual orexin receptor antagonist, TCS 1102, on self-administration and reinstatement of palatable food seeking.",
+      "confidence": 0.92,
+      "pmid": "28663114"
+    },
+    {
+      "entity1": "suvorexant",
+      "entity2": "oxycodone self-administration",
+      "relationship": "inhibits",
+      "evidence_text": "Suvorexant, an FDA-approved dual orexin receptor antagonist, reduces oxycodone self-administration and conditioned reinstatement in male and female rats.",
+      "confidence": 0.93,
+      "pmid": "37180716"
+    },
+    {
+      "entity1": "Danavorexton",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "Danavorexton (TAK-925) is an agonist for orexin receptor 2 where it promotes recovery from inhalational and i.v. anaesthesia and opioid sedation.",
+      "confidence": 0.96,
+      "pmid": "38346840"
+    },
+    {
+      "entity1": "TS-142",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "Novel compound with potent antagonistic activity against orexin receptors may be new treatment option for patients with insomnia.",
+      "confidence": 0.95,
+      "pmid": "35296912"
+    },
+    {
+      "entity1": "TS-142",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Novel compound with potent antagonistic activity against orexin receptors may be new treatment option for patients with insomnia.",
+      "confidence": 0.95,
+      "pmid": "35296912"
+    },
+    {
+      "entity1": "SDM-878",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "SDM-878 showed potent inhibitory activities for human and rat OX.",
+      "confidence": 0.94,
+      "pmid": "32337858"
+    },
+    {
+      "entity1": "TAK-925",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "We evaluated the efficacy of two small molecule hypocretin/orexin receptor-2 (HCRTR2) agonists in narcoleptic male orexin/tTA; TetO-DTA mice.",
+      "confidence": 0.9,
+      "pmid": "36808670"
+    },
+    {
+      "entity1": "ARN-776",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "We evaluated the efficacy of two small molecule hypocretin/orexin receptor-2 (HCRTR2) agonists in narcoleptic male orexin/tTA; TetO-DTA mice.",
+      "confidence": 0.9,
+      "pmid": "36808670"
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "Na+/Ca2+ exchanger",
+      "relationship": "activates",
+      "evidence_text": "the activation of the Na+/Ca2+ exchanger and non-selective cation channels of unknown identity.",
+      "confidence": 0.85,
+      "pmid": "34052812"
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "2-arachidonoyl glycerol",
+      "relationship": "activates",
+      "evidence_text": "the Gq-PLC pathway may also, under certain circumstances, take the route to diacylglycerol lipase, which leads to the production of the potent endocannabinoid (eCB), 2-arachidonoyl glycerol.",
+      "confidence": 0.8,
+      "pmid": "34052812"
+    },
+    {
+      "entity1": "orexin-A",
+      "entity2": "estradiol",
+      "relationship": "regulates",
+      "evidence_text": "determine the role of orexin on oestradiol production.",
+      "confidence": 0.78,
+      "pmid": "36881512"
+    },
+    {
+      "entity1": "orexin-A",
+      "entity2": "bone loss",
+      "relationship": "regulates",
+      "evidence_text": "ZGW exhibited a protective effect for PMOP that may be mediated via orexin-A and orexin receptors regulation.",
+      "confidence": 0.75,
+      "pmid": "34939389"
+    },
+    {
+      "entity1": "orexin-A",
+      "entity2": "analgesia",
+      "relationship": "activates",
+      "evidence_text": "orexin peptides induce analgesia that is comparable to morphine.",
+      "confidence": 0.85,
+      "pmid": "28552056"
+    },
+    {
+      "entity1": "(S)-1-amino-tetralin",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "The introduction of N-methyl-(3-methoxyphenyl)acetamide unit onto the 1-amino-tetralin skeleton remarkably enhanced the potency of the agonist.",
+      "confidence": 0.8,
+      "pmid": "35051577"
+    },
+    {
+      "entity1": "1-amino-tetralin",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "The introduction of N-methyl-(3-methoxyphenyl)acetamide unit onto the 1-amino-tetralin skeleton remarkably enhanced the potency of the agonist.",
+      "confidence": 0.78,
+      "pmid": "35051577"
+    },
+    {
+      "entity1": "Hcrtr2",
+      "entity2": "REMS",
+      "relationship": "regulates",
+      "evidence_text": "Unexpectedly, loss of Hcrtr2, but not Hcrtr1 or Hcrtr1&2, induced a dramatic increase in theta (7-11\u202fHz) electroencephalographic (EEG) activity in both wakefulness and rapid-eye-movement sleep (REMS).",
+      "confidence": 0.7,
+      "pmid": "38123729"
+    },
+    {
+      "entity1": "Hcrtr2",
+      "entity2": "HCRT",
+      "relationship": "binds_to",
+      "evidence_text": "We inactivated HCRT-to-DA connectivity by genetic disruption of Hypocretin receptor-2 (Hcrtr2) in DA neurons.",
+      "confidence": 0.75,
+      "pmid": "38123729"
+    },
+    {
+      "entity1": "orexin system",
+      "entity2": "epilepsy",
+      "relationship": "associated_with",
+      "evidence_text": "The present review analyzes the preclinical and clinical evidence linking the orexin system to epilepsy.",
+      "confidence": 0.85,
+      "pmid": "37212716"
+    },
+    {
+      "entity1": "orexin system",
+      "entity2": "seizures",
+      "relationship": "regulates",
+      "evidence_text": "the antagonism to the orexin system by DORAs can improve epilepsy by both a direct and a sleep\u2011mediated (indirect) effect.",
+      "confidence": 0.7,
+      "pmid": "37212716"
+    },
+    {
+      "entity1": "orexin\u2011B",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "In isolated rat cardiomyocytes, only orexin\u2011B (OR\u2011B) caused an increase in contractile shortening, independent of diastolic or systolic calcium levels.",
+      "confidence": 0.6,
+      "pmid": "30467191"
+    },
+    {
+      "entity1": "MK\u20111064",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Acute MK\u20111064 hastened SWS onset and increased the number of SWS episodes, without increasing sleep fragmentation in AIE and controls.",
+      "confidence": 0.65,
+      "pmid": "32424852"
+    },
+    {
+      "entity1": "AIE",
+      "entity2": "sleep fragmentation",
+      "relationship": "associated_with",
+      "evidence_text": "Female AIE rats exhibited lasting changes in sleep compared to controls. This was demonstrated by increased fragmentation of slow wave sleep (SWS) and rapid eye movement sleep.",
+      "confidence": 0.85,
+      "pmid": "32424852"
+    },
+    {
+      "entity1": "MK\u20111064",
+      "entity2": "SWS",
+      "relationship": "regulates",
+      "evidence_text": "Acute MK\u20111064 hastened SWS onset and increased the number of SWS episodes, without increasing sleep fragmentation in AIE and controls.",
+      "confidence": 0.8,
+      "pmid": "32424852"
+    }
+  ],
+  "valid_relationships": [
+    {
+      "entity1": "Almorexant",
+      "entity2": "orexin system",
+      "relationship": "inhibits",
+      "evidence_text": "Almorexant is now mainly used as a commercial specific inhibitor of the orexin system in animal studies due to safety issues.",
+      "confidence": 0.96,
+      "pmid": "35972717"
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R.",
+      "confidence": 0.95,
+      "pmid": "34052813"
+    },
+    {
+      "entity1": "Orexin-B",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R.",
+      "confidence": 0.95,
+      "pmid": "34052813"
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "Overall, it was concluded that OXA exerts neuroprotective effect during CIRI ... by Inhibiting OX1R-mediated NF-\u03baB, MAPK/ERK and MAPK/p38 signaling pathways.",
+      "confidence": 0.96,
+      "pmid": "34358627"
+    },
+    {
+      "entity1": "Danavorexton",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "We discovered a parenteral orexin receptor 2 (OX2R) agonist, danavorexton, and an orally available OX2R agonist, TAK-994; both improving NT1 phenotypes in mouse models and individuals with NT1.",
+      "confidence": 0.95,
+      "pmid": "39242684"
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "orexin receptor 2",
+      "relationship": "activates",
+      "evidence_text": "TAK-994, an oral orexin receptor 2-selective agonist",
+      "confidence": 0.95,
+      "pmid": "37494485"
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "hepatic adverse events",
+      "relationship": "associated_with",
+      "evidence_text": "The phase 2 trial and an extension trial were terminated early owing to hepatic adverse events.",
+      "confidence": 0.9,
+      "pmid": "37494485"
+    },
+    {
+      "entity1": "HCRTR1",
+      "entity2": "lactate production",
+      "relationship": "inhibits",
+      "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production",
+      "confidence": 0.95,
+      "pmid": "39119889"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "Orexin-A",
+      "relationship": "inhibits",
+      "evidence_text": "MSZRD significantly downregulated the serum Orexin\u2011A content in insomnia mice",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "5\u2011HT",
+      "relationship": "activates",
+      "evidence_text": "MSZRD effectively increased the content of 5\u2011HT ... in the hypothalamus of insomnia mice",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "5\u2011HTR1A",
+      "relationship": "activates",
+      "evidence_text": "MSZRD effectively increased ... 5\u2011HTR1A protein in the hypothalamus of insomnia mice",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "CRH",
+      "relationship": "inhibits",
+      "evidence_text": "MSZRD ... decreased the levels of ... CRH related hormones in HPA axis",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "ACTH",
+      "relationship": "inhibits",
+      "evidence_text": "MSZRD ... decreased the levels of ... ACTH related hormones in HPA axis",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "CORT",
+      "relationship": "inhibits",
+      "evidence_text": "MSZRD ... decreased the levels of ... CORT related hormones in HPA axis",
+      "confidence": 0.95,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "GABA",
+      "relationship": "activates",
+      "evidence_text": "serum GABA concentration was increased by treatment with MSZRD",
+      "confidence": 0.9,
+      "pmid": "34509822"
+    },
+    {
+      "entity1": "almorexant",
+      "entity2": "orexin receptor 1",
+      "relationship": "inhibits",
+      "evidence_text": "almorexant, a dual orexin receptor antagonist (DORA)",
+      "confidence": 0.95,
+      "pmid": "39047304"
+    },
+    {
+      "entity1": "almorexant",
+      "entity2": "orexin receptor 2",
+      "relationship": "inhibits",
+      "evidence_text": "almorexant, a dual orexin receptor antagonist (DORA)",
+      "confidence": 0.95,
+      "pmid": "39047304"
+    },
+    {
+      "entity1": "almorexant",
+      "entity2": "Aquaporin-4",
+      "relationship": "regulates",
+      "evidence_text": "which is related to the improvement in Aquaporin-4 polarity",
+      "confidence": 0.9,
+      "pmid": "39047304"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX1R",
+      "relationship": "activates",
+      "evidence_text": "Orexin enhances learning and memory as well as reward, stress, seizures, and epilepsy, partly through OX1Rs.",
+      "confidence": 0.9,
+      "pmid": "35180935"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX2R",
+      "relationship": "regulates",
+      "evidence_text": "while either aggravating or alleviating those phenomena via OX2Rs.",
+      "confidence": 0.8,
+      "pmid": "35180935"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX1R",
+      "relationship": "activates",
+      "evidence_text": "orexins are neuropeptides produced in the hypothalamus that stimulate a specific type of G-Protein coupled receptors (GPCR) called orexin receptors.",
+      "confidence": 0.9,
+      "pmid": "34464995"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "orexins are neuropeptides produced in the hypothalamus that stimulate a specific type of G-Protein coupled receptors (GPCR) called orexin receptors.",
+      "confidence": 0.9,
+      "pmid": "34464995"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "The orexin receptor antagonist suvorexant, which specifically block the endogenous waking system.",
+      "confidence": 0.85,
+      "pmid": "30905886"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "The orexin receptor antagonist suvorexant, which specifically block the endogenous waking system.",
+      "confidence": 0.85,
+      "pmid": "30905886"
+    },
+    {
+      "entity1": "OX1R",
+      "entity2": "glucose",
+      "relationship": "regulates",
+      "evidence_text": "Inactivation of orexin receptor type 1 in serotonin transporter-expressing cells of mice reduced insulin sensitivity in diet\u2011induced obesity, mainly by decreasing glucose utilization.",
+      "confidence": 0.9,
+      "pmid": "34475397"
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "glucose",
+      "relationship": "regulates",
+      "evidence_text": "Selective inactivation of orexin receptor type 2 improved glucose tolerance and insulin sensitivity in obese mice.",
+      "confidence": 0.9,
+      "pmid": "34475397"
+    },
+    {
+      "entity1": "OX1R",
+      "entity2": "hypertension",
+      "relationship": "activates",
+      "evidence_text": "upregulation of the orexin receptor 1 increases firing of hypothalamic paraventricular nucleus neurons, augments SNA, and contributes to hypertension.",
+      "confidence": 0.85,
+      "pmid": "28349223"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "Collectively, these results demonstrate that DORAs potently increase NREM and REM sleep in mice via blockade of orexin signaling, and higher doses can cause cataplexy when co-administered with a likely rewarding stimulus.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Collectively, these results demonstrate that DORAs potently increase NREM and REM sleep in mice via blockade of orexin signaling, and higher doses can cause cataplexy when co-administered with a likely rewarding stimulus.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Almorexant",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "Almorexant produced similar results.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Almorexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Almorexant produced similar results.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "NREM sleep",
+      "relationship": "activates",
+      "evidence_text": "In WT mice, lemborexant at 10 and 30 mg/kg quickly induced NREM sleep in a dose-dependent fashion.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Almorexant",
+      "entity2": "NREM sleep",
+      "relationship": "activates",
+      "evidence_text": "Almorexant produced similar results.",
+      "confidence": 0.9,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "cataplexy",
+      "relationship": "activates",
+      "evidence_text": "when mice were given chocolate as a rewarding stimulus, lemborexant dose-dependently increased cataplexy.",
+      "confidence": 0.8,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "Almorexant",
+      "entity2": "cataplexy",
+      "relationship": "activates",
+      "evidence_text": "Almorexant produced similar results.",
+      "confidence": 0.8,
+      "pmid": "31830270"
+    },
+    {
+      "entity1": "ORN0829",
+      "entity2": "Sleep",
+      "relationship": "activates",
+      "evidence_text": "Compound (-)-3h exhibited potent sleep-promoting effects at a po dose of 1 mg/kg in a rat polysomnogram study.",
+      "confidence": 0.9,
+      "pmid": "32482533"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "NREM sleep",
+      "relationship": "activates",
+      "evidence_text": "normalising hyperarousal by increasing both NREM and REM sleep via OX",
+      "confidence": 0.9,
+      "pmid": "37553894"
+    },
+    {
+      "entity1": "OXB",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "Both OXA and OXB peptides bind to two G-coupled receptors, orexin-1 (OX1R) and orexin-2 (OX2R) receptor, though with different binding affinity.",
+      "confidence": 0.95,
+      "pmid": "29496265"
+    },
+    {
+      "entity1": "OXA",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "Both OXA and OXB peptides bind to two G-coupled receptors, orexin-1 (OX1R) and orexin-2 (OX2R) receptor, though with different binding affinity.",
+      "confidence": 0.95,
+      "pmid": "29496265"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "PTSD",
+      "relationship": "activates",
+      "evidence_text": "This review focuses on the importance of the orexin neural system as a novel mechanism related to the pathophysiology of PTSD.",
+      "confidence": 0.85,
+      "pmid": "35618150"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "neurodegenerative diseases",
+      "relationship": "associated_with",
+      "evidence_text": "we discuss and update the main preclinical and human studies involving the orexin system with several psychiatric and neurodegenerative diseases.",
+      "confidence": 0.8,
+      "pmid": "37015302"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "neuropsychiatric diseases",
+      "relationship": "associated_with",
+      "evidence_text": "we discuss and update the main preclinical and human studies involving the orexin system with several psychiatric and neurodegenerative diseases.",
+      "confidence": 0.8,
+      "pmid": "37015302"
+    },
+    {
+      "entity1": "Orexin receptor",
+      "entity2": "Anxiety",
+      "relationship": "inhibits",
+      "evidence_text": "acute but not chronic stress, led to increased anxiety and immobility behavior which were both impeded by blocking the orexin receptor (OXR).",
+      "confidence": 0.9,
+      "pmid": "30458283"
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "evidence_text": "The hypothalamic neuropeptides, orexin-A and orexin-B, act through G-protein-coupled receptors (orexin-1 and orexin-2 receptors).",
+      "confidence": 0.95,
+      "pmid": "34052807"
+    },
+    {
+      "entity1": "Orexin-B",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "The hypothalamic neuropeptides, orexin-A and orexin-B, act through G-protein-coupled receptors (orexin-1 and orexin-2 receptors).",
+      "confidence": 0.95,
+      "pmid": "34052807"
+    },
+    {
+      "entity1": "Danavorexton",
+      "entity2": "cataplexy",
+      "relationship": "inhibits",
+      "evidence_text": "Danavorexton reduced sleep/wakefulness fragmentation and cataplexy-like episodes during the active phase.",
+      "confidence": 0.9,
+      "pmid": "35994639"
+    },
+    {
+      "entity1": "Orexin A",
+      "entity2": "Sleep",
+      "relationship": "regulates",
+      "evidence_text": "Generally, the primary role of orexins is to act as excitatory neurotransmitters and regulate the sleep process.",
+      "confidence": 0.8,
+      "pmid": "30423961"
+    },
+    {
+      "entity1": "Orexin B",
+      "entity2": "Sleep",
+      "relationship": "regulates",
+      "evidence_text": "Generally, the primary role of orexins is to act as excitatory neurotransmitters and regulate the sleep process.",
+      "confidence": 0.8,
+      "pmid": "30423961"
+    },
+    {
+      "entity1": "Orexins",
+      "entity2": "Narcolepsy",
+      "relationship": "inhibits",
+      "evidence_text": "Lack of orexins may lead to sleep disorder narcolepsy in mice, dogs, and humans.",
+      "confidence": 0.7,
+      "pmid": "30423961"
+    },
+    {
+      "entity1": "Orexin system",
+      "entity2": "Arousal",
+      "relationship": "associated_with",
+      "evidence_text": "The orexin system plays a relevant role in various physiological functions, including arousal, feeding, reward, and thermogenesis.",
+      "confidence": 0.8,
+      "pmid": "37054895"
+    },
+    {
+      "entity1": "OXB",
+      "entity2": "Spermatogenesis",
+      "relationship": "regulates",
+      "evidence_text": "The results suggest the expression of OXB and OX2R in mouse testis and their possible regulatory role in spermatogenesis and steroidogenesis.",
+      "confidence": 0.8,
+      "pmid": "36841281"
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "Spermatogenesis",
+      "relationship": "regulates",
+      "evidence_text": "The results suggest the expression of OXB and OX2R in mouse testis and their possible regulatory role in spermatogenesis and steroidogenesis.",
+      "confidence": 0.8,
+      "pmid": "36841281"
+    },
+    {
+      "entity1": "Orexin A",
+      "entity2": "Sleep",
+      "relationship": "regulates",
+      "evidence_text": "Recent evidence suggests the central orexin system, particularly orexins A and B and their receptors, have a key regulatory role for sleep in animal and human models.",
+      "confidence": 0.85,
+      "pmid": "36148653"
+    },
+    {
+      "entity1": "Orexin B",
+      "entity2": "Sleep",
+      "relationship": "regulates",
+      "evidence_text": "Recent evidence suggests the central orexin system, particularly orexins A and B and their receptors, have a key regulatory role for sleep in animal and human models.",
+      "confidence": 0.85,
+      "pmid": "36148653"
+    },
+    {
+      "entity1": "Orexin A",
+      "entity2": "Sympathetic activity",
+      "relationship": "regulates",
+      "evidence_text": "Recent evidence suggests the central orexin system, particularly orexins A and B and their receptors, have a key regulatory role for ... sympathetic regulation.",
+      "confidence": 0.8,
+      "pmid": "36148653"
+    },
+    {
+      "entity1": "OX1R",
+      "entity2": "Apoptosis",
+      "relationship": "activates",
+      "evidence_text": "its ability to trigger mitochondrial apoptosis in tumoral cells",
+      "confidence": 0.85,
+      "pmid": "35966051"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Blood pressure",
+      "relationship": "activates",
+      "evidence_text": "Multiple studies show that orexinergic stimulation results in increased blood pressure and heart rate.",
+      "confidence": 0.85,
+      "pmid": "29992504"
+    },
+    {
+      "entity1": "OX1R",
+      "entity2": "Reward",
+      "relationship": "associated_with",
+      "evidence_text": "OX1R ... is implicated in multiple functions, such as reward, emotions, and autonomic regulation.",
+      "confidence": 0.8,
+      "pmid": "37189339"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "monoaminergic neurons",
+      "relationship": "activates",
+      "evidence_text": "Orexin neurons are thought to act primarily on monoaminergic neurons to maintain arousal and vigilance.",
+      "confidence": 0.8,
+      "pmid": "34052806"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "dopaminergic system",
+      "relationship": "associated_with",
+      "evidence_text": "Orexin also has close interactions with the dopaminergic system, and many studies have suggested roles of orexin signaling in the reward system and roles for orexins in drug addiction.",
+      "confidence": 0.75,
+      "pmid": "34052806"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "drug addiction",
+      "relationship": "associated_with",
+      "evidence_text": "Orexin also has close interactions with the dopaminergic system, and many studies have suggested roles of orexin signaling in the reward system and roles for orexins in drug addiction.",
+      "confidence": 0.7,
+      "pmid": "34052806"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "evidence_text": "Suvorexant, a dual orexin receptor antagonist (DORA) is approved for the treatment of primary insomnia.",
+      "confidence": 0.9,
+      "pmid": "31066976"
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "Suvorexant, a dual orexin receptor antagonist (DORA) is approved for the treatment of primary insomnia.",
+      "confidence": 0.9,
+      "pmid": "31066976"
+    },
+    {
+      "entity1": "Estradiol",
+      "entity2": "orexin",
+      "relationship": "regulates",
+      "evidence_text": "The female menstrual or estrous cycle and its associated fluctuations in circulating estradiol (E2), progesterone, and other gonadal hormones alter orexin or hypocretin peptide production and receptor activity.",
+      "confidence": 0.85,
+      "pmid": "36571628"
+    },
+    {
+      "entity1": "SB-334867",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "orexin-1 receptor antagonist SB-334867",
+      "confidence": 0.9,
+      "pmid": "36480169"
+    },
+    {
+      "entity1": "SB-334867",
+      "entity2": "orexin-B",
+      "relationship": "cooccurs_with",
+      "evidence_text": "The results suggested that the combination of orexin-1 receptor antagonist SB-334867 and orexin-B with morphine significantly increased the analgesic effect compared to morphine-tolerant rats.",
+      "confidence": 0.8,
+      "pmid": "36480169"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "evidence_text": "Lemborexant is a dual antagonist acting on both two orexin receptors, the orexin 1 (OX1R) and 2 receptor (OX2R), with stronger inhibitory effects on OX2R.",
+      "confidence": 0.95,
+      "pmid": "33642529"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "Lemborexant is a dual antagonist acting on both two orexin receptors, the orexin 1 (OX1R) and 2 receptor (OX2R), with stronger inhibitory effects on OX2R.",
+      "confidence": 0.95,
+      "pmid": "33642529"
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Lemborexant is a dual antagonist acting on both two orexin receptors, the orexin 1 (OX1R) and 2 receptor (OX2R), with stronger inhibitory effects on OX2R.",
+      "confidence": 0.95,
+      "pmid": "33642529"
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Narcolepsy type 1",
+      "relationship": "associated_with",
+      "evidence_text": "Narcolepsy type 1 (NT1) ... NT1 symptoms are due to hypocretin deficiency.",
+      "confidence": 0.9,
+      "pmid": "39241492"
+    },
+    {
+      "entity1": "Orexin deficiency",
+      "entity2": "narcolepsy",
+      "relationship": "associated_with",
+      "evidence_text": "Orexin deficiency causes sleep/wake-state instability, resulting in narcolepsy.",
+      "confidence": 0.95,
+      "pmid": "29289556"
+    },
+    {
+      "entity1": "Hyper-activation of the orexin system",
+      "entity2": "insomnia",
+      "relationship": "associated_with",
+      "evidence_text": "Hyper-activation of the orexin system also causes sleep disturbances, such as insomnia, and hence, suvorexant, an orexin receptor antagonist, has been clinically used to treat insomnia.",
+      "confidence": 0.93,
+      "pmid": "29289556"
+    },
+    {
+      "entity1": "suvorexant",
+      "entity2": "orexin receptor",
+      "relationship": "binds_to",
+      "evidence_text": "suvorexant, an orexin receptor antagonist, has been clinically used to treat insomnia.",
+      "confidence": 0.96,
+      "pmid": "29289556"
+    },
+    {
+      "entity1": "CVN766",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "CVN766, a potent orexin 1 receptor antagonist that has greater than 1000-fold selectivity for the orexin 1 receptor over the orexin 2 receptor.",
+      "confidence": 0.97,
+      "pmid": "38295907"
+    },
+    {
+      "entity1": "CVN766",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "evidence_text": "CVN766, a potent orexin 1 receptor antagonist that has greater than 1000-fold selectivity for the orexin 1 receptor over the orexin 2 receptor.",
+      "confidence": 0.96,
+      "pmid": "38295907"
+    },
+    {
+      "entity1": "orexin B",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "Supradural orexin B induced migraine-like pain behaviors, photophobia and increased TNC ERK phosphorylation exclusively in males.",
+      "confidence": 0.95,
+      "pmid": "39233656"
+    },
+    {
+      "entity1": "orexin B",
+      "entity2": "ERK",
+      "relationship": "activates",
+      "evidence_text": "Supradural orexin B induced ... increased TNC ERK phosphorylation exclusively in males.",
+      "confidence": 0.92,
+      "pmid": "39233656"
+    },
+    {
+      "entity1": "suvorexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Blockade of orexin signaling with supradural suvorexant, a dual orexin receptor antagonist, prevented, but did not reverse, migraine-like pain in males induced by supradural IM cocktail.",
+      "confidence": 0.94,
+      "pmid": "39233656"
+    },
+    {
+      "entity1": "OxR1",
+      "entity2": "odor-attractive behavior",
+      "relationship": "regulates",
+      "evidence_text": "When odor-food reward associated mice underwent OxR1 antagonist injection in the amOT, their odor-attractive behavior was suppressed and odor-aversive behavior was conversely induced.",
+      "confidence": 0.93,
+      "pmid": "39725686"
+    },
+    {
+      "entity1": "OxR1 antagonist",
+      "entity2": "OxR1",
+      "relationship": "inhibits",
+      "evidence_text": "When odor-food reward associated mice underwent OxR1 antagonist injection in the amOT, their odor-attractive behavior was suppressed...",
+      "confidence": 0.94,
+      "pmid": "39725686"
+    },
+    {
+      "entity1": "orexin system",
+      "entity2": "cocaine abuse",
+      "relationship": "activates",
+      "evidence_text": "hcrt/ox transmission was found to facilitate motivated responding for intravenous cocaine.",
+      "confidence": 0.95,
+      "pmid": "30796894"
+    },
+    {
+      "entity1": "suvorexant",
+      "entity2": "cocaine-associated behaviors",
+      "relationship": "inhibits",
+      "evidence_text": "blocking hcrt/ox transmission using systemic or site-directed pharmacological antagonists markedly reduced motivated drug-taking as well as drug-seeking in tests of relapse.",
+      "confidence": 0.94,
+      "pmid": "30796894"
+    },
+    {
+      "entity1": "5-HT1AR",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "evidence_text": "we firstly demonstrated the heterodimer formation of 5-HT1AR and OX2R.",
+      "confidence": 0.93,
+      "pmid": "30481562"
+    },
+    {
+      "entity1": "TCS 1102",
+      "entity2": "orexin receptors",
+      "relationship": "inhibits",
+      "evidence_text": "the highly potent and commercially available dual orexin receptor antagonist, TCS 1102, on self-administration and reinstatement of palatable food seeking.",
+      "confidence": 0.92,
+      "pmid": "28663114"
+    },
+    {
+      "entity1": "Danavorexton",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "Danavorexton (TAK-925) is an agonist for orexin receptor 2 where it promotes recovery from inhalational and i.v. anaesthesia and opioid sedation.",
+      "confidence": 0.96,
+      "pmid": "38346840"
+    },
+    {
+      "entity1": "TS-142",
+      "entity2": "OX1R",
+      "relationship": "inhibits",
+      "evidence_text": "Novel compound with potent antagonistic activity against orexin receptors may be new treatment option for patients with insomnia.",
+      "confidence": 0.95,
+      "pmid": "35296912"
+    },
+    {
+      "entity1": "TS-142",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Novel compound with potent antagonistic activity against orexin receptors may be new treatment option for patients with insomnia.",
+      "confidence": 0.95,
+      "pmid": "35296912"
+    },
+    {
+      "entity1": "TAK-925",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "We evaluated the efficacy of two small molecule hypocretin/orexin receptor-2 (HCRTR2) agonists in narcoleptic male orexin/tTA; TetO-DTA mice.",
+      "confidence": 0.9,
+      "pmid": "36808670"
+    },
+    {
+      "entity1": "ARN-776",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "We evaluated the efficacy of two small molecule hypocretin/orexin receptor-2 (HCRTR2) agonists in narcoleptic male orexin/tTA; TetO-DTA mice.",
+      "confidence": 0.9,
+      "pmid": "36808670"
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "Na+/Ca2+ exchanger",
+      "relationship": "activates",
+      "evidence_text": "the activation of the Na+/Ca2+ exchanger and non-selective cation channels of unknown identity.",
+      "confidence": 0.85,
+      "pmid": "34052812"
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "2-arachidonoyl glycerol",
+      "relationship": "activates",
+      "evidence_text": "the Gq-PLC pathway may also, under certain circumstances, take the route to diacylglycerol lipase, which leads to the production of the potent endocannabinoid (eCB), 2-arachidonoyl glycerol.",
+      "confidence": 0.8,
+      "pmid": "34052812"
+    },
+    {
+      "entity1": "orexin-A",
+      "entity2": "estradiol",
+      "relationship": "regulates",
+      "evidence_text": "determine the role of orexin on oestradiol production.",
+      "confidence": 0.78,
+      "pmid": "36881512"
+    },
+    {
+      "entity1": "orexin-A",
+      "entity2": "bone loss",
+      "relationship": "regulates",
+      "evidence_text": "ZGW exhibited a protective effect for PMOP that may be mediated via orexin-A and orexin receptors regulation.",
+      "confidence": 0.75,
+      "pmid": "34939389"
+    },
+    {
+      "entity1": "orexin-A",
+      "entity2": "analgesia",
+      "relationship": "activates",
+      "evidence_text": "orexin peptides induce analgesia that is comparable to morphine.",
+      "confidence": 0.85,
+      "pmid": "28552056"
+    },
+    {
+      "entity1": "(S)-1-amino-tetralin",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "The introduction of N-methyl-(3-methoxyphenyl)acetamide unit onto the 1-amino-tetralin skeleton remarkably enhanced the potency of the agonist.",
+      "confidence": 0.8,
+      "pmid": "35051577"
+    },
+    {
+      "entity1": "1-amino-tetralin",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "The introduction of N-methyl-(3-methoxyphenyl)acetamide unit onto the 1-amino-tetralin skeleton remarkably enhanced the potency of the agonist.",
+      "confidence": 0.78,
+      "pmid": "35051577"
+    },
+    {
+      "entity1": "Hcrtr2",
+      "entity2": "REMS",
+      "relationship": "regulates",
+      "evidence_text": "Unexpectedly, loss of Hcrtr2, but not Hcrtr1 or Hcrtr1&2, induced a dramatic increase in theta (7-11\u202fHz) electroencephalographic (EEG) activity in both wakefulness and rapid-eye-movement sleep (REMS).",
+      "confidence": 0.7,
+      "pmid": "38123729"
+    },
+    {
+      "entity1": "orexin\u2011B",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "evidence_text": "In isolated rat cardiomyocytes, only orexin\u2011B (OR\u2011B) caused an increase in contractile shortening, independent of diastolic or systolic calcium levels.",
+      "confidence": 0.6,
+      "pmid": "30467191"
+    },
+    {
+      "entity1": "MK\u20111064",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "evidence_text": "Acute MK\u20111064 hastened SWS onset and increased the number of SWS episodes, without increasing sleep fragmentation in AIE and controls.",
+      "confidence": 0.65,
+      "pmid": "32424852"
+    },
+    {
+      "entity1": "MK\u20111064",
+      "entity2": "SWS",
+      "relationship": "regulates",
+      "evidence_text": "Acute MK\u20111064 hastened SWS onset and increased the number of SWS episodes, without increasing sleep fragmentation in AIE and controls.",
+      "confidence": 0.8,
+      "pmid": "32424852"
+    }
+  ],
+  "validation_results": [
+    {
+      "relationship": {
+        "entity1": "Almorexant",
+        "entity2": "orexin system",
+        "relationship": "inhibits",
+        "evidence_text": "Almorexant is now mainly used as a commercial specific inhibitor of the orexin system in animal studies due to safety issues.",
+        "confidence": 0.96,
+        "pmid": "35972717"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "OX1R",
+        "relationship": "binds_to",
+        "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R.",
+        "confidence": 0.95,
+        "pmid": "34052813"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-B",
+        "entity2": "OX2R",
+        "relationship": "binds_to",
+        "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R.",
+        "confidence": 0.95,
+        "pmid": "34052813"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "OX1R",
+        "relationship": "activates",
+        "evidence_text": "Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2Rs.",
+        "confidence": 0.94,
+        "pmid": "31782044"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.6377708978328174,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.64): 'Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2...'"
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2Rs.",
+        "confidence": 0.94,
+        "pmid": "31782044"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.6377708978328174,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.64): 'Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2...'"
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "OX1R",
+        "relationship": "inhibits",
+        "evidence_text": "Overall, it was concluded that OXA exerts neuroprotective effect during CIRI ... by Inhibiting OX1R-mediated NF-\u03baB, MAPK/ERK and MAPK/p38 signaling pathways.",
+        "confidence": 0.96,
+        "pmid": "34358627"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7386091127098321,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Danavorexton",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "We discovered a parenteral orexin receptor 2 (OX2R) agonist, danavorexton, and an orally available OX2R agonist, TAK-994; both improving NT1 phenotypes in mouse models and individuals with NT1.",
+        "confidence": 0.95,
+        "pmid": "39242684"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "TAK-861",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "TAK-861 ... activates OX2R with a half-maximal effective concentration of 2.5\u00a0nM and promotes wakefulness at 1\u00a0mg/kg in mice and monkeys.",
+        "confidence": 0.96,
+        "pmid": "39242684"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.44363636363636366,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.44): 'TAK-861 ... activates OX2R with a half-maximal effective concentration of 2.5\u00a0nM and promotes wakefu...'"
+    },
+    {
+      "relationship": {
+        "entity1": "TAK-994",
+        "entity2": "orexin receptor 2",
+        "relationship": "activates",
+        "evidence_text": "TAK-994, an oral orexin receptor 2-selective agonist",
+        "confidence": 0.95,
+        "pmid": "37494485"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "TAK-994",
+        "entity2": "hepatic adverse events",
+        "relationship": "associated_with",
+        "evidence_text": "The phase 2 trial and an extension trial were terminated early owing to hepatic adverse events.",
+        "confidence": 0.9,
+        "pmid": "37494485"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "HCRTR1",
+        "entity2": "lactate production",
+        "relationship": "inhibits",
+        "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production",
+        "confidence": 0.95,
+        "pmid": "39119889"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "HCRTR1",
+        "entity2": "brain-derived neurotrophic factor (BDNF)",
+        "relationship": "inhibits",
+        "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced ... BDNF expression",
+        "confidence": 0.95,
+        "pmid": "39119889"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.4126984126984127,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.41): 'Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced ... BDNF expression...'"
+    },
+    {
+      "relationship": {
+        "entity1": "HCRTR1",
+        "entity2": "adult hippocampal neuroplasticity",
+        "relationship": "inhibits",
+        "evidence_text": "Excessive hypocretin-1 ... reduced ... neuroplasticity, and cognitive impairment in CUMS model.",
+        "confidence": 0.9,
+        "pmid": "39119889"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.48847926267281105,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.49): 'Excessive hypocretin-1 ... reduced ... neuroplasticity, and cognitive impairment in CUMS model....'"
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "Orexin-A",
+        "relationship": "inhibits",
+        "evidence_text": "MSZRD significantly downregulated the serum Orexin\u2011A content in insomnia mice",
+        "confidence": 0.95,
+        "pmid": "34509822"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.8444444444444444,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "MSZRD significantly downregulated ... hypothalamic OX2R expression",
+        "confidence": 0.95,
+        "pmid": "34509822"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.5423728813559322,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.54): 'MSZRD significantly downregulated ... hypothalamic OX2R expression...'"
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "5\u2011HT",
+        "relationship": "activates",
+        "evidence_text": "MSZRD effectively increased the content of 5\u2011HT ... in the hypothalamus of insomnia mice",
+        "confidence": 0.95,
+        "pmid": "34509822"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7887323943661971,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "5\u2011HTR1A",
+        "relationship": "activates",
+        "evidence_text": "MSZRD effectively increased ... 5\u2011HTR1A protein in the hypothalamus of insomnia mice",
+        "confidence": 0.95,
+        "pmid": "34509822"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7655502392344498,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "DA",
+        "relationship": "inhibits",
+        "evidence_text": "MSZRD ... downregulated the content of DA ... in insomnia mice",
+        "confidence": 0.95,
+        "pmid": "34509822"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.593939393939394,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.59): 'MSZRD ... downregulated the content of DA ... in insomnia mice...'"
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "NE",
+        "relationship": "inhibits",
+        "evidence_text": "MSZRD ... downregulated the content of ... NE ... in insomnia mice",
+        "confidence": 0.95,
+        "pmid": "34509822"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.5853658536585366,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.59): 'MSZRD ... downregulated the content of ... NE ... in insomnia mice...'"
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "CRH",
+        "relationship": "inhibits",
+        "evidence_text": "MSZRD ... decreased the levels of ... CRH related hormones in HPA axis",
+        "confidence": 0.95,
+        "pmid": "34509822"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7590361445783133,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "ACTH",
+        "relationship": "inhibits",
+        "evidence_text": "MSZRD ... decreased the levels of ... ACTH related hormones in HPA axis",
+        "confidence": 0.95,
+        "pmid": "34509822"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7664670658682635,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "CORT",
+        "relationship": "inhibits",
+        "evidence_text": "MSZRD ... decreased the levels of ... CORT related hormones in HPA axis",
+        "confidence": 0.95,
+        "pmid": "34509822"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7544910179640718,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "GABA",
+        "relationship": "activates",
+        "evidence_text": "serum GABA concentration was increased by treatment with MSZRD",
+        "confidence": 0.9,
+        "pmid": "34509822"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "almorexant",
+        "entity2": "orexin receptor 1",
+        "relationship": "inhibits",
+        "evidence_text": "almorexant, a dual orexin receptor antagonist (DORA)",
+        "confidence": 0.95,
+        "pmid": "39047304"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "almorexant",
+        "entity2": "orexin receptor 2",
+        "relationship": "inhibits",
+        "evidence_text": "almorexant, a dual orexin receptor antagonist (DORA)",
+        "confidence": 0.95,
+        "pmid": "39047304"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "almorexant",
+        "entity2": "A\u03b2 deposition",
+        "relationship": "inhibits",
+        "evidence_text": "The application of almorexant can ... reduce cognitive impairment and A\u03b2 deposition",
+        "confidence": 0.9,
+        "pmid": "39047304"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.5693950177935944,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.57): 'The application of almorexant can ... reduce cognitive impairment and A\u03b2 deposition...'"
+    },
+    {
+      "relationship": {
+        "entity1": "almorexant",
+        "entity2": "Aquaporin-4",
+        "relationship": "regulates",
+        "evidence_text": "which is related to the improvement in Aquaporin-4 polarity",
+        "confidence": 0.9,
+        "pmid": "39047304"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "OX1R",
+        "relationship": "activates",
+        "evidence_text": "Orexin enhances learning and memory as well as reward, stress, seizures, and epilepsy, partly through OX1Rs.",
+        "confidence": 0.9,
+        "pmid": "35180935"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7632508833922261,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "OX2R",
+        "relationship": "regulates",
+        "evidence_text": "while either aggravating or alleviating those phenomena via OX2Rs.",
+        "confidence": 0.8,
+        "pmid": "35180935"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "OX1R",
+        "relationship": "activates",
+        "evidence_text": "orexins are neuropeptides produced in the hypothalamus that stimulate a specific type of G-Protein coupled receptors (GPCR) called orexin receptors.",
+        "confidence": 0.9,
+        "pmid": "34464995"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7978436657681941,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "orexins are neuropeptides produced in the hypothalamus that stimulate a specific type of G-Protein coupled receptors (GPCR) called orexin receptors.",
+        "confidence": 0.9,
+        "pmid": "34464995"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7978436657681941,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OX1R",
+        "entity2": "5-HT1AR",
+        "relationship": "associated_with",
+        "evidence_text": "we found that 5-HT1AR and OX1R form constitutive heterodimers.",
+        "confidence": 0.95,
+        "pmid": "35338110"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.4888888888888889,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.49): 'we found that 5-HT1AR and OX1R form constitutive heterodimers....'"
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "OX1R",
+        "relationship": "inhibits",
+        "evidence_text": "The orexin receptor antagonist suvorexant, which specifically block the endogenous waking system.",
+        "confidence": 0.85,
+        "pmid": "30905886"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7918367346938775,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "The orexin receptor antagonist suvorexant, which specifically block the endogenous waking system.",
+        "confidence": 0.85,
+        "pmid": "30905886"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7918367346938775,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OX1R",
+        "entity2": "glucose",
+        "relationship": "regulates",
+        "evidence_text": "Inactivation of orexin receptor type 1 in serotonin transporter-expressing cells of mice reduced insulin sensitivity in diet\u2011induced obesity, mainly by decreasing glucose utilization.",
+        "confidence": 0.9,
+        "pmid": "34475397"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.8878048780487805,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OX2R",
+        "entity2": "glucose",
+        "relationship": "regulates",
+        "evidence_text": "Selective inactivation of orexin receptor type 2 improved glucose tolerance and insulin sensitivity in obese mice.",
+        "confidence": 0.9,
+        "pmid": "34475397"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.8085106382978723,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin receptors",
+        "entity2": "hypertension",
+        "relationship": "activates",
+        "evidence_text": "pharmacological blockade of orexin receptors reduces blood pressure in SHRs.",
+        "confidence": 0.85,
+        "pmid": "28349223"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.4536082474226804,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.45): 'pharmacological blockade of orexin receptors reduces blood pressure in SHRs....'"
+    },
+    {
+      "relationship": {
+        "entity1": "OX1R",
+        "entity2": "hypertension",
+        "relationship": "activates",
+        "evidence_text": "upregulation of the orexin receptor 1 increases firing of hypothalamic paraventricular nucleus neurons, augments SNA, and contributes to hypertension.",
+        "confidence": 0.85,
+        "pmid": "28349223"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7772020725388601,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "20d",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "20d and 28d showed full agonist activity against OX.",
+        "confidence": 0.9,
+        "pmid": "36690040"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.4322033898305085,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.43): '20d and 28d showed full agonist activity against OX....'"
+    },
+    {
+      "relationship": {
+        "entity1": "28d",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "20d and 28d showed full agonist activity against OX.",
+        "confidence": 0.9,
+        "pmid": "36690040"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.4322033898305085,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.43): '20d and 28d showed full agonist activity against OX....'"
+    },
+    {
+      "relationship": {
+        "entity1": "TAK-994",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "TAK-994, a novel OX2R\u2011selective agonist.",
+        "confidence": 0.9,
+        "pmid": "37001988"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.3770491803278688,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.38): 'TAK-994, a novel OX2R\u2011selective agonist....'"
+    },
+    {
+      "relationship": {
+        "entity1": "Almorexant",
+        "entity2": "OX1R",
+        "relationship": "inhibits",
+        "evidence_text": "investigated ORAs have included the DORA almorexant.",
+        "confidence": 0.8,
+        "pmid": "36436175"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.348993288590604,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.35): 'investigated ORAs have included the DORA almorexant....'"
+    },
+    {
+      "relationship": {
+        "entity1": "Almorexant",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "investigated ORAs have included the DORA almorexant.",
+        "confidence": 0.8,
+        "pmid": "36436175"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.348993288590604,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.35): 'investigated ORAs have included the DORA almorexant....'"
+    },
+    {
+      "relationship": {
+        "entity1": "Lemborexant",
+        "entity2": "OX1R",
+        "relationship": "inhibits",
+        "evidence_text": "Collectively, these results demonstrate that DORAs potently increase NREM and REM sleep in mice via blockade of orexin signaling, and higher doses can cause cataplexy when co-administered with a likely rewarding stimulus.",
+        "confidence": 0.9,
+        "pmid": "31830270"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Lemborexant",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "Collectively, these results demonstrate that DORAs potently increase NREM and REM sleep in mice via blockade of orexin signaling, and higher doses can cause cataplexy when co-administered with a likely rewarding stimulus.",
+        "confidence": 0.9,
+        "pmid": "31830270"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Almorexant",
+        "entity2": "OX1R",
+        "relationship": "inhibits",
+        "evidence_text": "Almorexant produced similar results.",
+        "confidence": 0.9,
+        "pmid": "31830270"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Almorexant",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "Almorexant produced similar results.",
+        "confidence": 0.9,
+        "pmid": "31830270"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Lemborexant",
+        "entity2": "NREM sleep",
+        "relationship": "activates",
+        "evidence_text": "In WT mice, lemborexant at 10 and 30 mg/kg quickly induced NREM sleep in a dose-dependent fashion.",
+        "confidence": 0.9,
+        "pmid": "31830270"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Almorexant",
+        "entity2": "NREM sleep",
+        "relationship": "activates",
+        "evidence_text": "Almorexant produced similar results.",
+        "confidence": 0.9,
+        "pmid": "31830270"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Lemborexant",
+        "entity2": "cataplexy",
+        "relationship": "activates",
+        "evidence_text": "when mice were given chocolate as a rewarding stimulus, lemborexant dose-dependently increased cataplexy.",
+        "confidence": 0.8,
+        "pmid": "31830270"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Almorexant",
+        "entity2": "cataplexy",
+        "relationship": "activates",
+        "evidence_text": "Almorexant produced similar results.",
+        "confidence": 0.8,
+        "pmid": "31830270"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "ORN0829",
+        "entity2": "OX1R",
+        "relationship": "inhibits",
+        "evidence_text": "Here, we present the design, synthesis, and SAR of dual orexin 1 and 2 receptor antagonists...",
+        "confidence": 0.9,
+        "pmid": "32482533"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.6433566433566433,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.64): 'Here, we present the design, synthesis, and SAR of dual orexin 1 and 2 receptor antagonists......'"
+    },
+    {
+      "relationship": {
+        "entity1": "ORN0829",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "Here, we present the design, synthesis, and SAR of dual orexin 1 and 2 receptor antagonists...",
+        "confidence": 0.9,
+        "pmid": "32482533"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.6433566433566433,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.64): 'Here, we present the design, synthesis, and SAR of dual orexin 1 and 2 receptor antagonists......'"
+    },
+    {
+      "relationship": {
+        "entity1": "ORN0829",
+        "entity2": "Sleep",
+        "relationship": "activates",
+        "evidence_text": "Compound (-)-3h exhibited potent sleep-promoting effects at a po dose of 1 mg/kg in a rat polysomnogram study.",
+        "confidence": 0.9,
+        "pmid": "32482533"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.8275862068965517,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "inactive phase rapid eye movement (REM) sleep enhancement with the dual orexin receptor antagonist suvorexant (50 mg\u00b7kg",
+        "confidence": 0.9,
+        "pmid": "37553894"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.5315315315315315,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.53): 'inactive phase rapid eye movement (REM) sleep enhancement with the dual orexin receptor antagonist s...'"
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "REM sleep",
+        "relationship": "activates",
+        "evidence_text": "inactive phase rapid eye movement (REM) sleep enhancement with the dual orexin receptor antagonist suvorexant (50 mg\u00b7kg",
+        "confidence": 0.9,
+        "pmid": "37553894"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.5315315315315315,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.53): 'inactive phase rapid eye movement (REM) sleep enhancement with the dual orexin receptor antagonist s...'"
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "NREM sleep",
+        "relationship": "activates",
+        "evidence_text": "normalising hyperarousal by increasing both NREM and REM sleep via OX",
+        "confidence": 0.9,
+        "pmid": "37553894"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OXB",
+        "entity2": "OX2R",
+        "relationship": "binds_to",
+        "evidence_text": "Both OXA and OXB peptides bind to two G-coupled receptors, orexin-1 (OX1R) and orexin-2 (OX2R) receptor, though with different binding affinity.",
+        "confidence": 0.95,
+        "pmid": "29496265"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OXA",
+        "entity2": "OX2R",
+        "relationship": "binds_to",
+        "evidence_text": "Both OXA and OXB peptides bind to two G-coupled receptors, orexin-1 (OX1R) and orexin-2 (OX2R) receptor, though with different binding affinity.",
+        "confidence": 0.95,
+        "pmid": "29496265"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "PTSD",
+        "relationship": "activates",
+        "evidence_text": "This review focuses on the importance of the orexin neural system as a novel mechanism related to the pathophysiology of PTSD.",
+        "confidence": 0.85,
+        "pmid": "35618150"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "naphthalene",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "Design and synthesis of novel orexin 2 receptor agonists based on naphthalene skeleton.",
+        "confidence": 0.85,
+        "pmid": "35007725"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.32786885245901637,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.33): 'Design and synthesis of novel orexin 2 receptor agonists based on naphthalene skeleton....'"
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "neurodegenerative diseases",
+        "relationship": "associated_with",
+        "evidence_text": "we discuss and update the main preclinical and human studies involving the orexin system with several psychiatric and neurodegenerative diseases.",
+        "confidence": 0.8,
+        "pmid": "37015302"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "neuropsychiatric diseases",
+        "relationship": "associated_with",
+        "evidence_text": "we discuss and update the main preclinical and human studies involving the orexin system with several psychiatric and neurodegenerative diseases.",
+        "confidence": 0.8,
+        "pmid": "37015302"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-1 receptor",
+        "entity2": "Depression",
+        "relationship": "inhibits",
+        "evidence_text": "Chronic orexin-1 receptor blockage attenuates depressive behaviors and provokes PSD-95 expression in a rat model of depression.",
+        "confidence": 0.9,
+        "pmid": "36154849"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.27522935779816515,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.28): 'Chronic orexin-1 receptor blockage attenuates depressive behaviors and provokes PSD-95 expression in...'"
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-1 receptor",
+        "entity2": "PSD-95",
+        "relationship": "activates",
+        "evidence_text": "Chronic orexin-1 receptor blockage attenuates depressive behaviors and provokes PSD-95 expression in a rat model of depression.",
+        "confidence": 0.9,
+        "pmid": "36154849"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.27522935779816515,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.28): 'Chronic orexin-1 receptor blockage attenuates depressive behaviors and provokes PSD-95 expression in...'"
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin receptor",
+        "entity2": "Anxiety",
+        "relationship": "inhibits",
+        "evidence_text": "acute but not chronic stress, led to increased anxiety and immobility behavior which were both impeded by blocking the orexin receptor (OXR).",
+        "confidence": 0.9,
+        "pmid": "30458283"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin receptor",
+        "entity2": "social learning",
+        "relationship": "inhibits",
+        "evidence_text": "the acute but not chronic stress ... was reversed following the blockade of both OXRs.",
+        "confidence": 0.9,
+        "pmid": "30458283"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.6217228464419475,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.62): 'the acute but not chronic stress ... was reversed following the blockade of both OXRs....'"
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "OX1R",
+        "relationship": "binds_to",
+        "evidence_text": "The hypothalamic neuropeptides, orexin-A and orexin-B, act through G-protein-coupled receptors (orexin-1 and orexin-2 receptors).",
+        "confidence": 0.95,
+        "pmid": "34052807"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-B",
+        "entity2": "OX2R",
+        "relationship": "binds_to",
+        "evidence_text": "The hypothalamic neuropeptides, orexin-A and orexin-B, act through G-protein-coupled receptors (orexin-1 and orexin-2 receptors).",
+        "confidence": 0.95,
+        "pmid": "34052807"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Danavorexton",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "orexin 2 receptor-selective agonist danavorexton improves narcolepsy phenotype in a mouse model and in human patients.",
+        "confidence": 0.95,
+        "pmid": "35994639"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.4444444444444444,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.44): 'orexin 2 receptor-selective agonist danavorexton improves narcolepsy phenotype in a mouse model and ...'"
+    },
+    {
+      "relationship": {
+        "entity1": "Danavorexton",
+        "entity2": "cataplexy",
+        "relationship": "inhibits",
+        "evidence_text": "Danavorexton reduced sleep/wakefulness fragmentation and cataplexy-like episodes during the active phase.",
+        "confidence": 0.9,
+        "pmid": "35994639"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin A",
+        "entity2": "Sleep",
+        "relationship": "regulates",
+        "evidence_text": "Generally, the primary role of orexins is to act as excitatory neurotransmitters and regulate the sleep process.",
+        "confidence": 0.8,
+        "pmid": "30423961"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin B",
+        "entity2": "Sleep",
+        "relationship": "regulates",
+        "evidence_text": "Generally, the primary role of orexins is to act as excitatory neurotransmitters and regulate the sleep process.",
+        "confidence": 0.8,
+        "pmid": "30423961"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexins",
+        "entity2": "Narcolepsy",
+        "relationship": "inhibits",
+        "evidence_text": "Lack of orexins may lead to sleep disorder narcolepsy in mice, dogs, and humans.",
+        "confidence": 0.7,
+        "pmid": "30423961"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin system",
+        "entity2": "Arousal",
+        "relationship": "associated_with",
+        "evidence_text": "The orexin system plays a relevant role in various physiological functions, including arousal, feeding, reward, and thermogenesis.",
+        "confidence": 0.8,
+        "pmid": "37054895"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.9027777777777778,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "AM251",
+        "entity2": "CB1R",
+        "relationship": "inhibits",
+        "evidence_text": "AM251 (18\u00a0nmol/4 \u03bcl), as a selective CB1R antagonist, ...",
+        "confidence": 0.9,
+        "pmid": "35313383"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.3728813559322034,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.37): 'AM251 (18\u00a0nmol/4 \u03bcl), as a selective CB1R antagonist, ......'"
+    },
+    {
+      "relationship": {
+        "entity1": "TCS-OX2-29",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "TCS-OX2-29 (50\u00a0nmol/4 \u03bcl), as a selective OX2R antagonist, ...",
+        "confidence": 0.9,
+        "pmid": "35313383"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.4,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.40): 'TCS-OX2-29 (50\u00a0nmol/4 \u03bcl), as a selective OX2R antagonist, ......'"
+    },
+    {
+      "relationship": {
+        "entity1": "OXB",
+        "entity2": "Spermatogenesis",
+        "relationship": "regulates",
+        "evidence_text": "The results suggest the expression of OXB and OX2R in mouse testis and their possible regulatory role in spermatogenesis and steroidogenesis.",
+        "confidence": 0.8,
+        "pmid": "36841281"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OX2R",
+        "entity2": "Spermatogenesis",
+        "relationship": "regulates",
+        "evidence_text": "The results suggest the expression of OXB and OX2R in mouse testis and their possible regulatory role in spermatogenesis and steroidogenesis.",
+        "confidence": 0.8,
+        "pmid": "36841281"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin A",
+        "entity2": "Sleep",
+        "relationship": "regulates",
+        "evidence_text": "Recent evidence suggests the central orexin system, particularly orexins A and B and their receptors, have a key regulatory role for sleep in animal and human models.",
+        "confidence": 0.85,
+        "pmid": "36148653"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin B",
+        "entity2": "Sleep",
+        "relationship": "regulates",
+        "evidence_text": "Recent evidence suggests the central orexin system, particularly orexins A and B and their receptors, have a key regulatory role for sleep in animal and human models.",
+        "confidence": 0.85,
+        "pmid": "36148653"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin A",
+        "entity2": "Sympathetic activity",
+        "relationship": "regulates",
+        "evidence_text": "Recent evidence suggests the central orexin system, particularly orexins A and B and their receptors, have a key regulatory role for ... sympathetic regulation.",
+        "confidence": 0.8,
+        "pmid": "36148653"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.8220858895705522,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OX1R",
+        "entity2": "Apoptosis",
+        "relationship": "activates",
+        "evidence_text": "its ability to trigger mitochondrial apoptosis in tumoral cells",
+        "confidence": 0.85,
+        "pmid": "35966051"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Cancers",
+        "relationship": "associated_with",
+        "evidence_text": "Orexins and their receptors are involved in pathologies including ... cancers.",
+        "confidence": 0.8,
+        "pmid": "35966051"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.5859375,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.59): 'Orexins and their receptors are involved in pathologies including ... cancers....'"
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Blood pressure",
+        "relationship": "activates",
+        "evidence_text": "Multiple studies show that orexinergic stimulation results in increased blood pressure and heart rate.",
+        "confidence": 0.85,
+        "pmid": "29992504"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7259786476868327,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "TCS-OX2-29",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "TCS OX2 29 (TCS), a potent selective antagonist of OX2 receptors, would have positive effects ...",
+        "confidence": 0.9,
+        "pmid": "39402852"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.5413105413105413,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.54): 'TCS OX2 29 (TCS), a potent selective antagonist of OX2 receptors, would have positive effects ......'"
+    },
+    {
+      "relationship": {
+        "entity1": "OX1R",
+        "entity2": "Reward",
+        "relationship": "associated_with",
+        "evidence_text": "OX1R ... is implicated in multiple functions, such as reward, emotions, and autonomic regulation.",
+        "confidence": 0.8,
+        "pmid": "37189339"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.8138528138528138,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "monoaminergic neurons",
+        "relationship": "activates",
+        "evidence_text": "Orexin neurons are thought to act primarily on monoaminergic neurons to maintain arousal and vigilance.",
+        "confidence": 0.8,
+        "pmid": "34052806"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "dopaminergic system",
+        "relationship": "associated_with",
+        "evidence_text": "Orexin also has close interactions with the dopaminergic system, and many studies have suggested roles of orexin signaling in the reward system and roles for orexins in drug addiction.",
+        "confidence": 0.75,
+        "pmid": "34052806"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "drug addiction",
+        "relationship": "associated_with",
+        "evidence_text": "Orexin also has close interactions with the dopaminergic system, and many studies have suggested roles of orexin signaling in the reward system and roles for orexins in drug addiction.",
+        "confidence": 0.7,
+        "pmid": "34052806"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "OX1R",
+        "relationship": "binds_to",
+        "evidence_text": "Suvorexant, a dual orexin receptor antagonist (DORA) is approved for the treatment of primary insomnia.",
+        "confidence": 0.9,
+        "pmid": "31066976"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "OX2R",
+        "relationship": "binds_to",
+        "evidence_text": "Suvorexant, a dual orexin receptor antagonist (DORA) is approved for the treatment of primary insomnia.",
+        "confidence": 0.9,
+        "pmid": "31066976"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Estradiol",
+        "entity2": "orexin",
+        "relationship": "regulates",
+        "evidence_text": "The female menstrual or estrous cycle and its associated fluctuations in circulating estradiol (E2), progesterone, and other gonadal hormones alter orexin or hypocretin peptide production and receptor activity.",
+        "confidence": 0.85,
+        "pmid": "36571628"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "SB-334867",
+        "entity2": "OX1R",
+        "relationship": "inhibits",
+        "evidence_text": "orexin-1 receptor antagonist SB-334867",
+        "confidence": 0.9,
+        "pmid": "36480169"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "SB-334867",
+        "entity2": "orexin-B",
+        "relationship": "cooccurs_with",
+        "evidence_text": "The results suggested that the combination of orexin-1 receptor antagonist SB-334867 and orexin-B with morphine significantly increased the analgesic effect compared to morphine-tolerant rats.",
+        "confidence": 0.8,
+        "pmid": "36480169"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "D2R",
+        "relationship": "activates",
+        "evidence_text": "Orexin-A up-regulates dopamine D2 receptor and mRNA in the nucleus accumbens Shell.",
+        "confidence": 0.9,
+        "pmid": "33170427"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.4046242774566474,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.40): 'Orexin-A up-regulates dopamine D2 receptor and mRNA in the nucleus accumbens Shell....'"
+    },
+    {
+      "relationship": {
+        "entity1": "OX2R",
+        "entity2": "A\u03b2 deposition",
+        "relationship": "inhibits",
+        "evidence_text": "OX2R blockade ... reduced A\u03b2 pathology ... in 3xTg-AD mice.",
+        "confidence": 0.85,
+        "pmid": "38682858"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.3333333333333333,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.33): 'OX2R blockade ... reduced A\u03b2 pathology ... in 3xTg-AD mice....'"
+    },
+    {
+      "relationship": {
+        "entity1": "Lemborexant",
+        "entity2": "OX1R",
+        "relationship": "binds_to",
+        "evidence_text": "Lemborexant is a dual antagonist acting on both two orexin receptors, the orexin 1 (OX1R) and 2 receptor (OX2R), with stronger inhibitory effects on OX2R.",
+        "confidence": 0.95,
+        "pmid": "33642529"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Lemborexant",
+        "entity2": "OX2R",
+        "relationship": "binds_to",
+        "evidence_text": "Lemborexant is a dual antagonist acting on both two orexin receptors, the orexin 1 (OX1R) and 2 receptor (OX2R), with stronger inhibitory effects on OX2R.",
+        "confidence": 0.95,
+        "pmid": "33642529"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Lemborexant",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "Lemborexant is a dual antagonist acting on both two orexin receptors, the orexin 1 (OX1R) and 2 receptor (OX2R), with stronger inhibitory effects on OX2R.",
+        "confidence": 0.95,
+        "pmid": "33642529"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Narcolepsy type 1",
+        "relationship": "associated_with",
+        "evidence_text": "Narcolepsy type 1 (NT1) ... NT1 symptoms are due to hypocretin deficiency.",
+        "confidence": 0.9,
+        "pmid": "39241492"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7666666666666667,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin deficiency",
+        "entity2": "narcolepsy",
+        "relationship": "associated_with",
+        "evidence_text": "Orexin deficiency causes sleep/wake-state instability, resulting in narcolepsy.",
+        "confidence": 0.95,
+        "pmid": "29289556"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Hyper-activation of the orexin system",
+        "entity2": "insomnia",
+        "relationship": "associated_with",
+        "evidence_text": "Hyper-activation of the orexin system also causes sleep disturbances, such as insomnia, and hence, suvorexant, an orexin receptor antagonist, has been clinically used to treat insomnia.",
+        "confidence": 0.93,
+        "pmid": "29289556"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "suvorexant",
+        "entity2": "orexin receptor",
+        "relationship": "binds_to",
+        "evidence_text": "suvorexant, an orexin receptor antagonist, has been clinically used to treat insomnia.",
+        "confidence": 0.96,
+        "pmid": "29289556"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "CVN766",
+        "entity2": "OX1R",
+        "relationship": "inhibits",
+        "evidence_text": "CVN766, a potent orexin 1 receptor antagonist that has greater than 1000-fold selectivity for the orexin 1 receptor over the orexin 2 receptor.",
+        "confidence": 0.97,
+        "pmid": "38295907"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7506561679790026,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "CVN766",
+        "entity2": "OX1R",
+        "relationship": "binds_to",
+        "evidence_text": "CVN766, a potent orexin 1 receptor antagonist that has greater than 1000-fold selectivity for the orexin 1 receptor over the orexin 2 receptor.",
+        "confidence": 0.96,
+        "pmid": "38295907"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7506561679790026,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "orexin B",
+        "entity2": "OX2R",
+        "relationship": "binds_to",
+        "evidence_text": "Supradural orexin B induced migraine-like pain behaviors, photophobia and increased TNC ERK phosphorylation exclusively in males.",
+        "confidence": 0.95,
+        "pmid": "39233656"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "orexin B",
+        "entity2": "ERK",
+        "relationship": "activates",
+        "evidence_text": "Supradural orexin B induced ... increased TNC ERK phosphorylation exclusively in males.",
+        "confidence": 0.92,
+        "pmid": "39233656"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.7466666666666667,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "suvorexant",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "Blockade of orexin signaling with supradural suvorexant, a dual orexin receptor antagonist, prevented, but did not reverse, migraine-like pain in males induced by supradural IM cocktail.",
+        "confidence": 0.94,
+        "pmid": "39233656"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "EMPA",
+        "entity2": "OX2R",
+        "relationship": "binds_to",
+        "evidence_text": "EMPA is an OX2R-selective antagonist used for autoradiography of OX2R protein distribution.",
+        "confidence": 0.9,
+        "pmid": "35589803"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.3717948717948718,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.37): 'EMPA is an OX2R-selective antagonist used for autoradiography of OX2R protein distribution....'"
+    },
+    {
+      "relationship": {
+        "entity1": "OxR1",
+        "entity2": "odor-attractive behavior",
+        "relationship": "regulates",
+        "evidence_text": "When odor-food reward associated mice underwent OxR1 antagonist injection in the amOT, their odor-attractive behavior was suppressed and odor-aversive behavior was conversely induced.",
+        "confidence": 0.93,
+        "pmid": "39725686"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OxR1 antagonist",
+        "entity2": "OxR1",
+        "relationship": "inhibits",
+        "evidence_text": "When odor-food reward associated mice underwent OxR1 antagonist injection in the amOT, their odor-attractive behavior was suppressed...",
+        "confidence": 0.94,
+        "pmid": "39725686"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.8364779874213837,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "orexin system",
+        "entity2": "cocaine abuse",
+        "relationship": "activates",
+        "evidence_text": "hcrt/ox transmission was found to facilitate motivated responding for intravenous cocaine.",
+        "confidence": 0.95,
+        "pmid": "30796894"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "suvorexant",
+        "entity2": "cocaine-associated behaviors",
+        "relationship": "inhibits",
+        "evidence_text": "blocking hcrt/ox transmission using systemic or site-directed pharmacological antagonists markedly reduced motivated drug-taking as well as drug-seeking in tests of relapse.",
+        "confidence": 0.94,
+        "pmid": "30796894"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "5-HT1AR",
+        "entity2": "OX2R",
+        "relationship": "binds_to",
+        "evidence_text": "we firstly demonstrated the heterodimer formation of 5-HT1AR and OX2R.",
+        "confidence": 0.93,
+        "pmid": "30481562"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OX2R",
+        "entity2": "ERK",
+        "relationship": "inhibits",
+        "evidence_text": "heterodimer decreased the levels of phosphorylation of extracellular signal-regulated kinase (ERK).",
+        "confidence": 0.9,
+        "pmid": "30481562"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.6366559485530546,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.64): 'heterodimer decreased the levels of phosphorylation of extracellular signal-regulated kinase (ERK)....'"
+    },
+    {
+      "relationship": {
+        "entity1": "OX2R",
+        "entity2": "CREB",
+        "relationship": "inhibits",
+        "evidence_text": "heterodimer decreased the levels of phosphorylation of ... cAMP-response element-binding protein (CREB).",
+        "confidence": 0.9,
+        "pmid": "30481562"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.6392405063291139,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.64): 'heterodimer decreased the levels of phosphorylation of ... cAMP-response element-binding protein (CR...'"
+    },
+    {
+      "relationship": {
+        "entity1": "TCS 1102",
+        "entity2": "orexin receptors",
+        "relationship": "inhibits",
+        "evidence_text": "the highly potent and commercially available dual orexin receptor antagonist, TCS 1102, on self-administration and reinstatement of palatable food seeking.",
+        "confidence": 0.92,
+        "pmid": "28663114"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.8732394366197183,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "suvorexant",
+        "entity2": "oxycodone self-administration",
+        "relationship": "inhibits",
+        "evidence_text": "Suvorexant, an FDA-approved dual orexin receptor antagonist, reduces oxycodone self-administration and conditioned reinstatement in male and female rats.",
+        "confidence": 0.93,
+        "pmid": "37180716"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.0,
+      "is_valid": false,
+      "error_message": "No abstract found for PMID 37180716"
+    },
+    {
+      "relationship": {
+        "entity1": "Danavorexton",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "Danavorexton (TAK-925) is an agonist for orexin receptor 2 where it promotes recovery from inhalational and i.v. anaesthesia and opioid sedation.",
+        "confidence": 0.96,
+        "pmid": "38346840"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "TS-142",
+        "entity2": "OX1R",
+        "relationship": "inhibits",
+        "evidence_text": "Novel compound with potent antagonistic activity against orexin receptors may be new treatment option for patients with insomnia.",
+        "confidence": 0.95,
+        "pmid": "35296912"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "TS-142",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "Novel compound with potent antagonistic activity against orexin receptors may be new treatment option for patients with insomnia.",
+        "confidence": 0.95,
+        "pmid": "35296912"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "SDM-878",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "SDM-878 showed potent inhibitory activities for human and rat OX.",
+        "confidence": 0.94,
+        "pmid": "32337858"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.2610619469026549,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.26): 'SDM-878 showed potent inhibitory activities for human and rat OX....'"
+    },
+    {
+      "relationship": {
+        "entity1": "TAK-925",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "We evaluated the efficacy of two small molecule hypocretin/orexin receptor-2 (HCRTR2) agonists in narcoleptic male orexin/tTA; TetO-DTA mice.",
+        "confidence": 0.9,
+        "pmid": "36808670"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "ARN-776",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "We evaluated the efficacy of two small molecule hypocretin/orexin receptor-2 (HCRTR2) agonists in narcoleptic male orexin/tTA; TetO-DTA mice.",
+        "confidence": 0.9,
+        "pmid": "36808670"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OX2R",
+        "entity2": "Na+/Ca2+ exchanger",
+        "relationship": "activates",
+        "evidence_text": "the activation of the Na+/Ca2+ exchanger and non-selective cation channels of unknown identity.",
+        "confidence": 0.85,
+        "pmid": "34052812"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OX2R",
+        "entity2": "2-arachidonoyl glycerol",
+        "relationship": "activates",
+        "evidence_text": "the Gq-PLC pathway may also, under certain circumstances, take the route to diacylglycerol lipase, which leads to the production of the potent endocannabinoid (eCB), 2-arachidonoyl glycerol.",
+        "confidence": 0.8,
+        "pmid": "34052812"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.8857808857808858,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "orexin-A",
+        "entity2": "estradiol",
+        "relationship": "regulates",
+        "evidence_text": "determine the role of orexin on oestradiol production.",
+        "confidence": 0.78,
+        "pmid": "36881512"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "orexin-A",
+        "entity2": "bone loss",
+        "relationship": "regulates",
+        "evidence_text": "ZGW exhibited a protective effect for PMOP that may be mediated via orexin-A and orexin receptors regulation.",
+        "confidence": 0.75,
+        "pmid": "34939389"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "orexin-A",
+        "entity2": "analgesia",
+        "relationship": "activates",
+        "evidence_text": "orexin peptides induce analgesia that is comparable to morphine.",
+        "confidence": 0.85,
+        "pmid": "28552056"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "(S)-1-amino-tetralin",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "The introduction of N-methyl-(3-methoxyphenyl)acetamide unit onto the 1-amino-tetralin skeleton remarkably enhanced the potency of the agonist.",
+        "confidence": 0.8,
+        "pmid": "35051577"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "1-amino-tetralin",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "The introduction of N-methyl-(3-methoxyphenyl)acetamide unit onto the 1-amino-tetralin skeleton remarkably enhanced the potency of the agonist.",
+        "confidence": 0.78,
+        "pmid": "35051577"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Hcrtr2",
+        "entity2": "REMS",
+        "relationship": "regulates",
+        "evidence_text": "Unexpectedly, loss of Hcrtr2, but not Hcrtr1 or Hcrtr1&2, induced a dramatic increase in theta (7-11\u202fHz) electroencephalographic (EEG) activity in both wakefulness and rapid-eye-movement sleep (REMS).",
+        "confidence": 0.7,
+        "pmid": "38123729"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.99,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Hcrtr2",
+        "entity2": "HCRT",
+        "relationship": "binds_to",
+        "evidence_text": "We inactivated HCRT-to-DA connectivity by genetic disruption of Hypocretin receptor-2 (Hcrtr2) in DA neurons.",
+        "confidence": 0.75,
+        "pmid": "38123729"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.545,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.55): 'We inactivated HCRT-to-DA connectivity by genetic disruption of Hypocretin receptor-2 (Hcrtr2) in DA...'"
+    },
+    {
+      "relationship": {
+        "entity1": "orexin system",
+        "entity2": "epilepsy",
+        "relationship": "associated_with",
+        "evidence_text": "The present review analyzes the preclinical and clinical evidence linking the orexin system to epilepsy.",
+        "confidence": 0.85,
+        "pmid": "37212716"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.5698630136986301,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.57): 'The present review analyzes the preclinical and clinical evidence linking the orexin system to epile...'"
+    },
+    {
+      "relationship": {
+        "entity1": "orexin system",
+        "entity2": "seizures",
+        "relationship": "regulates",
+        "evidence_text": "the antagonism to the orexin system by DORAs can improve epilepsy by both a direct and a sleep\u2011mediated (indirect) effect.",
+        "confidence": 0.7,
+        "pmid": "37212716"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.5691906005221932,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.57): 'the antagonism to the orexin system by DORAs can improve epilepsy by both a direct and a sleep\u2011media...'"
+    },
+    {
+      "relationship": {
+        "entity1": "orexin\u2011B",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "evidence_text": "In isolated rat cardiomyocytes, only orexin\u2011B (OR\u2011B) caused an increase in contractile shortening, independent of diastolic or systolic calcium levels.",
+        "confidence": 0.6,
+        "pmid": "30467191"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.9867549668874173,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MK\u20111064",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "evidence_text": "Acute MK\u20111064 hastened SWS onset and increased the number of SWS episodes, without increasing sleep fragmentation in AIE and controls.",
+        "confidence": 0.65,
+        "pmid": "32424852"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.9925373134328358,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "AIE",
+        "entity2": "sleep fragmentation",
+        "relationship": "associated_with",
+        "evidence_text": "Female AIE rats exhibited lasting changes in sleep compared to controls. This was demonstrated by increased fragmentation of slow wave sleep (SWS) and rapid eye movement sleep.",
+        "confidence": 0.85,
+        "pmid": "32424852"
+      },
+      "pmid_valid": true,
+      "evidence_valid": false,
+      "evidence_similarity": 0.6094674556213018,
+      "is_valid": false,
+      "error_message": "Evidence not found in abstract (similarity: 0.61): 'Female AIE rats exhibited lasting changes in sleep compared to controls. This was demonstrated by in...'"
+    },
+    {
+      "relationship": {
+        "entity1": "MK\u20111064",
+        "entity2": "SWS",
+        "relationship": "regulates",
+        "evidence_text": "Acute MK\u20111064 hastened SWS onset and increased the number of SWS episodes, without increasing sleep fragmentation in AIE and controls.",
+        "confidence": 0.8,
+        "pmid": "32424852"
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 0.9925373134328358,
+      "is_valid": true,
+      "error_message": null
+    }
+  ],
+  "statistics": {
+    "total_abstracts": 100,
+    "total_chunks": 9,
+    "chunks_processed": 9,
+    "total_relationships": 140,
+    "valid_relationships": 100,
+    "invalid_relationships": 40,
+    "pmid_failures": 0,
+    "evidence_failures": 40,
+    "validation_rate": 0.7142857142857143,
+    "total_prompt_tokens": 33956,
+    "total_completion_tokens": 35291,
+    "total_latency_ms": 27978.58166694641,
+    "wall_clock_ms": 6979.849338531494,
+    "throughput_tok_per_sec": 2475.0003707946225
+  },
+  "errors": []
+}

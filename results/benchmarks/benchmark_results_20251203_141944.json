@@ -1,0 +1,41 @@
+{
+  "timestamp": "2025-12-03T14:19:44.132463",
+  "results": [
+    {
+      "extractor_name": "Gemini 2.5 Flash",
+      "model": "gemini/gemini-2.5-flash",
+      "total_abstracts": 93,
+      "successful_extractions": 0,
+      "failed_extractions": 93,
+      "total_relationships": 0,
+      "total_prompt_tokens": 0,
+      "total_completion_tokens": 0,
+      "total_tokens": 0,
+      "wall_clock_time_ms": 1.5680789947509766,
+      "total_api_latency_ms": 0.0,
+      "throughput_tokens_per_second": 0.0,
+      "completion_throughput_tokens_per_second": 0.0,
+      "avg_latency_ms": 0.0,
+      "total_cost_usd": 0.0,
+      "timestamp": "2025-12-03T14:19:44.129138"
+    },
+    {
+      "extractor_name": "LiteLLM openrouter/cerebras/gpt-oss-120b",
+      "model": "openrouter/cerebras/gpt-oss-120b",
+      "total_abstracts": 93,
+      "successful_extractions": 0,
+      "failed_extractions": 93,
+      "total_relationships": 0,
+      "total_prompt_tokens": 0,
+      "total_completion_tokens": 0,
+      "total_tokens": 0,
+      "wall_clock_time_ms": 2.443075180053711,
+      "total_api_latency_ms": 0.0,
+      "throughput_tokens_per_second": 0.0,
+      "completion_throughput_tokens_per_second": 0.0,
+      "avg_latency_ms": 0.0,
+      "total_cost_usd": 0.0,
+      "timestamp": "2025-12-03T14:19:44.132109"
+    }
+  ]
+}
