@@ -1,0 +1,137 @@
+{
+  "timestamp": "20251203_105203",
+  "total_time_seconds": 304.5311460494995,
+  "total_time_minutes": 5.075519100824992,
+  "models": [
+    {
+      "model": "original",
+      "config": {
+        "name": "original",
+        "p": 1.0,
+        "q": 1.0,
+        "description": "Balanced exploration - DeepWalk-like random walks",
+        "output": "models/link_predictor_original.pkl"
+      },
+      "train_time_seconds": 92.13389492034912,
+      "train_metrics": {
+        "roc_auc": 0.9873467926469679,
+        "avg_precision": 0.9864873708582289,
+        "train_size": 276862,
+        "test_size": 69056
+      },
+      "hard_neg_results": {
+        "random": {
+          "roc_auc": 0.9740557035249792,
+          "avg_precision": 0.9769419018141544,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "2hop": {
+          "roc_auc": 0.5954789173854921,
+          "avg_precision": 0.5340471516571955,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "degree_matched": {
+          "roc_auc": 0.9670760295811524,
+          "avg_precision": 0.9693943177042662,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "combined": {
+          "roc_auc": 0.7779218567594087,
+          "avg_precision": 0.6775723369483458,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        }
+      }
+    },
+    {
+      "model": "structural",
+      "config": {
+        "name": "structural",
+        "p": 1.0,
+        "q": 0.5,
+        "description": "DFS-like - captures structural roles and hub connectivity",
+        "output": "models/link_predictor_structural.pkl"
+      },
+      "train_time_seconds": 90.36056399345398,
+      "train_metrics": {
+        "roc_auc": 0.9881676593262748,
+        "avg_precision": 0.9871343022613277,
+        "train_size": 276862,
+        "test_size": 69056
+      },
+      "hard_neg_results": {
+        "random": {
+          "roc_auc": 0.9758613106952053,
+          "avg_precision": 0.9784900074014139,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "2hop": {
+          "roc_auc": 0.6030254906178896,
+          "avg_precision": 0.5392541356277714,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "degree_matched": {
+          "roc_auc": 0.966218540803088,
+          "avg_precision": 0.9671115853003884,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "combined": {
+          "roc_auc": 0.7796570822976138,
+          "avg_precision": 0.6786859130617201,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        }
+      }
+    },
+    {
+      "model": "homophily",
+      "config": {
+        "name": "homophily",
+        "p": 1.0,
+        "q": 2.0,
+        "description": "BFS-like - captures local communities and clusters",
+        "output": "models/link_predictor_homophily.pkl"
+      },
+      "train_time_seconds": 90.35744786262512,
+      "train_metrics": {
+        "roc_auc": 0.988529688761038,
+        "avg_precision": 0.9879620746194594,
+        "train_size": 276862,
+        "test_size": 69056
+      },
+      "hard_neg_results": {
+        "random": {
+          "roc_auc": 0.9744780817362405,
+          "avg_precision": 0.9770088936997784,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "2hop": {
+          "roc_auc": 0.6066213200287291,
+          "avg_precision": 0.5430899376207734,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "degree_matched": {
+          "roc_auc": 0.9698873160008838,
+          "avg_precision": 0.9720337738961822,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "combined": {
+          "roc_auc": 0.7863929404747347,
+          "avg_precision": 0.6880243224874856,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        }
+      }
+    }
+  ],
+  "summary_table": "\n==========================================================================================\nCOMPLETE RESULTS SUMMARY\n==========================================================================================\nModel        Strategy           ROC-AUC    Avg Precision  Note                \n------------------------------------------------------------------------------------------\noriginal     random (train)     0.9873     0.9865         Inflated            \n             random             0.9741     0.9769         Inflated            \n             2hop               0.5955     0.5340         Structural hard     \n             degree_matched     0.9671     0.9694         Controls bias       \n             combined           0.7779     0.6776         Most rigorous       \n------------------------------------------------------------------------------------------\nstructural   random (train)     0.9882     0.9871         Inflated            \n             random             0.9759     0.9785         Inflated            \n             2hop               0.6030     0.5393         Structural hard     \n             degree_matched     0.9662     0.9671         Controls bias       \n             combined           0.7797     0.6787         Most rigorous       \n------------------------------------------------------------------------------------------\nhomophily    random (train)     0.9885     0.9880         Inflated            \n             random             0.9745     0.9770         Inflated            \n             2hop               0.6066     0.5431         Structural hard     \n             degree_matched     0.9699     0.9720         Controls bias       \n             combined           0.7864     0.6880         Most rigorous       \n------------------------------------------------------------------------------------------\n=========================================================================================="
+}

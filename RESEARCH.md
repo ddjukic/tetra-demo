@@ -805,3 +805,293 @@ If validation results are strong, consider:
 **Last Updated**: 2025-12-03
 **Prepared By**: Research analysis for Tetra V1 validation strategy
 **Status**: Ready for implementation
+
+---
+---
+
+## Hard Negative Sampling Evaluation - Experimental Results
+### Date: 2025-12-03
+
+---
+
+## Executive Summary
+
+We implemented and evaluated hard negative sampling strategies to obtain realistic performance estimates for our Node2Vec link prediction models. **The results confirm that the original 0.99 ROC-AUC scores were inflated**, dropping to **0.78-0.79** under rigorous evaluation.
+
+---
+
+## 1. Experimental Setup
+
+### Models Evaluated
+
+| Model | p | q | Description |
+|-------|---|---|-------------|
+| Original | 1.0 | 1.0 | Balanced exploration (DeepWalk-like) |
+| Structural | 1.0 | 0.5 | DFS-like, captures structural roles and hub connectivity |
+| Homophily | 1.0 | 2.0 | BFS-like, captures local communities and clusters |
+
+### Negative Sampling Strategies
+
+1. **Random** (baseline): Uniform random non-edges - creates artificially easy negatives
+2. **2-hop**: Pairs at graph distance 2, sharing a common neighbor but no direct edge
+3. **Degree-matched**: Match degree distribution of positive edges, controls for degree bias
+4. **Combined** (most rigorous): 50% 2-hop + 50% degree-matched
+
+### Training Details
+
+- **Dataset**: STRING PPI Network (Human, score >= 700)
+- **Nodes**: 10,662 proteins
+- **Edges**: 83,077 training edges
+- **Test edges**: ~34,000 held-out edges
+- **Embedding dim**: 128
+- **Walk length**: 80
+- **Num walks**: 10
+- **Seed**: 42
+
+---
+
+## 2. Complete Results
+
+### Summary Table
+
+| Model | Strategy | ROC-AUC | Avg Precision | Note |
+|-------|----------|---------|---------------|------|
+| **Original** | random | 0.9741 | 0.9769 | Inflated |
+| | 2hop | 0.5955 | 0.5340 | Very hard |
+| | degree_matched | 0.9671 | 0.9694 | Mild effect |
+| | **combined** | **0.7779** | **0.6776** | **Most rigorous** |
+| **Structural** | random | 0.9759 | 0.9785 | Inflated |
+| | 2hop | 0.6030 | 0.5393 | Very hard |
+| | degree_matched | 0.9662 | 0.9671 | Mild effect |
+| | **combined** | **0.7797** | **0.6787** | **Most rigorous** |
+| **Homophily** | random | 0.9745 | 0.9770 | Inflated |
+| | 2hop | 0.6066 | 0.5431 | Very hard |
+| | degree_matched | 0.9699 | 0.9720 | Mild effect |
+| | **combined** | **0.7864** | **0.6880** | **Most rigorous** |
+
+### Performance Drop Analysis
+
+| Model | Random ROC-AUC | Combined ROC-AUC | Absolute Drop | Relative Drop |
+|-------|----------------|------------------|---------------|---------------|
+| Original | 0.9741 | 0.7779 | -0.1962 | -20.1% |
+| Structural | 0.9759 | 0.7797 | -0.1962 | -20.1% |
+| Homophily | 0.9745 | 0.7864 | -0.1881 | -19.3% |
+
+---
+
+## 3. Key Findings
+
+### Finding 1: Degree Bias is Massive
+
+The degree distribution comparison reveals extreme bias:
+
+```
+Positive edges:
+  Mean degree: 127.9
+  Median degree: 99.0
+
+Random negatives:
+  Mean degree: 32.0
+  Median degree: 18.0
+  Degree ratio (pos/neg): 4.00x  <-- Model can trivially use degree as proxy
+
+2-hop negatives:
+  Mean degree: 51.8
+  Median degree: 32.0
+  Degree ratio (pos/neg): 2.47x  <-- Still some bias, but harder
+
+Degree-matched negatives:
+  Mean degree: 115.3
+  Median degree: 89.0
+  Degree ratio (pos/neg): 1.11x  <-- Effectively controlled
+
+Combined negatives:
+  Mean degree: 85.1
+  Median degree: 53.0
+  Degree ratio (pos/neg): 1.50x  <-- Reasonable balance
+```
+
+### Finding 2: 2-Hop Negatives Are Extremely Challenging
+
+The 2-hop strategy produces ROC-AUC scores near random (0.60), suggesting:
+- Model relies heavily on graph distance features
+- 2-hop pairs look nearly identical to true edges in embedding space
+- Fine-grained biological specificity is NOT being captured
+
+### Finding 3: Degree-Matched Has Minimal Impact
+
+Surprisingly, degree-matching alone has only ~0.7% impact on ROC-AUC. This suggests:
+- The model IS learning something beyond pure degree statistics
+- But the "something" is still graph-structural (community/neighborhood), not biological specificity
+
+### Finding 4: Homophily Model Performs Best
+
+The BFS-like homophily model (q=2.0) achieves the best combined ROC-AUC (0.7864):
+- +0.85% over Original
+- +0.67% over Structural
+
+This makes biological sense:
+- PPI networks have strong **local community structure** (protein complexes, pathways)
+- BFS-like walks capture this local clustering better
+- Structural roles (hub vs peripheral) matter less than local context
+
+---
+
+## 4. Degree Distribution Visualizations
+
+### Random vs Combined Negatives
+
+```
+RANDOM NEGATIVES:
+Positive edges:  [============================] Mean=128
+Negative edges:  [=======]                      Mean=32
+                 Trivially distinguishable by degree!
+
+COMBINED NEGATIVES:
+Positive edges:  [============================] Mean=128
+Negative edges:  [=====================]        Mean=85
+                 Much harder to distinguish!
+```
+
+---
+
+## 5. Implications for Production Use
+
+### What the Model CAN Do Well
+
+1. **Rank candidate interactions**: Relative ordering is meaningful
+2. **Filter low-probability pairs**: Scores below 0.3 are very unlikely to be true
+3. **Prioritize validation experiments**: Focus lab work on high-scoring novel predictions
+
+### What the Model CANNOT Do
+
+1. **Provide calibrated probabilities**: 0.8 score does NOT mean 80% chance of interaction
+2. **Distinguish true negatives**: Cannot reliably say "these proteins don't interact"
+3. **Capture fine-grained biology**: Knows neighborhoods, not binding specificity
+
+### Recommended Usage
+
+```python
+# GOOD: Use for prioritization
+candidates = predictor.predict(pairs)
+top_100 = sorted(candidates, key=lambda x: x['ml_score'], reverse=True)[:100]
+
+# BAD: Don't use as binary classifier
+is_interaction = predictor.predict(pair)['ml_score'] > 0.5  # Don't do this!
+```
+
+---
+
+## 6. Comparison with Literature
+
+### Expected vs Observed
+
+| Study | Dataset | Evaluation | ROC-AUC |
+|-------|---------|------------|---------|
+| This work | STRING PPI | Random negatives | 0.97 |
+| This work | STRING PPI | Combined hard | 0.78 |
+| Node2Vec original | Facebook | Random negatives | 0.98 |
+| StellarGraph demo | General graph | Proper validation | 0.91 |
+| Recent PPI papers | Various | Hard negatives | 0.80-0.87 |
+
+**Our results align with recent literature on rigorous link prediction evaluation.**
+
+---
+
+## 7. W&B Tracking
+
+All experiments are logged to Weights & Biases:
+
+- **Project**: https://wandb.ai/dedu/tetra-link-prediction
+- **Runs**:
+  - `node2vec_original` - Original model (p=1, q=1)
+  - `node2vec_structural` - Structural model (p=1, q=0.5)
+  - `node2vec_homophily` - Homophily model (p=1, q=2)
+
+### Logged Metrics
+
+- `metrics/random_roc_auc`: Performance with random negatives
+- `metrics/2hop_roc_auc`: Performance with 2-hop negatives
+- `metrics/degree_matched_roc_auc`: Performance with degree-matched negatives
+- `metrics/combined_roc_auc`: Performance with combined hard negatives
+- `train/time_seconds`: Training time per model
+
+### Artifacts
+
+Trained models saved as W&B artifacts for reproducibility.
+
+---
+
+## 8. Code Implementation
+
+### New Files Created
+
+1. **`ml/hard_negative_sampling.py`**
+   - `HardNegativeSampler` class with 4 sampling strategies
+   - `evaluate_with_hard_negatives()` function for comprehensive evaluation
+   - `compare_degree_distributions()` diagnostic utility
+
+2. **`scripts/retrain_all_models.py`**
+   - Batch training script for all model variants
+   - Full W&B integration
+   - JSON results export
+
+### Modified Files
+
+1. **`scripts/train_link_predictor.py`**
+   - Added `--wandb` flag for W&B tracking
+   - Added `--eval-all-strategies` for hard negative evaluation
+   - Added `--model-name` for experiment naming
+
+---
+
+## 9. Recommendations for Future Work
+
+### Immediate (Use Now)
+
+1. **Report combined ROC-AUC (0.78-0.79) as the realistic performance metric**
+2. **Use homophily model (q=2.0) for production** - best hard negative performance
+3. **Calibrate predictions before using as probabilities**
+
+### Short-term (Next Sprint)
+
+1. **Implement biologically-informed negative sampling**
+   - Same pathway but non-interacting
+   - Same subcellular localization but non-interacting
+   - Requires GO term or pathway annotations
+
+2. **Train ensemble model**
+   - Combine all 3 variants with learned weights
+   - May capture different aspects of interaction signal
+
+### Long-term (Research Direction)
+
+1. **Investigate GNN-based approaches**
+   - Graph Neural Networks can incorporate node features
+   - May achieve better generalization
+
+2. **Multi-evidence integration**
+   - Combine STRING evidence types (experimental, text-mining, etc.)
+   - Learn which evidence types are most predictive
+
+---
+
+## 10. Conclusions
+
+1. **Random negative sampling inflates ROC-AUC by ~20%** (0.97 -> 0.78)
+
+2. **2-hop negatives are extremely challenging** - near-random performance (0.60) indicates model relies on graph distance, not biological specificity
+
+3. **Degree-matched negatives have minimal impact alone** - model learns something beyond pure degree statistics
+
+4. **Homophily model (BFS-like, q=2.0) performs best** on hard negatives, consistent with strong local community structure in PPI networks
+
+5. **Realistic performance estimate: ROC-AUC = 0.78-0.79** - this is legitimate for link prediction and useful for prioritization tasks
+
+6. **Full experiment tracking in W&B** enables reproducibility and comparison of future model improvements
+
+---
+
+**Last Updated**: 2025-12-03
+**Experiment Duration**: 5.1 minutes total training time
+**W&B Project**: https://wandb.ai/dedu/tetra-link-prediction
