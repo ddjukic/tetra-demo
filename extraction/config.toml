@@ -69,7 +69,8 @@ ENTITY1 = { TYPE = "string", REQUIRED = true }
 ENTITY2 = { TYPE = "string", REQUIRED = true }
 RELATIONSHIP = { TYPE = "string", REQUIRED = true }
 CONFIDENCE = { TYPE = "number", REQUIRED = true }
-EVIDENCE_TEXT = { TYPE = "string", REQUIRED = true }
+# For batched mining: use sentence indices instead of text (reduces tokens, ensures verbatim)
+EVIDENCE_SENTENCE_INDICES = { TYPE = "array", ITEMS = "integer", REQUIRED = true }
 PMID = { TYPE = "string", REQUIRED = true }
 
 # Batched mining configuration
@@ -120,18 +121,20 @@ RETRY_DELAY_MS = 1000
 SYSTEM = """You are a biomedical relationship extraction expert.
 
 Extract semantic relationships between biomedical entities from PubMed abstracts.
+Each abstract has numbered sentences like [1], [2], [3], etc.
 
 For each relationship found, provide:
-1. source_entity: The source entity
-2. target_entity: The target entity
+1. entity1: The source entity (normalized name)
+2. entity2: The target entity (normalized name)
 3. relationship: One of the specified types
 4. confidence: 0.0-1.0 based on evidence strength
-5. evidence_text: The EXACT sentence from the abstract (verbatim quote)
-6. pmid: The PubMed ID of the source paper
+5. evidence_sentence_indices: Array of sentence numbers (e.g., [2, 3]) that support this relationship
+6. pmid: The PubMed ID where this relationship is found
 
 Rules:
 - Only extract relationships EXPLICITLY stated or strongly implied
-- Evidence must be VERBATIM quotes from the text
+- Reference sentences by their number [N], do NOT reproduce the text
+- Include ALL sentence numbers that support the relationship
 - Include the PMID for each relationship
 - If no relationships found, return empty array"""
 
@@ -141,7 +144,10 @@ USER_TEMPLATE = """## ENTITIES TO LOOK FOR
 ## RELATIONSHIP TYPES
 {relationship_types}
 
-## ABSTRACTS TO ANALYZE
+## ABSTRACTS TO ANALYZE (sentences numbered [1], [2], etc.)
 {abstracts}
 
-Return a JSON object with "relationships" array. Each relationship must include the PMID."""
+Return a JSON object with "relationships" array. Each relationship must include:
+- entity1, entity2, relationship, confidence
+- evidence_sentence_indices: array of integers (sentence numbers, NOT the text)
+- pmid"""

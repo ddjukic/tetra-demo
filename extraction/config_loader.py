@@ -140,7 +140,7 @@ class SchemaConfig:
         }
 
     def build_batched_json_schema(self) -> dict[str, Any]:
-        """Build JSON schema for batched mining with PMID field."""
+        """Build JSON schema for batched mining with sentence indices."""
         return {
             "type": "json_schema",
             "json_schema": {
@@ -161,7 +161,10 @@ class SchemaConfig:
                                         "enum": self.RELATIONSHIP_TYPES,
                                     },
                                     "confidence": {"type": "number"},
-                                    "evidence_text": {"type": "string"},
+                                    "evidence_sentence_indices": {
+                                        "type": "array",
+                                        "items": {"type": "integer"},
+                                    },
                                     "pmid": {"type": "string"},
                                 },
                                 "required": [
@@ -169,7 +172,7 @@ class SchemaConfig:
                                     "entity2",
                                     "relationship",
                                     "confidence",
-                                    "evidence_text",
+                                    "evidence_sentence_indices",
                                     "pmid",
                                 ],
                                 "additionalProperties": False,
@@ -183,7 +186,7 @@ class SchemaConfig:
         }
 
     def build_batched_gemini_schema(self) -> dict[str, Any]:
-        """Build Gemini response schema for batched mining with PMID field."""
+        """Build Gemini response schema for batched mining with sentence indices."""
         return {
             "type": "json_object",
             "response_schema": {
@@ -201,7 +204,10 @@ class SchemaConfig:
                                     "enum": self.RELATIONSHIP_TYPES,
                                 },
                                 "confidence": {"type": "number"},
-                                "evidence_text": {"type": "string"},
+                                "evidence_sentence_indices": {
+                                    "type": "array",
+                                    "items": {"type": "integer"},
+                                },
                                 "pmid": {"type": "string"},
                             },
                             "required": [
@@ -209,7 +215,7 @@ class SchemaConfig:
                                 "entity2",
                                 "relationship",
                                 "confidence",
-                                "evidence_text",
+                                "evidence_sentence_indices",
                                 "pmid",
                             ],
                         },

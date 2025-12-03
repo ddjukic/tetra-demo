@@ -59,6 +59,58 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 
+def split_into_sentences(text: str) -> list[str]:
+    """
+    Split text into sentences for numbered indexing.
+
+    Uses simple heuristics: split on . ? ! followed by space or end.
+    Returns list of stripped sentences (non-empty).
+    """
+    if not text:
+        return []
+
+    sentences = []
+    current = ""
+
+    for i, char in enumerate(text):
+        current += char
+        # Check for sentence-ending punctuation
+        if char in ".?!":
+            # Look ahead to see if this is end of sentence
+            next_char = text[i + 1] if i + 1 < len(text) else " "
+            if next_char in " \n\t" or i + 1 >= len(text):
+                stripped = current.strip()
+                if stripped and len(stripped) > 10:  # Minimum sentence length
+                    sentences.append(stripped)
+                current = ""
+
+    # Add any remaining text
+    if current.strip() and len(current.strip()) > 10:
+        sentences.append(current.strip())
+
+    return sentences
+
+
+def number_sentences(text: str) -> tuple[str, list[str]]:
+    """
+    Number sentences in text for reference.
+
+    Returns:
+        Tuple of (numbered_text, sentence_list)
+        numbered_text: "[1] First sentence. [2] Second sentence."
+        sentence_list: ["First sentence.", "Second sentence."]
+    """
+    sentences = split_into_sentences(text)
+    if not sentences:
+        return text, []
+
+    numbered_parts = []
+    for i, sentence in enumerate(sentences, 1):
+        numbered_parts.append(f"[{i}] {sentence}")
+
+    return " ".join(numbered_parts), sentences
+
+
 @dataclass
 class AbstractChunk:
     """A batch of abstracts for mining."""
@@ -68,6 +120,7 @@ class AbstractChunk:
     abstracts: list[dict[str, Any]]  # {pmid, title, abstract, year}
     entities: list[str]  # Unique entities in this chunk
     total_tokens: int
+    sentence_map: dict[str, list[str]] = field(default_factory=dict)  # pmid -> sentences
 
 
 @dataclass
@@ -77,9 +130,10 @@ class ExtractedRelationship:
     entity1: str
     entity2: str
     relationship: str
-    evidence_text: str
     confidence: float
     pmid: str
+    evidence_sentence_indices: list[int] = field(default_factory=list)
+    evidence_text: str = ""  # Populated after sentence extraction
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
@@ -87,9 +141,10 @@ class ExtractedRelationship:
             "entity1": self.entity1,
             "entity2": self.entity2,
             "relationship": self.relationship,
-            "evidence_text": self.evidence_text,
             "confidence": self.confidence,
             "pmid": self.pmid,
+            "evidence_sentence_indices": self.evidence_sentence_indices,
+            "evidence_text": self.evidence_text,
         }
 
 
@@ -356,6 +411,93 @@ def validate_relationship_provenance(
     )
 
 
+def validate_relationship_provenance_indexed(
+    relationship: ExtractedRelationship,
+    chunk: AbstractChunk,
+) -> ValidationResult:
+    """
+    Validate provenance using sentence indices (not fuzzy text matching).
+
+    Checks:
+    1. PMID exists in the chunk's PMID list
+    2. All sentence indices are valid (within bounds)
+
+    This is more reliable than fuzzy matching since we extract
+    sentences by index rather than having the LLM reproduce text.
+
+    Args:
+        relationship: The extracted relationship to validate
+        chunk: The chunk that was used for extraction
+
+    Returns:
+        ValidationResult with validation status
+    """
+    # Check PMID validity
+    pmid_valid = relationship.pmid in chunk.pmids
+
+    if not pmid_valid:
+        return ValidationResult(
+            relationship=relationship,
+            pmid_valid=False,
+            evidence_valid=False,
+            evidence_similarity=0.0,
+            error_message=f"PMID {relationship.pmid} not in chunk PMIDs: {chunk.pmids}",
+        )
+
+    # Get sentences for this PMID
+    sentences = chunk.sentence_map.get(relationship.pmid, [])
+
+    if not sentences:
+        return ValidationResult(
+            relationship=relationship,
+            pmid_valid=True,
+            evidence_valid=False,
+            evidence_similarity=0.0,
+            error_message=f"No sentences found for PMID {relationship.pmid}",
+        )
+
+    # Check if sentence indices are provided
+    indices = relationship.evidence_sentence_indices
+    if not indices:
+        return ValidationResult(
+            relationship=relationship,
+            pmid_valid=True,
+            evidence_valid=False,
+            evidence_similarity=0.0,
+            error_message="No evidence sentence indices provided",
+        )
+
+    # Check if all indices are valid (1-based)
+    invalid_indices = []
+    valid_count = 0
+    for idx in indices:
+        if isinstance(idx, int) and 1 <= idx <= len(sentences):
+            valid_count += 1
+        else:
+            invalid_indices.append(idx)
+
+    # Calculate validity score based on how many indices are valid
+    evidence_similarity = valid_count / len(indices) if indices else 0.0
+    evidence_valid = len(invalid_indices) == 0 and valid_count > 0
+
+    error_msg = None
+    if invalid_indices:
+        error_msg = (
+            f"Invalid sentence indices {invalid_indices} "
+            f"(PMID {relationship.pmid} has {len(sentences)} sentences)"
+        )
+    elif valid_count == 0:
+        error_msg = "No valid sentence indices"
+
+    return ValidationResult(
+        relationship=relationship,
+        pmid_valid=True,
+        evidence_valid=evidence_valid,
+        evidence_similarity=evidence_similarity,
+        error_message=error_msg,
+    )
+
+
 # =============================================================================
 # BatchedLiteLLMMiner
 # =============================================================================
@@ -547,10 +689,12 @@ class BatchedLiteLLMMiner:
         """
         Build system and user prompts for a chunk.
 
+        Numbers sentences in each abstract and populates chunk.sentence_map.
+
         Returns:
             Tuple of (system_prompt, user_prompt)
         """
-        # Format abstracts with PMID markers
+        # Format abstracts with PMID markers and numbered sentences
         abstracts_text = []
         for article in chunk.abstracts:
             pmid = article.get("pmid", "unknown")
@@ -558,9 +702,13 @@ class BatchedLiteLLMMiner:
             abstract = article.get("abstract", "")
             year = article.get("year", "")
 
+            # Number sentences and store mapping
+            numbered_abstract, sentences = number_sentences(abstract)
+            chunk.sentence_map[pmid] = sentences
+
             abstract_block = f"""[PMID: {pmid}] ({year})
 Title: {title}
-Abstract: {abstract}"""
+Abstract: {numbered_abstract}"""
             abstracts_text.append(abstract_block)
 
         abstracts_formatted = "\n\n---\n\n".join(abstracts_text)
@@ -693,19 +841,33 @@ Abstract: {abstract}"""
             if confidence < min_confidence:
                 continue
 
+            pmid = rel.get("pmid", "")
+            sentence_indices = rel.get("evidence_sentence_indices", [])
+
+            # Extract actual sentences from sentence_map
+            evidence_text = ""
+            sentences_for_pmid = chunk.sentence_map.get(pmid, [])
+            valid_sentences = []
+            for idx in sentence_indices:
+                # Indices are 1-based in the prompt
+                if isinstance(idx, int) and 1 <= idx <= len(sentences_for_pmid):
+                    valid_sentences.append(sentences_for_pmid[idx - 1])
+            evidence_text = " ".join(valid_sentences)
+
             extracted = ExtractedRelationship(
                 entity1=rel.get("entity1", ""),
                 entity2=rel.get("entity2", ""),
                 relationship=rel.get("relationship", "").lower(),
-                evidence_text=rel.get("evidence_text", ""),
                 confidence=confidence,
-                pmid=rel.get("pmid", ""),
+                pmid=pmid,
+                evidence_sentence_indices=sentence_indices,
+                evidence_text=evidence_text,
             )
             relationships.append(extracted)
 
-            # Validate provenance
-            validation = validate_relationship_provenance(
-                extracted, chunk, self._evidence_threshold
+            # Validate provenance (now uses index-based validation)
+            validation = validate_relationship_provenance_indexed(
+                extracted, chunk
             )
             validation_results.append(validation)
 

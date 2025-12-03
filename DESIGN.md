@@ -651,7 +651,54 @@ Based on the scaling study finding that smaller chunks improve verbatim extracti
 - Wall clock time is similar (~7s) due to more parallel chunks
 - Override via `BatchedLiteLLMMiner(chunk_tokens=2500)`
 
-### 10.5 Configuration
+### 10.5 Sentence-Index Solution
+
+**The Breakthrough:** Instead of asking the LLM to extract/quote evidence text (which causes paraphrasing), have it reference sentence indices and extract verbatim programmatically.
+
+**How It Works:**
+
+```
+1. Pre-processing: Number sentences in each abstract
+   "HCRTR2 activates PKC. This leads to..."
+   → "[1] HCRTR2 activates PKC. [2] This leads to..."
+
+2. LLM Output: Sentence indices instead of text
+   {
+     "entity1": "HCRTR2",
+     "entity2": "PKC",
+     "relationship": "ACTIVATES",
+     "evidence_sentence_indices": [1],  // ← Indices, not text
+     "pmid": "12345678"
+   }
+
+3. Post-processing: Extract verbatim by index
+   evidence_text = sentences[1-1]  // → "HCRTR2 activates PKC."
+```
+
+**Results Comparison (100 abstracts):**
+
+| Approach | Validation Rate | PMID Accuracy | Evidence Failures |
+|----------|-----------------|---------------|-------------------|
+| Text extraction (old) | 62.0% | 100% | ~37 |
+| Sentence indices (new) | **97.7%** | 100% | 2 |
+
+**Improvement:** +35.7 percentage points (62% → 97.7%)
+
+**Why It Works:**
+- LLM just outputs integers (e.g., `[1, 2]`), no text reproduction
+- Eliminates paraphrasing entirely
+- Reduces output tokens
+- Validation becomes simple bounds checking
+- 100% verbatim evidence by construction
+
+**Failure Mode:** The only failures (2 out of 88) were invalid indices - model cited sentence 6 when PMID only had 4 sentences. This is easily detectable.
+
+**Implementation Files:**
+- `extraction/config.toml` - Updated prompts with numbered sentence format
+- `extraction/config_loader.py` - Schema uses `evidence_sentence_indices: [int]`
+- `extraction/batched_litellm_miner.py` - `number_sentences()`, index-based validation
+
+### 10.6 Configuration
 
 Batched extraction settings in `extraction/config.toml`:
 
