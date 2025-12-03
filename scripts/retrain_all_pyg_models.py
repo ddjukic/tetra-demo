@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Retrain all Node2Vec link prediction models with W&B tracking.
+Retrain all PyG Node2Vec link prediction models with W&B tracking.
 
-This script trains and evaluates all 3 model flavors with rigorous hard negative
+This script trains and evaluates all 3 PyG model flavors with rigorous hard negative
 evaluation to obtain realistic performance metrics.
 
 Models:
@@ -18,21 +18,13 @@ Each model is evaluated against 4 negative sampling strategies:
 
 Usage:
     # Run all training with W&B tracking
-    uv run python scripts/retrain_all_models.py --wandb
+    uv run python scripts/retrain_all_pyg_models.py --wandb
 
     # Run without W&B (for testing)
-    uv run python scripts/retrain_all_models.py
+    uv run python scripts/retrain_all_pyg_models.py
 
-    # Skip training, only evaluate existing models
-    uv run python scripts/retrain_all_models.py --skip-training --eval-only
-
-Expected Results (with hard negatives):
-    | Model | Strategy | ROC-AUC | Note |
-    |-------|----------|---------|------|
-    | Original | random | 0.99 | Inflated |
-    | Original | combined | 0.79-0.85 | Realistic |
-    | Structural | combined | 0.78-0.84 | |
-    | Homophily | combined | 0.80-0.86 | |
+    # Train specific models only
+    uv run python scripts/retrain_all_pyg_models.py --wandb --models original structural
 """
 
 import argparse
@@ -42,48 +34,72 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
+
+import numpy as np
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
-# Model configurations
-MODEL_CONFIGS = [
+# PyG Model configurations
+PYG_MODEL_CONFIGS = [
     {
-        "name": "original",
+        "name": "pyg_original",
         "p": 1.0,
         "q": 1.0,
-        "description": "Balanced exploration - DeepWalk-like random walks",
-        "output": "models/link_predictor_original.pkl",
+        "description": "PyG Balanced exploration - DeepWalk-like random walks",
+        "output": "models/pyg_link_predictor_original.pkl",
     },
     {
-        "name": "structural",
+        "name": "pyg_structural",
         "p": 1.0,
         "q": 0.5,
-        "description": "DFS-like - captures structural roles and hub connectivity",
-        "output": "models/link_predictor_structural.pkl",
+        "description": "PyG DFS-like - captures structural roles and hub connectivity",
+        "output": "models/pyg_link_predictor_structural.pkl",
     },
     {
-        "name": "homophily",
+        "name": "pyg_homophily",
         "p": 1.0,
         "q": 2.0,
-        "description": "BFS-like - captures local communities and clusters",
-        "output": "models/link_predictor_homophily.pkl",
+        "description": "PyG BFS-like - captures local communities and clusters",
+        "output": "models/pyg_link_predictor_homophily.pkl",
     },
 ]
 
 
-def train_single_model(
+def log_roc_curve(
+    wandb,
+    y_true: np.ndarray,
+    y_pred_proba: np.ndarray,
+    strategy_name: str,
+    title: str = None,
+):
+    """Log ROC curve to W&B with proper formatting."""
+    y_probas = np.column_stack([1 - y_pred_proba, y_pred_proba])
+    roc_plot = wandb.plot.roc_curve(
+        y_true=y_true.astype(int).tolist(),
+        y_probas=y_probas.tolist(),
+        labels=["No Edge", "Edge"],
+        title=title or f"ROC Curve - {strategy_name}",
+    )
+    wandb.log({f"roc_curves/{strategy_name}": roc_plot})
+
+
+def train_single_pyg_model(
     config: Dict,
     data_dir: str,
     wandb_enabled: bool = False,
     wandb_project: str = "tetra-link-prediction",
     eval_strategies: bool = True,
+    epochs: int = 100,
+    batch_size: int = 128,
+    lr: float = 0.01,
+    device: str = "auto",
     seed: int = 42,
 ) -> Dict:
     """
-    Train a single model configuration with optional W&B tracking.
+    Train a single PyG model configuration with optional W&B tracking.
 
     Args:
         config: Model configuration dict
@@ -91,13 +107,17 @@ def train_single_model(
         wandb_enabled: Enable W&B tracking
         wandb_project: W&B project name
         eval_strategies: Evaluate with all negative sampling strategies
+        epochs: Number of training epochs
+        batch_size: Training batch size
+        lr: Learning rate
+        device: Device to use (auto, mps, cuda, cpu)
         seed: Random seed
 
     Returns:
         Results dictionary with metrics
     """
-    from ml.link_predictor import LinkPredictor
-    from ml.hard_negative_sampling import HardNegativeSampler, evaluate_with_hard_negatives
+    from ml.pyg_link_predictor import PyGLinkPredictor
+    from ml.hard_negative_sampling import HardNegativeSampler
 
     print("\n" + "=" * 80)
     print(f"Training: {config['name']} (p={config['p']}, q={config['q']})")
@@ -111,20 +131,27 @@ def train_single_model(
             import wandb
             run = wandb.init(
                 project=wandb_project,
-                name=f"node2vec_{config['name']}",
+                name=config["name"],
                 notes=config["description"],
+                tags=["pyg", "node2vec", device],
                 config={
+                    "framework": "pytorch_geometric",
                     "model_variant": config["name"],
                     "p": config["p"],
                     "q": config["q"],
                     "embedding_dim": 128,
                     "walk_length": 80,
-                    "num_walks": 10,
+                    "walks_per_node": 10,
+                    "context_size": 10,
+                    "epochs": epochs,
+                    "batch_size": batch_size,
+                    "lr": lr,
                     "min_score": 700,
                     "test_size": 0.2,
                     "seed": seed,
+                    "device": device,
                 },
-                reinit=True,  # Allow multiple runs in same process
+                reinit=True,
             )
             print(f"W&B run: {run.url}")
         except Exception as e:
@@ -134,14 +161,15 @@ def train_single_model(
     start_time = time.time()
 
     # Initialize predictor
-    predictor = LinkPredictor(
+    predictor = PyGLinkPredictor(
         embedding_dim=128,
         walk_length=80,
-        num_walks=10,
+        walks_per_node=10,
+        context_size=10,
         p=config["p"],
         q=config["q"],
         min_score=700,
-        workers=4,
+        device=device,
         seed=seed,
     )
 
@@ -151,18 +179,27 @@ def train_single_model(
 
     # Train
     print("\nTraining model...")
-    metrics = predictor.train(test_size=0.2)
+    metrics = predictor.train_with_validation(
+        test_size=0.2,
+        epochs=epochs,
+        batch_size=batch_size,
+        lr=lr,
+        verbose=True,
+    )
     train_time = time.time() - start_time
 
     results = {
         "model": config["name"],
         "config": config,
+        "device": str(predictor.device),
         "train_time_seconds": train_time,
         "train_metrics": {
             "roc_auc": metrics["auc"],
             "avg_precision": metrics["average_precision"],
             "train_size": metrics["train_size"],
             "test_size": metrics["test_size"],
+            "final_loss": metrics["final_loss"],
+            "embedding_time_seconds": metrics["embedding_time_seconds"],
         },
         "hard_neg_results": {},
     }
@@ -172,11 +209,27 @@ def train_single_model(
         import wandb
         wandb.log({
             "train/time_seconds": train_time,
+            "train/embedding_time_seconds": metrics["embedding_time_seconds"],
             "train/train_size": metrics["train_size"],
             "train/test_size": metrics["test_size"],
+            "train/final_loss": metrics["final_loss"],
             "metrics/random_roc_auc": metrics["auc"],
             "metrics/random_avg_precision": metrics["average_precision"],
         })
+
+        # Log loss curve
+        for epoch, loss in enumerate(metrics["loss_history"], 1):
+            wandb.log({"train/loss": loss, "epoch": epoch})
+
+        # Log ROC curve for random negatives
+        if "_y_test" in metrics and "_y_pred_proba" in metrics:
+            log_roc_curve(
+                wandb,
+                np.array(metrics["_y_test"]),
+                np.array(metrics["_y_pred_proba"]),
+                "random",
+                title="ROC Curve - Random Negatives"
+            )
 
     # Hard negative evaluation
     if eval_strategies:
@@ -191,52 +244,81 @@ def train_single_model(
         for edge in predictor.edge_set:
             if edge not in train_edge_set:
                 n1, n2 = edge
-                if n1 in predictor.node2vec_model.wv and n2 in predictor.node2vec_model.wv:
+                if n1 in predictor.node_to_idx and n2 in predictor.node_to_idx:
                     test_edges.append((n1, n2))
 
-        # Sample test edges for evaluation (for speed)
+        # Sample test edges for evaluation
         import random
         random.seed(seed)
         if len(test_edges) > 10000:
             test_edges = random.sample(test_edges, 10000)
 
-        # Evaluate
-        hard_neg_results = evaluate_with_hard_negatives(
-            predictor,
-            test_edges,
-            predictor.node2vec_model,
-            sampler,
-            strategies=["random", "2hop", "degree_matched", "combined"]
-        )
+        print(f"Evaluating on {len(test_edges)} test edges")
 
-        results["hard_neg_results"] = hard_neg_results
+        # Evaluate each strategy
+        strategies = ["random", "2hop", "degree_matched", "combined"]
 
-        # Log to W&B
-        if run:
-            import wandb
-            import numpy as np
-            for strategy, strat_results in hard_neg_results.items():
-                # Log scalar metrics
+        for strategy in strategies:
+            print(f"\nEvaluating with {strategy} negatives...")
+
+            # Sample negatives
+            if strategy == "random":
+                negatives = sampler.sample_random_negatives(len(test_edges))
+            elif strategy == "2hop":
+                negatives = sampler.sample_2hop_negatives(len(test_edges))
+            elif strategy == "degree_matched":
+                negatives = sampler.sample_degree_matched_negatives(test_edges, len(test_edges))
+            elif strategy == "combined":
+                negatives = sampler.sample_combined_hard_negatives(test_edges, len(test_edges))
+
+            # Build features
+            X_pos, X_neg = [], []
+            for n1, n2 in test_edges:
+                features = predictor._get_edge_features(n1, n2)
+                if features is not None:
+                    X_pos.append(features)
+
+            for n1, n2 in negatives:
+                if n1 in predictor.node_to_idx and n2 in predictor.node_to_idx:
+                    features = predictor._get_edge_features(n1, n2)
+                    if features is not None:
+                        X_neg.append(features)
+
+            # Combine
+            X = np.array(X_pos + X_neg)
+            y_true = np.array([1] * len(X_pos) + [0] * len(X_neg))
+
+            # Predict
+            from sklearn.metrics import roc_auc_score, average_precision_score
+            y_pred = predictor.classifier.predict_proba(X)[:, 1]
+
+            auc = roc_auc_score(y_true, y_pred)
+            ap = average_precision_score(y_true, y_pred)
+
+            results["hard_neg_results"][strategy] = {
+                "roc_auc": auc,
+                "avg_precision": ap,
+                "n_positives": len(X_pos),
+                "n_negatives": len(X_neg),
+            }
+
+            print(f"  {strategy}: ROC-AUC={auc:.4f}, AP={ap:.4f}")
+
+            # Log to W&B
+            if run:
+                import wandb
                 wandb.log({
-                    f"metrics/{strategy}_roc_auc": strat_results["roc_auc"],
-                    f"metrics/{strategy}_avg_precision": strat_results["avg_precision"],
+                    f"metrics/{strategy}_roc_auc": auc,
+                    f"metrics/{strategy}_avg_precision": ap,
                 })
-
-                # Log ROC curve using wandb.plot.roc_curve()
-                if "y_true" in strat_results and "y_pred_proba" in strat_results:
-                    y_true = strat_results["y_true"]
-                    y_pred_proba = strat_results["y_pred_proba"]
-
-                    # Create probability matrix for wandb (need [P(class0), P(class1)])
-                    y_probas = np.column_stack([1 - y_pred_proba, y_pred_proba])
-
-                    roc_plot = wandb.plot.roc_curve(
-                        y_true=y_true.astype(int).tolist(),
-                        y_probas=y_probas.tolist(),
-                        labels=["No Edge", "Edge"],
-                        title=f"ROC Curve - {strategy}"
-                    )
-                    wandb.log({f"roc_curves/{strategy}": roc_plot})
+                # Log ROC curve
+                log_roc_curve(
+                    wandb,
+                    y_true,
+                    y_pred,
+                    strategy,
+                    title=f"ROC Curve - {strategy.replace('_', ' ').title()}"
+                )
 
     # Save model
     print(f"\nSaving model to {config['output']}...")
@@ -248,7 +330,7 @@ def train_single_model(
     if run:
         import wandb
         artifact = wandb.Artifact(
-            name=f"link_predictor_{config['name']}",
+            name=f"pyg_link_predictor_{config['name']}",
             type="model",
             description=config["description"],
         )
@@ -260,22 +342,14 @@ def train_single_model(
 
 
 def print_summary_table(all_results: List[Dict]) -> str:
-    """
-    Print and return a formatted summary table of results.
-
-    Args:
-        all_results: List of result dictionaries
-
-    Returns:
-        Formatted table string
-    """
+    """Print and return a formatted summary table of results."""
     lines = []
     lines.append("\n" + "=" * 90)
-    lines.append("COMPLETE RESULTS SUMMARY")
+    lines.append("COMPLETE PyG RESULTS SUMMARY")
     lines.append("=" * 90)
 
     # Header
-    header = f"{'Model':<12} {'Strategy':<18} {'ROC-AUC':<10} {'Avg Precision':<14} {'Note':<20}"
+    header = f"{'Model':<18} {'Strategy':<18} {'ROC-AUC':<10} {'Avg Precision':<14} {'Note':<20}"
     lines.append(header)
     lines.append("-" * 90)
 
@@ -285,7 +359,7 @@ def print_summary_table(all_results: List[Dict]) -> str:
         # Training (random) results first
         train_auc = result["train_metrics"]["roc_auc"]
         train_ap = result["train_metrics"]["avg_precision"]
-        lines.append(f"{model_name:<12} {'random (train)':<18} {train_auc:<10.4f} {train_ap:<14.4f} {'Inflated':<20}")
+        lines.append(f"{model_name:<18} {'random (train)':<18} {train_auc:<10.4f} {train_ap:<14.4f} {'Inflated':<20}")
 
         # Hard negative results
         if result.get("hard_neg_results"):
@@ -305,7 +379,7 @@ def print_summary_table(all_results: List[Dict]) -> str:
                     elif strategy == "degree_matched":
                         note = "Controls bias"
 
-                    lines.append(f"{'':<12} {strategy:<18} {auc:<10.4f} {ap:<14.4f} {note:<20}")
+                    lines.append(f"{'':<18} {strategy:<18} {auc:<10.4f} {ap:<14.4f} {note:<20}")
 
         lines.append("-" * 90)
 
@@ -317,7 +391,7 @@ def print_summary_table(all_results: List[Dict]) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Retrain all Node2Vec link prediction models with W&B tracking"
+        description="Retrain all PyG Node2Vec link prediction models with W&B tracking"
     )
     parser.add_argument(
         "--data-dir",
@@ -337,21 +411,36 @@ def main():
         help="W&B project name",
     )
     parser.add_argument(
-        "--skip-training",
-        action="store_true",
-        help="Skip training, only evaluate existing models",
-    )
-    parser.add_argument(
-        "--eval-only",
-        action="store_true",
-        help="Only run hard negative evaluation on existing models",
-    )
-    parser.add_argument(
         "--models",
         nargs="+",
         choices=["original", "structural", "homophily"],
         default=["original", "structural", "homophily"],
         help="Which models to train (default: all)",
+    )
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=100,
+        help="Number of training epochs (default: 100)",
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=128,
+        help="Training batch size (default: 128)",
+    )
+    parser.add_argument(
+        "--lr",
+        type=float,
+        default=0.01,
+        help="Learning rate (default: 0.01)",
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="auto",
+        choices=["auto", "mps", "cuda", "cpu"],
+        help="Device to use for training (default: auto)",
     )
     parser.add_argument(
         "--seed",
@@ -369,13 +458,17 @@ def main():
     args = parser.parse_args()
 
     print("=" * 80)
-    print("Node2Vec Link Prediction - Full Retraining with Hard Negative Evaluation")
+    print("PyG Node2Vec Link Prediction - Full Retraining with Hard Negative Evaluation")
     print("=" * 80)
     print(f"\nConfiguration:")
     print(f"  Data directory: {args.data_dir}")
     print(f"  W&B enabled: {args.wandb}")
     print(f"  W&B project: {args.wandb_project}")
     print(f"  Models to train: {args.models}")
+    print(f"  Epochs: {args.epochs}")
+    print(f"  Batch size: {args.batch_size}")
+    print(f"  Learning rate: {args.lr}")
+    print(f"  Device: {args.device}")
     print(f"  Seed: {args.seed}")
     print()
 
@@ -395,7 +488,13 @@ def main():
             sys.exit(1)
 
     # Filter configs based on selected models
-    configs_to_run = [c for c in MODEL_CONFIGS if c["name"] in args.models]
+    model_name_map = {
+        "original": "pyg_original",
+        "structural": "pyg_structural",
+        "homophily": "pyg_homophily",
+    }
+    selected_names = [model_name_map[m] for m in args.models]
+    configs_to_run = [c for c in PYG_MODEL_CONFIGS if c["name"] in selected_names]
 
     # Create results directory
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
@@ -406,12 +505,16 @@ def main():
 
     for config in configs_to_run:
         try:
-            result = train_single_model(
+            result = train_single_pyg_model(
                 config=config,
                 data_dir=args.data_dir,
                 wandb_enabled=args.wandb,
                 wandb_project=args.wandb_project,
                 eval_strategies=True,
+                epochs=args.epochs,
+                batch_size=args.batch_size,
+                lr=args.lr,
+                device=args.device,
                 seed=args.seed,
             )
             all_results.append(result)
@@ -428,11 +531,10 @@ def main():
 
     # Save results to JSON
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    results_file = Path(args.output_dir) / f"training_results_{timestamp}.json"
+    results_file = Path(args.output_dir) / f"pyg_training_results_{timestamp}.json"
 
     # Convert numpy types for JSON serialization
     def convert_types(obj):
-        import numpy as np
         if isinstance(obj, np.floating):
             return float(obj)
         elif isinstance(obj, np.integer):
@@ -445,6 +547,7 @@ def main():
 
     json_results = {
         "timestamp": timestamp,
+        "framework": "pytorch_geometric",
         "total_time_seconds": total_time,
         "total_time_minutes": total_time / 60,
         "models": [convert_types(r) for r in all_results],
@@ -477,6 +580,7 @@ def main():
             combined_auc = result["hard_neg_results"]["combined"]["roc_auc"]
             drop = random_auc - combined_auc
             print(f"\n{model.upper()} Model:")
+            print(f"  Device: {result.get('device', 'N/A')}")
             print(f"  Random ROC-AUC: {random_auc:.4f}")
             print(f"  Combined (hard) ROC-AUC: {combined_auc:.4f}")
             print(f"  Performance drop: {drop:.4f} ({drop/random_auc*100:.1f}%)")

@@ -509,6 +509,8 @@ def evaluate_with_hard_negatives(
             "avg_precision": ap,
             "n_positives": len(positive_samples),
             "n_negatives": len(negative_samples),
+            "y_true": y_true,  # For ROC curve plotting
+            "y_pred_proba": y_pred,  # For ROC curve plotting
         }
 
         print(f"\nResults for {strategy}:")

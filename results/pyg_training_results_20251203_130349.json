@@ -1,0 +1,147 @@
+{
+  "timestamp": "20251203_130349",
+  "framework": "pytorch_geometric",
+  "total_time_seconds": 2536.397444009781,
+  "total_time_minutes": 42.273290733496346,
+  "models": [
+    {
+      "model": "pyg_original",
+      "config": {
+        "name": "pyg_original",
+        "p": 1.0,
+        "q": 1.0,
+        "description": "PyG Balanced exploration - DeepWalk-like random walks",
+        "output": "models/pyg_link_predictor_original.pkl"
+      },
+      "device": "mps",
+      "train_time_seconds": 818.000195980072,
+      "train_metrics": {
+        "roc_auc": 0.9967970624632565,
+        "avg_precision": 0.9975432862998179,
+        "train_size": 276862,
+        "test_size": 69056,
+        "final_loss": 0.8344318107480094,
+        "embedding_time_seconds": 738.1208188533783
+      },
+      "hard_neg_results": {
+        "random": {
+          "roc_auc": 0.986037203766054,
+          "avg_precision": 0.9905126991435158,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "2hop": {
+          "roc_auc": 0.8449917058429751,
+          "avg_precision": 0.843566759612889,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "degree_matched": {
+          "roc_auc": 0.9693150231450349,
+          "avg_precision": 0.9709345526787516,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "combined": {
+          "roc_auc": 0.9071833827905769,
+          "avg_precision": 0.9020243807647241,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        }
+      }
+    },
+    {
+      "model": "pyg_structural",
+      "config": {
+        "name": "pyg_structural",
+        "p": 1.0,
+        "q": 0.5,
+        "description": "PyG DFS-like - captures structural roles and hub connectivity",
+        "output": "models/pyg_link_predictor_structural.pkl"
+      },
+      "device": "mps",
+      "train_time_seconds": 834.2359712123871,
+      "train_metrics": {
+        "roc_auc": 0.9967804197939164,
+        "avg_precision": 0.9974385578362142,
+        "train_size": 276862,
+        "test_size": 69056,
+        "final_loss": 0.8347241495336805,
+        "embedding_time_seconds": 752.4327511787415
+      },
+      "hard_neg_results": {
+        "random": {
+          "roc_auc": 0.9862663861658005,
+          "avg_precision": 0.9905307732584526,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "2hop": {
+          "roc_auc": 0.841459626628979,
+          "avg_precision": 0.8345514138047644,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "degree_matched": {
+          "roc_auc": 0.9700021282485964,
+          "avg_precision": 0.9712330566311177,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "combined": {
+          "roc_auc": 0.9056731839527403,
+          "avg_precision": 0.8963133359183999,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        }
+      }
+    },
+    {
+      "model": "pyg_homophily",
+      "config": {
+        "name": "pyg_homophily",
+        "p": 1.0,
+        "q": 2.0,
+        "description": "PyG BFS-like - captures local communities and clusters",
+        "output": "models/pyg_link_predictor_homophily.pkl"
+      },
+      "device": "mps",
+      "train_time_seconds": 829.2798490524292,
+      "train_metrics": {
+        "roc_auc": 0.9966898207961136,
+        "avg_precision": 0.9974552108065848,
+        "train_size": 276862,
+        "test_size": 69056,
+        "final_loss": 0.8082056854452405,
+        "embedding_time_seconds": 746.7942283153534
+      },
+      "hard_neg_results": {
+        "random": {
+          "roc_auc": 0.9856396713319254,
+          "avg_precision": 0.9901297080999812,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "2hop": {
+          "roc_auc": 0.845933811733909,
+          "avg_precision": 0.8468290055507006,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "degree_matched": {
+          "roc_auc": 0.970049874581877,
+          "avg_precision": 0.9716882966963145,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        },
+        "combined": {
+          "roc_auc": 0.9087897816480601,
+          "avg_precision": 0.9061210135209838,
+          "n_positives": 3363,
+          "n_negatives": 3363
+        }
+      }
+    }
+  ],
+  "summary_table": "\n==========================================================================================\nCOMPLETE PyG RESULTS SUMMARY\n==========================================================================================\nModel              Strategy           ROC-AUC    Avg Precision  Note                \n------------------------------------------------------------------------------------------\npyg_original       random (train)     0.9968     0.9975         Inflated            \n                   random             0.9860     0.9905         Inflated            \n                   2hop               0.8450     0.8436         Structural hard     \n                   degree_matched     0.9693     0.9709         Controls bias       \n                   combined           0.9072     0.9020         Most rigorous       \n------------------------------------------------------------------------------------------\npyg_structural     random (train)     0.9968     0.9974         Inflated            \n                   random             0.9863     0.9905         Inflated            \n                   2hop               0.8415     0.8346         Structural hard     \n                   degree_matched     0.9700     0.9712         Controls bias       \n                   combined           0.9057     0.8963         Most rigorous       \n------------------------------------------------------------------------------------------\npyg_homophily      random (train)     0.9967     0.9975         Inflated            \n                   random             0.9856     0.9901         Inflated            \n                   2hop               0.8459     0.8468         Structural hard     \n                   degree_matched     0.9700     0.9717         Controls bias       \n                   combined           0.9088     0.9061         Most rigorous       \n------------------------------------------------------------------------------------------\n=========================================================================================="
+}

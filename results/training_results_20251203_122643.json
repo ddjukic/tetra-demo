@@ -1,0 +1,28 @@
+{
+  "timestamp": "20251203_122643",
+  "total_time_seconds": 313.4766757488251,
+  "total_time_minutes": 5.224611262480418,
+  "models": [
+    {
+      "model": "original",
+      "config": {
+        "name": "original",
+        "p": 1.0,
+        "q": 1.0,
+        "description": "Balanced exploration - DeepWalk-like random walks",
+        "output": "models/link_predictor_original.pkl"
+      },
+      "train_time_seconds": 94.43841314315796,
+      "train_metrics": {
+        "roc_auc": 0.9893590382443884,
+        "avg_precision": 0.9887863830518187,
+        "train_size": 276862,
+        "test_size": 69056
+      },
+      "hard_neg_results": {
+        "random": {
+          "roc_auc": 0.9760297491487225,
+          "avg_precision": 0.9783022654603527,
+          "n_positives": 3363,
+          "n_negatives": 3363,
+          "y_true": 
