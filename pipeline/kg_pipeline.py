@@ -27,6 +27,21 @@ from pipeline.models import PipelineInput, PipelineResult, GraphStatistics
 logger = logging.getLogger(__name__)
 
 
+def _normalize_for_lookup(text: str) -> str:
+    """
+    Normalize entity text for fuzzy type lookup.
+
+    Removes case differences, hyphens, and spaces to enable matching
+    between LLM-extracted entity names and PubTator annotations.
+
+    Examples:
+        "ACE-2" -> "ace2"
+        "COVID 19" -> "covid19"
+        "HCRTR-1" -> "hcrtr1"
+    """
+    return text.lower().strip().replace("-", "").replace(" ", "").replace("_", "")
+
+
 class KGPipeline:
     """
     Pure Python async pipeline for knowledge graph construction.
@@ -219,8 +234,15 @@ class KGPipeline:
         """
         graph = KnowledgeGraph()
 
+        # Track STRING entity IDs for post-processing (these are always proteins)
+        string_entity_ids: set[str] = set()
+
         # Build entity type lookup from PubTator annotations for later use
-        # Store multiple case variants to handle LLM output variations
+        # Store multiple variants to handle LLM output variations:
+        # - Original text
+        # - Lowercase
+        # - Uppercase
+        # - Normalized (no hyphens, spaces, underscores)
         pubtator_types: dict[str, str] = {}
         for pmid, annotations in annotations_by_pmid.items():
             for ann in annotations:
@@ -231,6 +253,10 @@ class KGPipeline:
                     pubtator_types[entity_text] = entity_type
                     pubtator_types[entity_text.lower()] = entity_type
                     pubtator_types[entity_text.upper()] = entity_type
+                    # Also store normalized version for fuzzy matching
+                    normalized = _normalize_for_lookup(entity_text)
+                    if normalized:
+                        pubtator_types[normalized] = entity_type
 
         # 1. Add ALL entities from PubTator NER annotations
         entity_to_pmids: dict[str, set[str]] = {}
@@ -282,6 +308,9 @@ class KGPipeline:
             if protein_a and protein_b:
                 graph.add_entity(protein_a, EntityType.PROTEIN.value, protein_a)
                 graph.add_entity(protein_b, EntityType.PROTEIN.value, protein_b)
+                # Track STRING entities for post-processing type enrichment
+                string_entity_ids.add(protein_a)
+                string_entity_ids.add(protein_b)
 
                 graph.add_relationship(
                     source=protein_a,
@@ -304,17 +333,23 @@ class KGPipeline:
             evidence_text = rel.get("evidence_text", "")
 
             if entity1 and entity2:
-                # Look up entity types from PubTator, fallback chain for case variations
+                # Look up entity types from PubTator with fallback chain:
+                # 1. Exact match
+                # 2. Lowercase match
+                # 3. Uppercase match
+                # 4. Normalized match (removes hyphens, spaces, underscores)
                 e1_type = (
                     pubtator_types.get(entity1)
                     or pubtator_types.get(entity1.lower())
                     or pubtator_types.get(entity1.upper())
+                    or pubtator_types.get(_normalize_for_lookup(entity1))
                     or "unknown"
                 )
                 e2_type = (
                     pubtator_types.get(entity2)
                     or pubtator_types.get(entity2.lower())
                     or pubtator_types.get(entity2.upper())
+                    or pubtator_types.get(_normalize_for_lookup(entity2))
                     or "unknown"
                 )
 
@@ -349,6 +384,55 @@ class KGPipeline:
                         "text_snippet": evidence_text,
                     }],
                 )
+
+        # 5. POST-PROCESSING: Enrich "unknown" entity types
+        # This catches entities that were added by LLM extraction with names
+        # that didn't match PubTator annotations exactly
+        unknown_count_before = sum(
+            1 for e in graph.entities.values() if e.get("type") == "unknown"
+        )
+
+        for entity_id, entity_data in graph.entities.items():
+            current_type = entity_data.get("type", "unknown")
+
+            # Skip if already typed
+            if current_type != "unknown":
+                continue
+
+            # Priority 1: If entity was source/target of STRING interaction -> protein
+            if entity_id in string_entity_ids:
+                graph.entities[entity_id]["type"] = EntityType.PROTEIN.value
+                graph.graph.nodes[entity_id]["type"] = EntityType.PROTEIN.value
+                graph.graph.nodes[entity_id]["entity_type"] = EntityType.PROTEIN.value
+                continue
+
+            # Priority 2: Try fuzzy matching against PubTator types
+            # Check normalized form
+            normalized_id = _normalize_for_lookup(entity_id)
+            found_type = pubtator_types.get(normalized_id)
+
+            if not found_type:
+                # Try exact matches with case variants
+                found_type = (
+                    pubtator_types.get(entity_id)
+                    or pubtator_types.get(entity_id.lower())
+                    or pubtator_types.get(entity_id.upper())
+                )
+
+            if found_type and found_type != "unknown":
+                graph.entities[entity_id]["type"] = found_type
+                graph.graph.nodes[entity_id]["type"] = found_type
+                graph.graph.nodes[entity_id]["entity_type"] = found_type
+
+        unknown_count_after = sum(
+            1 for e in graph.entities.values() if e.get("type") == "unknown"
+        )
+
+        if unknown_count_before > unknown_count_after:
+            logger.info(
+                f"Entity type enrichment: resolved {unknown_count_before - unknown_count_after} "
+                f"unknown types ({unknown_count_before} -> {unknown_count_after})"
+            )
 
         return graph
 
@@ -416,9 +500,10 @@ class KGPipeline:
         for node_id in nodes_with_typed_edges:
             if node_id in graph.graph.nodes:
                 node_data = graph.graph.nodes[node_id]
+                # Entity type is stored as "type" in the graph (not "entity_type")
                 pruned.add_entity(
                     entity_id=node_id,
-                    entity_type=node_data.get("entity_type", "unknown"),
+                    entity_type=node_data.get("type", "unknown"),
                     name=node_data.get("name", node_id),
                     entity_ncbi_id=node_data.get("entity_ncbi_id", ""),
                 )
