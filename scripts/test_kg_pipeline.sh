@@ -1,13 +1,16 @@
 #!/bin/bash
 # Test KG Agent Pipeline - kills previous server, starts fresh, creates session, runs test
+# Usage: ./test_kg_pipeline.sh [max_articles]
+# Example: ./test_kg_pipeline.sh 100
 
 set -e
 
 PORT=8080
 APP_NAME="kg_agent"
 USER_ID="test_user"
+MAX_ARTICLES=${1:-10}  # Default to 10 articles if not specified
 
-echo "=== KG Agent Pipeline Test ==="
+echo "=== KG Agent Pipeline Test (max $MAX_ARTICLES articles) ==="
 START=$(date +%s)
 
 # 0. Kill any existing server
@@ -49,7 +52,7 @@ fi
 
 # 3. Run the pipeline test
 echo "[3] Running pipeline test..."
-echo "    Query: Get STRING network, search PubMed, get annotations, extract relationships, build graph"
+echo "    Query: Build knowledge graph for orexin pathway (max $MAX_ARTICLES articles)"
 
 RESPONSE=$(curl -s -X POST http://localhost:$PORT/run \
     -H "Content-Type: application/json" \
@@ -60,7 +63,7 @@ RESPONSE=$(curl -s -X POST http://localhost:$PORT/run \
         \"new_message\": {
             \"role\": \"user\",
             \"parts\": [{
-                \"text\": \"Get the STRING network for HCRTR1, HCRTR2, HCRT. Search PubMed for orexin signaling (max 10 results). Get entity annotations. Extract relationships. Build a knowledge graph.\"
+                \"text\": \"Build a knowledge graph for orexin signaling pathway with HCRTR1, HCRTR2, HCRT. Fetch up to $MAX_ARTICLES articles from PubMed.\"
             }]
         },
         \"streaming\": false
@@ -75,25 +78,21 @@ KG_RESULT=$(echo "$RESPONSE" | jq -r '.[] | select(.content.parts[0].functionRes
 
 if [ -n "$KG_RESULT" ] && [ "$KG_RESULT" != "null" ]; then
     echo "Knowledge Graph Summary:"
-    echo "$KG_RESULT" | jq '.summary'
+    echo "$KG_RESULT" | jq '.'
 
-    NODE_COUNT=$(echo "$KG_RESULT" | jq '.node_count')
-    EDGE_COUNT=$(echo "$KG_RESULT" | jq '.edge_count')
     echo ""
-    echo "Node Count: $NODE_COUNT"
-    echo "Edge Count: $EDGE_COUNT"
+    echo "=== Relationship Type Breakdown ==="
+    echo "$KG_RESULT" | jq -r '.relationship_types | to_entries | sort_by(-.value) | .[] | "  \(.key): \(.value)"'
 else
     echo "Warning: Could not find build_knowledge_graph response"
-    echo "Last response:"
-    echo "$RESPONSE" | jq '.[-1].content.parts[0].text // .[-1]' 2>/dev/null || echo "$RESPONSE" | head -c 2000
-fi
-
-# Get entity annotation counts
-ANNOT_RESULT=$(echo "$RESPONSE" | jq -r '.[] | select(.content.parts[0].functionResponse.name == "get_entity_annotations") | .content.parts[0].functionResponse.response')
-if [ -n "$ANNOT_RESULT" ] && [ "$ANNOT_RESULT" != "null" ]; then
-    echo ""
-    echo "Entity Annotations:"
-    echo "$ANNOT_RESULT" | jq '{pmids_annotated, entity_type_counts}'
+    echo "Checking for final text response..."
+    FINAL_TEXT=$(echo "$RESPONSE" | jq -r '.[-1].content.parts[0].text // empty' 2>/dev/null)
+    if [ -n "$FINAL_TEXT" ]; then
+        echo "$FINAL_TEXT"
+    else
+        echo "Raw response (first 3000 chars):"
+        echo "$RESPONSE" | head -c 3000
+    fi
 fi
 
 END=$(date +%s)
@@ -101,6 +100,6 @@ ELAPSED=$((END - START))
 echo ""
 echo "=== Total Time: ${ELAPSED}s ==="
 
-# Optionally kill server after test (uncomment if desired)
-# echo "Stopping server..."
-# kill $SERVER_PID 2>/dev/null
+# Kill server after test
+echo "Stopping server..."
+kill $SERVER_PID 2>/dev/null || true
