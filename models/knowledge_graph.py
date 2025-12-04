@@ -332,7 +332,15 @@ class KnowledgeGraph:
         novel = []
         for rel_key, data in self.relationships.items():
             ml_score = data.get("ml_score")
-            if ml_score is None or ml_score < min_ml_score:
+            if ml_score is None:
+                continue
+            # Handle string ml_score (from GraphML load)
+            if isinstance(ml_score, str):
+                try:
+                    ml_score = float(ml_score)
+                except ValueError:
+                    continue
+            if ml_score < min_ml_score:
                 continue
 
             # Check if there's only ML evidence (no literature)
@@ -425,6 +433,158 @@ class KnowledgeGraph:
             JSON string representation of the graph
         """
         return json.dumps(self.to_dict(), indent=indent)
+
+    def save(self, path: str, format: str = "graphml") -> str:
+        """
+        Save the knowledge graph to disk.
+
+        Supports multiple formats:
+        - graphml: XML-based format, readable by Cytoscape, Gephi, etc.
+        - pickle: Python pickle (includes all attributes, fast)
+        - json: JSON export (custom format with entities/relationships)
+
+        Args:
+            path: Base path for the output file (extension added based on format)
+            format: Output format - "graphml", "pickle", or "json"
+
+        Returns:
+            Path to the saved file
+        """
+        from pathlib import Path
+        import pickle
+
+        base_path = Path(path)
+        base_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if format == "graphml":
+            # GraphML is widely compatible (Cytoscape, Gephi, etc.)
+            file_path = base_path.with_suffix(".graphml")
+            # Convert edge keys to strings for GraphML compatibility
+            G_copy = nx.MultiDiGraph()
+            for node, attrs in self.graph.nodes(data=True):
+                # Filter to serializable attributes
+                safe_attrs = {k: str(v) if not isinstance(v, (str, int, float, bool)) else v
+                              for k, v in attrs.items()}
+                G_copy.add_node(node, **safe_attrs)
+            for u, v, key, attrs in self.graph.edges(keys=True, data=True):
+                safe_attrs = {}
+                for k, val in attrs.items():
+                    if isinstance(val, (str, int, float, bool)):
+                        safe_attrs[k] = val
+                    elif isinstance(val, list):
+                        safe_attrs[k] = json.dumps(val)
+                    else:
+                        safe_attrs[k] = str(val)
+                G_copy.add_edge(u, v, key=str(key), **safe_attrs)
+            nx.write_graphml(G_copy, str(file_path))
+
+        elif format == "pickle":
+            # Pickle preserves everything but is Python-only
+            file_path = base_path.with_suffix(".pkl")
+            with open(file_path, "wb") as f:
+                pickle.dump({
+                    "graph": self.graph,
+                    "entities": self.entities,
+                    "relationships": self.relationships,
+                }, f)
+
+        elif format == "json":
+            # JSON is portable but may lose some type info
+            file_path = base_path.with_suffix(".json")
+            with open(file_path, "w") as f:
+                json.dump(self.to_dict(), f, indent=2)
+
+        else:
+            raise ValueError(f"Unsupported format: {format}. Use 'graphml', 'pickle', or 'json'.")
+
+        return str(file_path)
+
+    @classmethod
+    def load(cls, path: str) -> "KnowledgeGraph":
+        """
+        Load a knowledge graph from disk.
+
+        Detects format from file extension:
+        - .graphml: GraphML format
+        - .pkl: Python pickle
+        - .json: JSON format
+
+        Args:
+            path: Path to the graph file
+
+        Returns:
+            Loaded KnowledgeGraph instance
+        """
+        from pathlib import Path
+        import pickle
+
+        file_path = Path(path)
+
+        if not file_path.exists():
+            raise FileNotFoundError(f"Graph file not found: {path}")
+
+        suffix = file_path.suffix.lower()
+
+        if suffix == ".graphml":
+            # Load from GraphML
+            G = nx.read_graphml(str(file_path))
+            kg = cls()
+            kg.graph = nx.MultiDiGraph(G)
+
+            # Reconstruct entities from nodes
+            for node, attrs in kg.graph.nodes(data=True):
+                kg.entities[node] = dict(attrs)
+
+            # Reconstruct relationships from edges
+            for u, v, key, attrs in kg.graph.edges(keys=True, data=True):
+                # Parse JSON strings back to lists and convert numeric strings
+                parsed_attrs = {}
+                for k, val in attrs.items():
+                    if isinstance(val, str):
+                        # Try parsing as JSON array first
+                        if val.startswith("["):
+                            try:
+                                parsed_attrs[k] = json.loads(val)
+                                continue
+                            except json.JSONDecodeError:
+                                pass
+                        # Try converting to float (handles scores, weights, etc.)
+                        try:
+                            parsed_attrs[k] = float(val)
+                            # Convert to int if it's a whole number
+                            if parsed_attrs[k] == int(parsed_attrs[k]):
+                                parsed_attrs[k] = int(parsed_attrs[k])
+                            continue
+                        except ValueError:
+                            pass
+                        parsed_attrs[k] = val
+                    else:
+                        parsed_attrs[k] = val
+                kg.relationships[(u, v, key)] = parsed_attrs
+                # Update edge attributes in graph too
+                kg.graph.edges[u, v, key].update(parsed_attrs)
+
+            return kg
+
+        elif suffix == ".pkl":
+            # Load from pickle
+            with open(file_path, "rb") as f:
+                data = pickle.load(f)
+
+            kg = cls()
+            kg.graph = data.get("graph", nx.MultiDiGraph())
+            kg.entities = data.get("entities", {})
+            kg.relationships = data.get("relationships", {})
+            return kg
+
+        elif suffix == ".json":
+            # Load from JSON
+            with open(file_path, "r") as f:
+                data = json.load(f)
+            return cls.from_dict(data)
+
+        else:
+            raise ValueError(f"Unsupported file extension: {suffix}. Use '.graphml', '.pkl', or '.json'.")
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "KnowledgeGraph":

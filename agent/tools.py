@@ -9,6 +9,8 @@ import asyncio
 import logging
 from typing import Any, Callable, Optional, Protocol
 
+import numpy as np
+
 from ml.link_predictor import LinkPredictor
 from clients.string_client import StringClient
 from clients.pubmed_client import PubMedClient
@@ -22,6 +24,28 @@ from models.knowledge_graph import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def get_confidence_tier(percentile: float) -> tuple[str, str]:
+    """
+    Map percentile to confidence tier with interpretation.
+
+    Args:
+        percentile: Percentile rank (0-100) of the prediction score.
+
+    Returns:
+        Tuple of (tier_name, interpretation_text)
+    """
+    if percentile >= 99:
+        return ("Very Strong", "Top 1% - highly likely interaction")
+    elif percentile >= 95:
+        return ("Strong", "Top 5% - strong prediction")
+    elif percentile >= 90:
+        return ("Moderate", "Top 10% - moderate confidence")
+    elif percentile >= 75:
+        return ("Weak", "Top 25% - weak signal")
+    else:
+        return ("Low", "Below top 25% - low confidence")
 
 
 class AgentTools:
@@ -197,7 +221,7 @@ class AgentTools:
                 "type": "function",
                 "function": {
                     "name": "predict_novel_links",
-                    "description": "Apply ML link predictor to find novel protein-protein interactions",
+                    "description": "Apply ML link predictor to find novel protein-protein interactions. Returns predictions with interpretable confidence scores including: ml_score (0-1 probability), percentile (rank among all candidates), confidence_tier (Very Strong/Strong/Moderate/Weak/Low), and interpretation text to help users understand the prediction strength.",
                     "parameters": {
                         "type": "object",
                         "properties": {
@@ -824,12 +848,18 @@ class AgentTools:
         """
         Apply link predictor to find novel interactions in the graph.
 
+        Returns predictions with interpretable confidence scores:
+        - ml_score: Raw ML probability (0-1)
+        - percentile: Rank among all candidate predictions (0-100)
+        - confidence_tier: Very Strong (>99%), Strong (>95%), Moderate (>90%), Weak (>75%), Low (<75%)
+        - interpretation: Human-readable explanation of confidence
+
         Args:
             min_ml_score: Minimum ML prediction score (default 0.7)
             max_predictions: Maximum number of predictions to return
 
         Returns:
-            Dictionary with predictions and count.
+            Dictionary with predictions (including interpretable scores), count, and score distribution stats.
         """
         try:
             if self.current_graph is None:
@@ -840,10 +870,11 @@ class AgentTools:
                 }
 
             # Get all protein entities from the graph
+            # Include "unknown" type for graphs loaded from GraphML where type may not be preserved
             proteins = [
                 entity_id
                 for entity_id, data in self.current_graph.entities.items()
-                if data.get("type") in ["protein", "gene"]
+                if data.get("type") in ["protein", "gene", "unknown"]
             ]
 
             if len(proteins) < 2:
@@ -868,14 +899,45 @@ class AgentTools:
                     "message": "All protein pairs already have relationships",
                 }
 
-            # Run predictions
-            pairs_to_predict = candidate_pairs[:max_predictions * 3]
-            predictions = self.link_predictor.predict(pairs_to_predict)
+            # Run predictions on ALL candidates to build score distribution
+            # (limit to reasonable number if too many)
+            max_to_score = min(len(candidate_pairs), 1000)
+            pairs_to_predict = candidate_pairs[:max_to_score]
+            all_predictions = self.link_predictor.predict(pairs_to_predict)
 
-            # Filter by score and sort
+            # Filter out errors
+            valid_predictions = [
+                p for p in all_predictions
+                if not p.get("error") and p.get("ml_score") is not None
+            ]
+
+            if not valid_predictions:
+                return {
+                    "predictions": [],
+                    "count": 0,
+                    "message": "No valid predictions returned from ML model",
+                }
+
+            # Build score distribution for percentile calculation
+            all_scores = np.array([p.get("ml_score", 0) for p in valid_predictions])
+            sorted_scores = np.sort(all_scores)
+
+            # Add interpretable fields to each prediction
+            n_scores = len(sorted_scores)
+            for pred in valid_predictions:
+                score = pred.get("ml_score", 0)
+                # Percentile = fraction of predictions with score <= this one
+                percentile = 100 * np.searchsorted(sorted_scores, score) / n_scores if n_scores > 0 else 0
+                pred["percentile"] = round(percentile, 1)
+
+                tier, interpretation = get_confidence_tier(percentile)
+                pred["confidence_tier"] = tier
+                pred["interpretation"] = interpretation
+
+            # Filter by min_ml_score and sort
             filtered = [
-                p for p in predictions
-                if p.get("ml_score", 0) >= min_ml_score and not p.get("error")
+                p for p in valid_predictions
+                if p.get("ml_score", 0) >= min_ml_score
             ]
             filtered.sort(key=lambda x: x.get("ml_score", 0), reverse=True)
             top_predictions = filtered[:max_predictions]
@@ -891,13 +953,31 @@ class AgentTools:
                         "source_type": EvidenceSource.ML_PREDICTED.value,
                         "source_id": "link_predictor",
                         "confidence": pred["ml_score"],
+                        "percentile": pred["percentile"],
+                        "confidence_tier": pred["confidence_tier"],
                     }],
                 )
+
+            # Compute distribution stats for context
+            score_stats = {
+                "median": round(float(np.median(all_scores)), 3),
+                "p95_threshold": round(float(np.percentile(all_scores, 95)), 3),
+                "p99_threshold": round(float(np.percentile(all_scores, 99)), 3),
+            }
 
             return {
                 "predictions": top_predictions,
                 "count": len(top_predictions),
                 "total_candidates": len(candidate_pairs),
+                "candidates_scored": len(valid_predictions),
+                "score_distribution": score_stats,
+                "interpretation_guide": {
+                    "Very Strong": "Top 1% - highly likely interaction",
+                    "Strong": "Top 5% - strong prediction",
+                    "Moderate": "Top 10% - moderate confidence",
+                    "Weak": "Top 25% - weak signal",
+                    "Low": "Below top 25% - low confidence",
+                },
             }
         except Exception as e:
             logger.error(f"Error predicting links: {e}")

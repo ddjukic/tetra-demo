@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import logging
 import os
+import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any, TYPE_CHECKING
 
@@ -152,6 +154,11 @@ class KGOrchestrator:
             f"{result.graph.to_summary()['edge_count']} edges"
         )
 
+        # Save graph to disk if configured
+        if self._config.save_graph:
+            saved_path = self._save_graph(user_query)
+            logger.info(f"Graph saved to: {saved_path}")
+
         return self._graph
 
     async def expand(
@@ -209,7 +216,47 @@ class KGOrchestrator:
             f"{result.graph.to_summary()['edge_count']} edges"
         )
 
+        # Save expanded graph if configured
+        if self._config.save_graph:
+            saved_path = self._save_graph(expansion_query, suffix="_expanded")
+            logger.info(f"Expanded graph saved to: {saved_path}")
+
         return self._graph
+
+    def _save_graph(self, query: str, suffix: str = "") -> str:
+        """
+        Save the current graph to disk.
+
+        Args:
+            query: Query used to build the graph (for filename).
+            suffix: Optional suffix for the filename.
+
+        Returns:
+            Path to the saved file.
+        """
+        if self._graph is None:
+            raise ValueError("No graph to save")
+
+        # Create output directory
+        output_dir = Path(self._config.graph_output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate filename from query
+        # Extract key terms (e.g., "orexin signaling pathway" -> "orexin_signaling")
+        query_slug = re.sub(r'[^a-zA-Z0-9\s]', '', query.lower())
+        query_slug = '_'.join(query_slug.split()[:3])  # First 3 words
+        if not query_slug:
+            query_slug = "graph"
+
+        # Add timestamp for uniqueness
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{query_slug}{suffix}_{timestamp}"
+
+        # Save using configured format
+        file_path = output_dir / filename
+        saved_path = self._graph.save(str(file_path), format=self._config.graph_format)
+
+        return saved_path
 
     def get_graph_summary(self) -> dict[str, Any]:
         """

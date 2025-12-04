@@ -72,7 +72,7 @@ def load_link_predictor():
     if pyg_model_path.exists():
         try:
             from ml.pyg_link_predictor import PyGLinkPredictor
-            predictor = PyGLinkPredictor.load(str(pyg_model_path), device="cpu")
+            predictor = PyGLinkPredictor.load(str(pyg_model_path), device="auto")
             return predictor
         except ImportError:
             # torch/torch-geometric not installed - fall through to legacy
@@ -100,135 +100,6 @@ def get_demo_knowledge_graph():
     """Get or create a demo knowledge graph instance."""
     from models.knowledge_graph import KnowledgeGraph
     return KnowledgeGraph()
-
-
-# =============================================================================
-# Pipeline Execution
-# =============================================================================
-
-async def run_pipeline(seed_terms: list[str], max_papers: int, research_focus: str | None = None):
-    """
-    Run the full knowledge graph pipeline.
-
-    Args:
-        seed_terms: List of seed proteins/genes to expand
-        max_papers: Maximum number of PubMed papers to fetch
-        research_focus: Optional research context for query construction
-
-    Returns:
-        Tuple of (MergeResult, PipelineReport)
-    """
-    from pipeline import (
-        PipelineConfig,
-        PipelineReport,
-        expand_string_network,
-        construct_pubmed_query,
-        run_parallel_extraction,
-        merge_to_knowledge_graph,
-        annotations_list_to_dict,
-    )
-    from clients.pubmed_client import PubMedClient
-    from agent.graph_agent import set_active_graph
-
-    # Create configuration
-    config = PipelineConfig(
-        pubmed_max_results=max_papers,
-        langfuse_session_id=str(uuid.uuid4()),
-    )
-
-    # Create pipeline report
-    report = PipelineReport.create()
-
-    # Phase 1: STRING expansion
-    with st.status("Phase 1: Expanding protein network via STRING...", expanded=True) as status:
-        st.write(f"Seed proteins: {', '.join(seed_terms)}")
-        string_result = await expand_string_network(seed_terms, config, report)
-        st.write(f"Found {len(string_result.expanded_proteins)} proteins")
-        st.write(f"Retrieved {len(string_result.interactions)} interactions")
-        status.update(label=f"STRING expansion complete: {len(string_result.expanded_proteins)} proteins", state="complete")
-
-    # Phase 2: Query construction
-    with st.status("Phase 2: Constructing PubMed query...", expanded=True) as status:
-        query_result = await construct_pubmed_query(
-            proteins=string_result.expanded_proteins,
-            research_focus=research_focus or "protein interactions",
-            config=config,
-            report=report,
-        )
-        st.code(query_result.query, language="text")
-        if query_result.strategy_explanation:
-            explanation = query_result.strategy_explanation
-            st.caption(f"Query strategy: {explanation[:200]}..." if len(explanation) > 200 else f"Query strategy: {explanation}")
-        status.update(label="Query constructed", state="complete")
-
-    # Phase 3: PubMed fetch + NER
-    with st.status("Phase 3: Fetching papers and annotations...", expanded=True) as status:
-        api_key = os.environ.get("PUBMED_API_KEY")
-        client = PubMedClient(api_key=api_key)
-
-        try:
-            # Search for PMIDs
-            pmids = await client.search(query_result.query, max_results=config.pubmed_max_results)
-            st.write(f"Found {len(pmids)} matching papers")
-
-            if pmids:
-                # Fetch abstracts
-                articles = await client.fetch_abstracts(pmids)
-                st.write(f"Fetched {len(articles)} abstracts")
-
-                # Get NER annotations
-                annotations = await client.get_pubtator_annotations(pmids)
-                st.write(f"Retrieved {len(annotations)} entity annotations")
-            else:
-                articles = []
-                annotations = []
-                st.warning("No papers found for this query")
-        finally:
-            await client.close()
-
-        status.update(label=f"Fetched {len(articles)} papers with {len(annotations)} annotations", state="complete")
-
-    if not articles:
-        st.error("No papers found. Try different seed terms or broader research focus.")
-        return None, report
-
-    # Phase 4: Parallel extraction
-    with st.status("Phase 4: Extracting relationships (this may take a minute)...", expanded=True) as status:
-        # Convert annotations list to dict
-        annotations_dict = annotations_list_to_dict(annotations)
-
-        extraction_result = await run_parallel_extraction(
-            articles=articles,
-            annotations=annotations_dict,
-            config=config,
-            report=report,
-        )
-        st.write(f"Found {len(extraction_result.cooccurrence_edges)} co-occurrences")
-        st.write(f"Extracted {len(extraction_result.llm_relationships)} LLM relationships")
-        status.update(label=f"Extraction complete: {len(extraction_result.llm_relationships)} relationships", state="complete")
-
-    # Phase 5: Merge to graph
-    with st.status("Phase 5: Building knowledge graph...", expanded=True) as status:
-        merge_result = await merge_to_knowledge_graph(
-            string_result=string_result,
-            extraction_result=extraction_result,
-            pubmed_articles=articles,
-            config=config,
-            report=report,
-            annotations=annotations_dict,
-        )
-        st.write(f"Created {merge_result.nodes_created} nodes")
-        st.write(f"Created {merge_result.edges_created} edges")
-        st.write(f"Deduplicated {merge_result.edges_deduplicated} duplicate edges")
-        status.update(label=f"Graph built: {merge_result.nodes_created} nodes, {merge_result.edges_created} edges", state="complete")
-
-    # Set graph for Q&A agent
-    set_active_graph(merge_result.graph)
-
-    # Finalize report
-    report.finalize()
-
-    return merge_result, report
 
 
 # =============================================================================
@@ -486,131 +357,75 @@ tab_research, tab_chat, tab_graph, tab_explore = st.tabs(["Research", "Chat", "G
 # =============================================================================
 
 with tab_research:
-    st.subheader("Build Knowledge Graph")
-    st.markdown("""
-    Enter seed proteins/genes to build a knowledge graph from scientific literature.
-    The pipeline will:
-    1. Expand the protein network using STRING database
-    2. Construct an optimized PubMed query
-    3. Fetch papers and extract biomedical entities
-    4. Mine relationships using co-occurrence and LLM analysis
-    5. Build a unified knowledge graph
-    """)
+    st.subheader("What would you like to investigate today?")
 
-    # Input form
-    col1, col2 = st.columns([3, 1])
-
-    with col1:
-        seed_terms = st.text_input(
-            "Seed Proteins/Genes",
-            placeholder="e.g., HCRTR1, HCRTR2, orexin",
-            help="Enter protein names or gene symbols separated by commas"
-        )
-
-    with col2:
-        max_papers = st.number_input(
-            "Max Papers",
-            min_value=10,
-            max_value=200,
-            value=50,
-            step=10,
-            help="Number of papers to fetch (default 50)"
-        )
-
-    research_focus = st.text_input(
-        "Research Focus (optional)",
-        placeholder="e.g., metabolic regulation, sleep disorders",
-        help="Describe the research context for better query construction"
+    # Single unified query input
+    user_query = st.text_area(
+        "Research Query",
+        placeholder="BRCA1 cancer",
+        help="Enter proteins/genes and research context. Examples: 'HCRTR1 HCRTR2 sleep disorders', 'TP53 DNA damage response', 'insulin diabetes signaling'",
+        height=80,
+        label_visibility="collapsed"
     )
 
-    # Query syntax help
-    with st.expander("PubMed Query Syntax Help", expanded=False):
-        st.markdown("""
-        **Boolean Operators:**
-        - `AND` - both terms required: `BRCA1 AND breast cancer`
-        - `OR` - either term: `HCRTR1 OR HCRTR2`
-        - `NOT` - exclude term: `cancer NOT lung`
-        - Parentheses for grouping: `(HCRTR1 OR HCRTR2) AND sleep`
-
-        **Field Tags:**
-        - `[Title/Abstract]` - search in title/abstract: `orexin[Title/Abstract]`
-        - `[MeSH Terms]` - MeSH vocabulary: `"breast neoplasms"[MeSH Terms]`
-        - `[pdat]` - publication date: `2020:2024[pdat]`
-
-        **Species Filter (use MeSH, NOT [Organism]):**
-        - Human studies: `humans[MeSH Terms]`
-        - Mouse studies: `mice[MeSH Terms]`
-
-        **Examples:**
-        ```
-        orexin AND humans[MeSH Terms] AND 2020:2024[pdat]
-        BRCA1 AND breast cancer AND review[pt]
-        (HCRTR1 OR HCRTR2) AND sleep disorders
-        ```
-        """)
+    # Max papers - always visible
+    max_papers = st.number_input(
+        "Max Papers",
+        min_value=100,
+        max_value=1000,
+        value=200,
+        step=100,
+        help="Number of papers to fetch from PubMed"
+    )
 
     # Build button
-    build_disabled = not seed_terms or not google_api_key
+    build_disabled = not user_query.strip() or not google_api_key
     if not google_api_key:
         st.warning("Google API Key required for pipeline execution. Set GOOGLE_API_KEY in .env file.")
 
     if st.button("Build Knowledge Graph", type="primary", use_container_width=True, disabled=build_disabled):
-        seed_list = [s.strip() for s in seed_terms.split(",") if s.strip()]
+        query_text = user_query.strip()
+        st.info(f"Building knowledge graph for: {query_text}")
 
-        if not seed_list:
-            st.error("Please enter at least one seed protein/gene.")
-        else:
-            st.info(f"Starting pipeline with seeds: {', '.join(seed_list)}")
+        try:
+            # Use the orchestrator which handles everything via LLM agents
+            from pipeline.orchestrator import KGOrchestrator
+            from pipeline.config import PipelineConfig
+            from agent.graph_agent import set_active_graph
 
-            try:
-                merge_result, report = run_async(run_pipeline(
-                    seed_terms=seed_list,
-                    max_papers=max_papers,
-                    research_focus=research_focus if research_focus else None,
+            config = PipelineConfig(
+                pubmed_max_results=max_papers,
+                langfuse_session_id=str(uuid.uuid4()),
+            )
+
+            with st.spinner("Building knowledge graph...", show_time=True):
+                orchestrator = KGOrchestrator(config=config)
+                graph = run_async(orchestrator.build(
+                    user_query=query_text,
+                    max_articles=max_papers,
                 ))
 
-                if merge_result:
-                    # Store in session state
-                    st.session_state.knowledge_graph = merge_result.graph
-                    st.session_state.pipeline_report = report
+                # Set graph for Q&A agent
+                set_active_graph(graph)
 
-                    # Clear agent manager to reinitialize with new graph
-                    if "agent_manager" in st.session_state:
-                        del st.session_state.agent_manager
+            # Store in session state
+            st.session_state.knowledge_graph = graph
 
-                    st.success(f"Knowledge graph built successfully!")
+            # Clear agent manager to reinitialize with new graph
+            if "agent_manager" in st.session_state:
+                del st.session_state.agent_manager
 
-                    # Show summary
-                    st.subheader("Pipeline Summary")
-                    st.text(report.summary_text())
+            # Show summary
+            summary = graph.to_summary()
+            st.success(f"Knowledge graph built: {summary.get('node_count', 0)} nodes, {summary.get('edge_count', 0)} edges")
+            st.info("Navigate to the **Chat** tab to query your knowledge graph!")
 
-                    # Show token usage
-                    with st.expander("Token Usage & Cost"):
-                        report_dict = report.to_dict()
-                        if "phase_metrics" in report_dict:
-                            st.json(report_dict["phase_metrics"])
+        except Exception as e:
+            st.error(f"Pipeline failed: {str(e)}")
+            import traceback
+            with st.expander("Error Details"):
+                st.code(traceback.format_exc())
 
-                        if "total_cost" in report_dict:
-                            st.metric("Total Estimated Cost", f"${report_dict['total_cost']:.4f}")
-
-                    st.info("Navigate to the **Chat** tab to query your knowledge graph!")
-
-            except Exception as e:
-                st.error(f"Pipeline failed: {str(e)}")
-                import traceback
-                with st.expander("Error Details"):
-                    st.code(traceback.format_exc())
-
-    # Show existing graph summary if available
-    if "pipeline_report" in st.session_state:
-        st.divider()
-        st.subheader("Last Pipeline Run")
-        st.text(st.session_state.pipeline_report.summary_text())
-
-        with st.expander("Detailed Metrics"):
-            report_dict = st.session_state.pipeline_report.to_dict()
-            if "phase_metrics" in report_dict:
-                st.json(report_dict["phase_metrics"])
 
 
 # =============================================================================

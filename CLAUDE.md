@@ -92,6 +92,9 @@ tetra_v1/
 
 ## Critical Patterns
 
+### 0. Reusable Scripts
+Use re-usable & parameterized scripts. If they do not already exist, write them or modify existing ones. Do not write inline python on the command line unless doing ad hoc data processing (e.g., parsing JSON from an API call).
+
 ### 1. Async/Await Everywhere
 All I/O operations must be non-blocking:
 ```python

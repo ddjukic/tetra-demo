@@ -63,6 +63,11 @@ class PipelineConfig:
     ml_min_score: float = 0.7
     ml_max_predictions: int = 20
 
+    # Graph persistence settings
+    save_graph: bool = True  # Save graphs to disk after building
+    graph_output_dir: str = "graphs"  # Directory for saved graphs
+    graph_format: str = "graphml"  # Format: graphml, pickle, or json
+
     # Observability settings
     langfuse_enabled: bool = True
     langfuse_session_id: str | None = None
@@ -88,6 +93,9 @@ class PipelineConfig:
             "mining_model": self.mining_model,
             "ml_min_score": self.ml_min_score,
             "ml_max_predictions": self.ml_max_predictions,
+            "save_graph": self.save_graph,
+            "graph_output_dir": self.graph_output_dir,
+            "graph_format": self.graph_format,
             "langfuse_enabled": self.langfuse_enabled,
             "langfuse_session_id": self.langfuse_session_id,
         }
@@ -124,6 +132,9 @@ class PipelineConfig:
             "mining_model",
             "ml_min_score",
             "ml_max_predictions",
+            "save_graph",
+            "graph_output_dir",
+            "graph_format",
             "langfuse_enabled",
             "langfuse_session_id",
         }
@@ -198,6 +209,9 @@ class PipelineConfig:
             mining_model=os.environ.get("TETRA_MINING_MODEL", "gemini-2.0-flash-exp"),
             ml_min_score=get_float("TETRA_ML_MIN_SCORE", 0.7),
             ml_max_predictions=get_int("TETRA_ML_MAX_PREDICTIONS", 20),
+            save_graph=get_bool("TETRA_SAVE_GRAPH", True),
+            graph_output_dir=os.environ.get("TETRA_GRAPH_OUTPUT_DIR", "graphs"),
+            graph_format=os.environ.get("TETRA_GRAPH_FORMAT", "graphml"),
             langfuse_enabled=get_bool("TETRA_LANGFUSE_ENABLED", True),
             langfuse_session_id=get_str_or_none("TETRA_LANGFUSE_SESSION_ID", None),
         )
@@ -228,6 +242,9 @@ class PipelineConfig:
             mining_model=self.mining_model,
             ml_min_score=self.ml_min_score,
             ml_max_predictions=self.ml_max_predictions,
+            save_graph=self.save_graph,
+            graph_output_dir=self.graph_output_dir,
+            graph_format=self.graph_format,
             langfuse_enabled=self.langfuse_enabled,
             langfuse_session_id=session_id or str(uuid.uuid4()),
         )
@@ -243,6 +260,7 @@ class PipelineConfig:
             f"  Mining: concurrent={self.mining_max_concurrent}, retries={self.mining_max_retries}, "
             f"model={self.mining_model}\n"
             f"  ML: min_score={self.ml_min_score}, max_predictions={self.ml_max_predictions}\n"
+            f"  Graph: save={self.save_graph}, output_dir={self.graph_output_dir}, format={self.graph_format}\n"
             f"  Langfuse: enabled={self.langfuse_enabled}, session={self.langfuse_session_id}\n"
             f")"
         )
