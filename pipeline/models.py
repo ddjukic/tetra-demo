@@ -187,6 +187,25 @@ class PipelineInput:
 
 
 @dataclass
+class GraphStatistics:
+    """Statistics for a knowledge graph (before/after pruning)."""
+
+    node_count: int = 0
+    edge_count: int = 0
+    component_count: int = 0
+    relationship_types: dict[str, int] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary."""
+        return {
+            "node_count": self.node_count,
+            "edge_count": self.edge_count,
+            "component_count": self.component_count,
+            "relationship_types": self.relationship_types,
+        }
+
+
+@dataclass
 class PipelineResult:
     """
     Result from the KGPipeline processing.
@@ -201,6 +220,12 @@ class PipelineResult:
     processing_time_ms: float = 0.0
     mining_statistics: dict[str, Any] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
+
+    # Before/after pruning statistics
+    stats_before_pruning: GraphStatistics = field(default_factory=GraphStatistics)
+    stats_after_pruning: GraphStatistics = field(default_factory=GraphStatistics)
+    nodes_pruned: int = 0
+    edges_pruned: int = 0
 
     @property
     def success(self) -> bool:
@@ -219,4 +244,9 @@ class PipelineResult:
             "processing_time_ms": self.processing_time_ms,
             "mining_statistics": self.mining_statistics,
             "errors": self.errors,
+            # Pruning statistics
+            "before_pruning": self.stats_before_pruning.to_dict(),
+            "after_pruning": self.stats_after_pruning.to_dict(),
+            "nodes_pruned": self.nodes_pruned,
+            "edges_pruned": self.edges_pruned,
         }

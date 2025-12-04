@@ -22,7 +22,7 @@ from models.knowledge_graph import (
     EvidenceSource,
     EntityType,
 )
-from pipeline.models import PipelineInput, PipelineResult
+from pipeline.models import PipelineInput, PipelineResult, GraphStatistics
 
 logger = logging.getLogger(__name__)
 
@@ -113,28 +113,49 @@ class KGPipeline:
             f"from {mining_stats.get('total_relationships', 0)} total"
         )
 
-        # Step 2: Build knowledge graph
-        graph = self._build_graph(
+        # Step 2: Build knowledge graph (full, with co-occurrence edges)
+        full_graph = self._build_graph(
             string_interactions=input_data.string_interactions,
             literature_relationships=relationships,
             annotations_by_pmid=input_data.annotations,
         )
 
+        # Step 3: Compute stats before pruning
+        stats_before = self._compute_graph_stats(full_graph)
+        logger.info(
+            f"Graph before pruning: {stats_before.node_count} nodes, "
+            f"{stats_before.edge_count} edges, {stats_before.component_count} components"
+        )
+
+        # Step 4: Prune co-occurrence-only nodes
+        pruned_graph = self._prune_cooccurrence_only_nodes(full_graph)
+
+        # Step 5: Compute stats after pruning
+        stats_after = self._compute_graph_stats(pruned_graph)
+
+        nodes_pruned = stats_before.node_count - stats_after.node_count
+        edges_pruned = stats_before.edge_count - stats_after.edge_count
+
         processing_time_ms = (time.time() - start_time) * 1000
 
         logger.info(
-            f"KGPipeline complete: {graph.to_summary()['node_count']} nodes, "
-            f"{graph.to_summary()['edge_count']} edges in {processing_time_ms:.0f}ms"
+            f"KGPipeline complete: {stats_after.node_count} nodes, "
+            f"{stats_after.edge_count} edges (pruned {nodes_pruned} nodes, "
+            f"{edges_pruned} edges) in {processing_time_ms:.0f}ms"
         )
 
         return PipelineResult(
-            graph=graph,
+            graph=pruned_graph,
             relationships_extracted=mining_stats.get("total_relationships", 0),
             relationships_valid=len(relationships),
-            entities_found=graph.to_summary().get("node_count", 0),
+            entities_found=stats_after.node_count,
             processing_time_ms=processing_time_ms,
             mining_statistics=mining_stats,
             errors=errors,
+            stats_before_pruning=stats_before,
+            stats_after_pruning=stats_after,
+            nodes_pruned=nodes_pruned,
+            edges_pruned=edges_pruned,
         )
 
     async def _extract_relationships(
@@ -296,6 +317,105 @@ class KGPipeline:
                 )
 
         return graph
+
+    def _compute_graph_stats(self, graph: KnowledgeGraph) -> GraphStatistics:
+        """Compute statistics for a graph."""
+        import networkx as nx
+
+        summary = graph.to_summary()
+        rel_types = summary.get("relationship_types", {})
+
+        # Count connected components
+        try:
+            component_count = nx.number_connected_components(graph.graph.to_undirected())
+        except Exception:
+            component_count = 0
+
+        return GraphStatistics(
+            node_count=summary.get("node_count", 0),
+            edge_count=summary.get("edge_count", 0),
+            component_count=component_count,
+            relationship_types=rel_types,
+        )
+
+    def _prune_cooccurrence_only_nodes(
+        self,
+        graph: KnowledgeGraph,
+    ) -> KnowledgeGraph:
+        """
+        Prune nodes that are only connected via co-occurrence edges.
+
+        Keeps nodes that have at least one typed relationship (activates,
+        inhibits, associated_with, regulates, binds_to, interacts_with).
+
+        Args:
+            graph: Original KnowledgeGraph.
+
+        Returns:
+            Pruned KnowledgeGraph with only nodes having typed relationships.
+        """
+        import networkx as nx
+
+        # Typed relationship types (not co-occurrence)
+        typed_rel_types = {
+            RelationshipType.ACTIVATES.value,
+            RelationshipType.INHIBITS.value,
+            RelationshipType.ASSOCIATED_WITH.value,
+            RelationshipType.REGULATES.value,
+            RelationshipType.BINDS_TO.value,
+            RelationshipType.INTERACTS_WITH.value,
+        }
+
+        # Find nodes with at least one typed edge
+        nodes_with_typed_edges = set()
+        for u, v, data in graph.graph.edges(data=True):
+            # Check both "relation_type" (how it's stored) and "rel_type" (fallback)
+            rel_type = data.get("relation_type", data.get("rel_type", ""))
+            if rel_type in typed_rel_types:
+                nodes_with_typed_edges.add(u)
+                nodes_with_typed_edges.add(v)
+
+        # Create pruned graph
+        pruned = KnowledgeGraph()
+
+        # Add only nodes with typed edges
+        for node_id in nodes_with_typed_edges:
+            if node_id in graph.graph.nodes:
+                node_data = graph.graph.nodes[node_id]
+                pruned.add_entity(
+                    entity_id=node_id,
+                    entity_type=node_data.get("entity_type", "unknown"),
+                    name=node_data.get("name", node_id),
+                    entity_ncbi_id=node_data.get("entity_ncbi_id", ""),
+                )
+
+        # Add only typed edges between kept nodes
+        for u, v, data in graph.graph.edges(data=True):
+            rel_type = data.get("relation_type", data.get("rel_type", ""))
+            if (
+                u in nodes_with_typed_edges
+                and v in nodes_with_typed_edges
+                and rel_type in typed_rel_types
+            ):
+                # Convert rel_type string back to enum
+                try:
+                    rel_enum = RelationshipType(rel_type)
+                except ValueError:
+                    rel_enum = RelationshipType.ASSOCIATED_WITH
+
+                pruned.add_relationship(
+                    source=u,
+                    target=v,
+                    rel_type=rel_enum,
+                    evidence=data.get("evidence", []),
+                )
+
+        logger.info(
+            f"Pruning: {graph.to_summary()['node_count']} → {pruned.to_summary()['node_count']} nodes, "
+            f"{graph.to_summary()['edge_count']} → {pruned.to_summary()['edge_count']} edges"
+        )
+
+        return pruned
 
 
 async def run_kg_pipeline(

@@ -210,12 +210,21 @@ class DataFetchAgent:
             if protein_query:
                 terms.append(f"({protein_query})")
 
-        # Construct final query
+        # Build base query from terms or use user query
         if not terms:
-            # Fallback: use the user query directly
-            return user_query
+            base_query = user_query
+        else:
+            # For PubMed, simpler queries work better
+            # Just use the topic term, not the gene filters (those are too restrictive)
+            topic_terms = [t for t in terms if not t.startswith("(")]
+            if topic_terms:
+                base_query = " AND ".join(topic_terms)
+            else:
+                base_query = terms[0] if terms else user_query
 
-        query = " AND ".join(terms)
+        # Add filters for homo sapiens and recent articles (2020+)
+        # Use MeSH Terms for species (per PubMed docs) and [pdat] for publication date
+        query = f'({base_query}) AND humans[MeSH Terms] AND 2020:2025[pdat]'
         self._current_input.pubmed_query = query
         return query
 
