@@ -42,6 +42,69 @@ def _normalize_for_lookup(text: str) -> str:
     return text.lower().strip().replace("-", "").replace(" ", "").replace("_", "")
 
 
+# Entity synonym mapping for canonicalization
+# Maps variant names to their canonical (STRING/official) form
+# This merges entities that are the same but appear under different names
+_ENTITY_SYNONYMS: dict[str, str] = {
+    # Orexin receptors
+    "ox1r": "HCRTR1",
+    "ox-1r": "HCRTR1",
+    "ox 1r": "HCRTR1",
+    "orexin receptor 1": "HCRTR1",
+    "orexin receptor type 1": "HCRTR1",
+    "orexin-1 receptor": "HCRTR1",
+    "hcrtr-1": "HCRTR1",
+    "ox2r": "HCRTR2",
+    "ox-2r": "HCRTR2",
+    "ox 2r": "HCRTR2",
+    "orexin receptor 2": "HCRTR2",
+    "orexin receptor type 2": "HCRTR2",
+    "orexin-2 receptor": "HCRTR2",
+    "hcrtr-2": "HCRTR2",
+    # Orexin/Hypocretin
+    "orexin": "HCRT",
+    "orexins": "HCRT",
+    "orexin a": "HCRT",
+    "orexin b": "HCRT",
+    "orexin-a": "HCRT",
+    "orexin-b": "HCRT",
+    "hypocretin": "HCRT",
+    "hypocretins": "HCRT",
+    "hcrt/orexin": "HCRT",
+    "orexin/hcrt": "HCRT",
+    "prepro-orexin": "HCRT",
+    "preproorexin": "HCRT",
+    "hcrt": "HCRT",
+}
+
+
+def _canonicalize_entity(name: str) -> str:
+    """
+    Canonicalize entity name to merge synonyms.
+
+    Maps variant names (OX1R, Orexin, etc.) to their canonical form
+    (HCRTR1, HCRT) to ensure the same entity isn't duplicated in the graph.
+
+    Args:
+        name: Entity name from any source (STRING, PubTator, LLM extraction)
+
+    Returns:
+        Canonical entity name, or original name if no synonym mapping exists.
+    """
+    # Normalize for lookup
+    normalized = name.lower().strip().replace("-", " ").replace("_", " ")
+    normalized_no_space = normalized.replace(" ", "")
+
+    # Check both forms against synonym map
+    if normalized_no_space in _ENTITY_SYNONYMS:
+        return _ENTITY_SYNONYMS[normalized_no_space]
+    if normalized in _ENTITY_SYNONYMS:
+        return _ENTITY_SYNONYMS[normalized]
+
+    # If no synonym found, preserve original case
+    return name
+
+
 class KGPipeline:
     """
     Pure Python async pipeline for knowledge graph construction.
@@ -239,7 +302,7 @@ class KGPipeline:
 
         # Build entity type lookup from PubTator annotations for later use
         # Store multiple variants to handle LLM output variations:
-        # - Original text
+        # - Original text (and its canonical form)
         # - Lowercase
         # - Uppercase
         # - Normalized (no hyphens, spaces, underscores)
@@ -257,9 +320,15 @@ class KGPipeline:
                     normalized = _normalize_for_lookup(entity_text)
                     if normalized:
                         pubtator_types[normalized] = entity_type
+                    # Store canonical form for synonym lookup
+                    canonical = _canonicalize_entity(entity_text)
+                    if canonical != entity_text:
+                        pubtator_types[canonical] = entity_type
+                        pubtator_types[canonical.lower()] = entity_type
 
-        # 1. Add ALL entities from PubTator NER annotations
+        # 1. Add ALL entities from PubTator NER annotations (with canonicalization)
         entity_to_pmids: dict[str, set[str]] = {}
+        canonicalized_count = 0
         for pmid, annotations in annotations_by_pmid.items():
             for ann in annotations:
                 entity_text = ann.get("entity_text", "")
@@ -267,21 +336,27 @@ class KGPipeline:
                 entity_ncbi_id = ann.get("entity_id", "")
 
                 if entity_text:
+                    # Canonicalize entity name to merge synonyms
+                    canonical_name = _canonicalize_entity(entity_text)
+                    if canonical_name != entity_text:
+                        canonicalized_count += 1
+
                     graph.add_entity(
-                        entity_id=entity_text,
+                        entity_id=canonical_name,
                         entity_type=entity_type,
-                        name=entity_text,
+                        name=canonical_name,
                         entity_ncbi_id=entity_ncbi_id,
                     )
-                    # Track PMIDs for co-occurrence
-                    if entity_text not in entity_to_pmids:
-                        entity_to_pmids[entity_text] = set()
-                    entity_to_pmids[entity_text].add(pmid)
+                    # Track PMIDs for co-occurrence (use canonical name)
+                    if canonical_name not in entity_to_pmids:
+                        entity_to_pmids[canonical_name] = set()
+                    entity_to_pmids[canonical_name].add(pmid)
 
-        # 2. Create co-occurrence edges (entities in same PMID)
+        # 2. Create co-occurrence edges (entities in same PMID) - use canonical names
         for pmid, annotations in annotations_by_pmid.items():
+            # Canonicalize all entity names in this PMID
             entities_in_pmid = list(set(
-                ann.get("entity_text", "")
+                _canonicalize_entity(ann.get("entity_text", ""))
                 for ann in annotations if ann.get("entity_text")
             ))
             # Create edges between all pairs of entities in same PMID
@@ -323,33 +398,37 @@ class KGPipeline:
                     }],
                 )
 
-        # 4. Add typed literature relationships (enrich/override co-occurrence)
+        # 4. Add typed literature relationships (enrich/override co-occurrence) - canonicalize names
         for rel in literature_relationships:
-            entity1 = rel.get("entity1", "")
-            entity2 = rel.get("entity2", "")
+            raw_entity1 = rel.get("entity1", "")
+            raw_entity2 = rel.get("entity2", "")
             rel_type_str = rel.get("relationship", "associated_with")
             confidence = rel.get("confidence", 0.5)
             pmid = rel.get("pmid", "")
             evidence_text = rel.get("evidence_text", "")
 
-            if entity1 and entity2:
+            if raw_entity1 and raw_entity2:
+                # Canonicalize entity names to merge synonyms
+                entity1 = _canonicalize_entity(raw_entity1)
+                entity2 = _canonicalize_entity(raw_entity2)
+
                 # Look up entity types from PubTator with fallback chain:
-                # 1. Exact match
-                # 2. Lowercase match
-                # 3. Uppercase match
+                # 1. Canonical form
+                # 2. Exact match (original)
+                # 3. Lowercase match
                 # 4. Normalized match (removes hyphens, spaces, underscores)
                 e1_type = (
                     pubtator_types.get(entity1)
-                    or pubtator_types.get(entity1.lower())
-                    or pubtator_types.get(entity1.upper())
-                    or pubtator_types.get(_normalize_for_lookup(entity1))
+                    or pubtator_types.get(raw_entity1)
+                    or pubtator_types.get(raw_entity1.lower())
+                    or pubtator_types.get(_normalize_for_lookup(raw_entity1))
                     or "unknown"
                 )
                 e2_type = (
                     pubtator_types.get(entity2)
-                    or pubtator_types.get(entity2.lower())
-                    or pubtator_types.get(entity2.upper())
-                    or pubtator_types.get(_normalize_for_lookup(entity2))
+                    or pubtator_types.get(raw_entity2)
+                    or pubtator_types.get(raw_entity2.lower())
+                    or pubtator_types.get(_normalize_for_lookup(raw_entity2))
                     or "unknown"
                 )
 
@@ -432,6 +511,13 @@ class KGPipeline:
             logger.info(
                 f"Entity type enrichment: resolved {unknown_count_before - unknown_count_after} "
                 f"unknown types ({unknown_count_before} -> {unknown_count_after})"
+            )
+
+        # Log canonicalization stats
+        if canonicalized_count > 0:
+            logger.info(
+                f"Entity canonicalization: merged {canonicalized_count} synonym occurrences "
+                f"into canonical forms (e.g., OX1R->HCRTR1, Orexin->HCRT)"
             )
 
         return graph
