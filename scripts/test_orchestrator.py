@@ -103,6 +103,7 @@ async def run_direct_pipeline_test(query: str, max_articles: int) -> dict:
     """
     from agent.data_fetch_agent import DataFetchAgent
     from pipeline.kg_pipeline import KGPipeline
+    from pipeline.config import PipelineConfig
 
     print(f"\n{'='*60}")
     print(f"Direct Pipeline Test (with pruning stats)")
@@ -113,9 +114,10 @@ async def run_direct_pipeline_test(query: str, max_articles: int) -> dict:
 
     start_time = time.time()
 
-    # Step 1: Fetch data
-    print("[1] Fetching data with DataFetchAgent...")
-    fetch_agent = DataFetchAgent()
+    # Step 1: Fetch data with STRING extension enabled
+    config = PipelineConfig(string_extend_network=10)
+    print(f"[1] Fetching data with DataFetchAgent (string_extend_network={config.string_extend_network})...")
+    fetch_agent = DataFetchAgent(config=config)
     pipeline_input = await fetch_agent.fetch(
         user_query=query,
         max_articles=max_articles,

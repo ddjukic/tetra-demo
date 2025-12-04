@@ -169,65 +169,69 @@ class DataFetchAgent:
         """
         Construct an optimal PubMed query.
 
-        Uses information from STRING network and user query.
-        In a full implementation, this would use the LLM for optimization.
+        Uses expanded proteins from STRING network plus topic terms.
+        Strategy: (topic_terms) OR (gene1 OR gene2 OR ...) to find articles
+        that mention ANY of our proteins of interest.
         """
+        import re
         query_lower = user_query.lower()
 
-        # Extract key terms from user query
-        terms = []
-
-        # Add pathway/topic terms
-        topic_keywords = [
-            "signaling", "pathway", "mechanism", "interaction",
-            "regulation", "expression", "function", "role"
-        ]
-        for keyword in topic_keywords:
-            if keyword in query_lower:
-                terms.append(keyword)
-
-        # Add disease terms if mentioned
-        disease_terms = [
-            "cancer", "diabetes", "alzheimer", "parkinson",
-            "obesity", "inflammation", "infection"
-        ]
-        for disease in disease_terms:
-            if disease in query_lower:
-                terms.append(disease)
-
-        # Extract main topic
-        # Simple approach: find the first noun phrase
-        import re
-        # Find "for the X" or "about X" patterns
-        topic_match = re.search(r'(?:for|about|of)\s+(?:the\s+)?(\w+(?:\s+\w+)?)', query_lower)
+        # Extract topic term (e.g., "orexin" from "orexin signaling pathway")
+        topic_term = None
+        topic_match = re.search(r'(?:for|about|of)\s+(?:the\s+)?(\w+)', query_lower)
         if topic_match:
             topic = topic_match.group(1).strip()
-            if topic not in ['the', 'a', 'an']:
-                terms.insert(0, topic)
+            if topic not in ['the', 'a', 'an', 'build', 'create', 'make']:
+                topic_term = topic
 
-        # Add proteins from STRING network
+        # Build gene query from expanded STRING proteins
+        # Prioritize original seeds, then add discovered proteins
+        # Keep query short to avoid 414 URI Too Long errors
+        gene_query = None
+        max_genes_in_query = 8  # PubMed has URL length limits
+
         if self._current_input and self._current_input.seed_proteins:
-            # Add seed proteins to query
-            protein_query = " OR ".join(
-                f'"{p}"[Gene Name]' for p in self._current_input.seed_proteins[:3]
-            )
-            if protein_query:
-                terms.append(f"({protein_query})")
+            # Get original seeds from metadata (if available)
+            original_seeds = set()
+            if "string_extension" in self._current_input.metadata:
+                original_seeds = set(
+                    self._current_input.metadata["string_extension"].get("original_seeds", [])
+                )
 
-        # Build base query from terms or use user query
-        if not terms:
-            base_query = user_query
-        else:
-            # For PubMed, simpler queries work better
-            # Just use the topic term, not the gene filters (those are too restrictive)
-            topic_terms = [t for t in terms if not t.startswith("(")]
-            if topic_terms:
-                base_query = " AND ".join(topic_terms)
+            # Prioritize: original seeds first, then discovered proteins
+            all_proteins = self._current_input.seed_proteins
+            if original_seeds:
+                # Put original seeds first
+                priority_proteins = [p for p in all_proteins if p in original_seeds]
+                other_proteins = [p for p in all_proteins if p not in original_seeds]
+                proteins = priority_proteins + other_proteins
             else:
-                base_query = terms[0] if terms else user_query
+                proteins = all_proteins
+
+            proteins = proteins[:max_genes_in_query]
+            if proteins:
+                # Use [tiab] (title/abstract) for gene names - more flexible than [Gene Name]
+                gene_terms = [f'"{p}"[tiab]' for p in proteins]
+                gene_query = " OR ".join(gene_terms)
+                logger.info(
+                    f"PubMed query using {len(proteins)} proteins: {proteins}"
+                )
+
+        # Construct query: (topic OR genes) to maximize article retrieval
+        # Articles matching EITHER the topic OR mentioning any of our proteins
+        query_parts = []
+        if topic_term:
+            query_parts.append(f'"{topic_term}"[tiab]')
+        if gene_query:
+            query_parts.append(f"({gene_query})")
+
+        if query_parts:
+            base_query = " OR ".join(query_parts)
+        else:
+            # Fallback to user query if we couldn't extract anything
+            base_query = user_query
 
         # Add filters for homo sapiens and recent articles (2020+)
-        # Use MeSH Terms for species (per PubMed docs) and [pdat] for publication date
         query = f'({base_query}) AND humans[MeSH Terms] AND 2020:2025[pdat]'
         self._current_input.pubmed_query = query
         return query

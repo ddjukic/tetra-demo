@@ -91,7 +91,8 @@ class PubMedClient:
             return []
 
         url = f"{self.EUTILS_BASE}/esearch.fcgi"
-        params = {
+        # Use POST for long queries to avoid 414 URI Too Long errors
+        data_payload = {
             **self._eutils_params(),
             "db": "pubmed",
             "term": query,
@@ -101,7 +102,8 @@ class PubMedClient:
         }
 
         try:
-            response = await self._client.get(url, params=params)
+            # POST allows longer queries than GET
+            response = await self._client.post(url, data=data_payload)
             response.raise_for_status()
             data = response.json()
 
@@ -142,7 +144,8 @@ class PubMedClient:
             return []
 
         url = f"{self.EUTILS_BASE}/efetch.fcgi"
-        params = {
+        # Use POST to avoid 414 URI Too Long errors with many PMIDs
+        data_payload = {
             **self._eutils_params(),
             "db": "pubmed",
             "id": ",".join(pmids),
@@ -151,7 +154,8 @@ class PubMedClient:
         }
 
         try:
-            response = await self._client.get(url, params=params)
+            # POST allows longer PMID lists than GET
+            response = await self._client.post(url, data=data_payload)
             response.raise_for_status()
 
             # Parse XML response
