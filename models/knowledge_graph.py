@@ -317,7 +317,7 @@ class KnowledgeGraph:
 
         return neighbors[:max_neighbors]
 
-    def get_novel_predictions(self, min_ml_score: float = 0.7) -> list[dict[str, Any]]:
+    def get_novel_predictions(self, min_ml_score: float = 0.5) -> list[dict[str, Any]]:
         """
         Get ML-predicted edges with no literature support.
 
@@ -336,6 +336,9 @@ class KnowledgeGraph:
                 continue
             # Handle string ml_score (from GraphML load)
             if isinstance(ml_score, str):
+                # Skip 'None' strings
+                if ml_score == 'None' or ml_score == 'null':
+                    continue
                 try:
                     ml_score = float(ml_score)
                 except ValueError:
@@ -363,6 +366,50 @@ class KnowledgeGraph:
         novel.sort(key=lambda x: x.get("ml_score", 0), reverse=True)
 
         return novel
+
+    def get_all_ml_predictions(self, min_ml_score: float = 0.5) -> list[dict[str, Any]]:
+        """
+        Get ALL ML predictions above threshold, regardless of literature support.
+
+        Unlike get_novel_predictions(), this returns predictions that may also
+        have literature evidence. Useful for seeing all ML-scored relationships.
+
+        Args:
+            min_ml_score: Minimum ML prediction score to include (default: 0.5)
+
+        Returns:
+            List of relationship dictionaries for all ML predictions, sorted by ml_score descending.
+        """
+        predictions = []
+        for rel_key, data in self.relationships.items():
+            ml_score = data.get("ml_score")
+            if ml_score is None:
+                continue
+            # Handle string ml_score (from GraphML load)
+            if isinstance(ml_score, str):
+                # Skip 'None' strings
+                if ml_score == 'None' or ml_score == 'null':
+                    continue
+                try:
+                    ml_score = float(ml_score)
+                except ValueError:
+                    continue
+            if ml_score < min_ml_score:
+                continue
+
+            predictions.append({
+                "source": rel_key[0],
+                "target": rel_key[1],
+                "relation_type": rel_key[2],
+                "ml_score": ml_score,
+                "evidence": data.get("evidence", []),
+                **{k: v for k, v in data.items() if k not in ["source", "target", "relation_type", "ml_score", "evidence"]}
+            })
+
+        # Sort by ml_score descending
+        predictions.sort(key=lambda x: x.get("ml_score", 0), reverse=True)
+
+        return predictions
 
     def to_summary(self) -> dict[str, Any]:
         """
@@ -541,6 +588,10 @@ class KnowledgeGraph:
                 parsed_attrs = {}
                 for k, val in attrs.items():
                     if isinstance(val, str):
+                        # Handle 'None' string -> Python None
+                        if val == 'None' or val == 'null':
+                            parsed_attrs[k] = None
+                            continue
                         # Try parsing as JSON array first
                         if val.startswith("["):
                             try:

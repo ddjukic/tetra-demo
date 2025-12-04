@@ -400,7 +400,7 @@ with tab_research:
 
             with st.spinner("Building knowledge graph...", show_time=True):
                 orchestrator = KGOrchestrator(config=config)
-                graph = run_async(orchestrator.build(
+                graph, pipeline_input = run_async(orchestrator.build(
                     user_query=query_text,
                     max_articles=max_papers,
                 ))
@@ -420,12 +420,50 @@ with tab_research:
             st.success(f"Knowledge graph built: {summary.get('node_count', 0)} nodes, {summary.get('edge_count', 0)} edges")
             st.info("Navigate to the **Chat** tab to query your knowledge graph!")
 
-            # Build details accordion
-            with st.expander("Build Details", expanded=False):
-                st.markdown(f"**Query:** {query_text}")
-                st.markdown(f"**Max Papers:** {max_papers}")
+            # Build details accordion - chronological pipeline execution
+            with st.expander("Build Details", expanded=True):
+                # 1. STRING Network
+                st.subheader("1. STRING Network")
+                if pipeline_input and pipeline_input.metadata and "string_extension" in pipeline_input.metadata:
+                    ext = pipeline_input.metadata["string_extension"]
+                    st.write(f"**Seed Proteins:** {', '.join(ext.get('original_seeds', []))}")
+                    st.write(f"**Network Extension:** {ext.get('extend_network', 0)} hops")
+                    st.write(f"**Proteins Found:** {ext.get('expanded_proteins', 0)}")
+                    st.write(f"**Interactions Found:** {ext.get('total_interactions', 0)}")
+                elif pipeline_input and pipeline_input.seed_proteins:
+                    st.write(f"**Seed Proteins:** {', '.join(pipeline_input.seed_proteins)}")
+                    st.write(f"**Interactions Found:** {len(pipeline_input.string_interactions)}")
+                else:
+                    st.write("No STRING network data available")
 
                 st.divider()
+
+                # 2. PubMed Search
+                st.subheader("2. PubMed Search")
+                if pipeline_input and pipeline_input.pubmed_query:
+                    st.code(pipeline_input.pubmed_query, language=None)
+                else:
+                    st.write("No PubMed query available")
+
+                papers_count = len(pipeline_input.articles) if pipeline_input else 0
+                st.write(f"**Papers Fetched:** {papers_count}")
+
+                # 3. Papers List (collapsible)
+                if pipeline_input and pipeline_input.articles:
+                    with st.expander(f"View {len(pipeline_input.articles)} Papers"):
+                        for article in pipeline_input.articles[:20]:  # Show first 20
+                            pmid = article.get('pmid', '')
+                            title = article.get('title', 'No title')
+                            year = article.get('year', '')
+                            title_display = title[:80] + "..." if len(title) > 80 else title
+                            st.markdown(f"- **[PMID:{pmid}](https://pubmed.ncbi.nlm.nih.gov/{pmid})** ({year}): {title_display}")
+                        if len(pipeline_input.articles) > 20:
+                            st.caption(f"... and {len(pipeline_input.articles) - 20} more papers")
+
+                st.divider()
+
+                # 4. Graph Statistics (existing functionality)
+                st.subheader("3. Graph Statistics")
 
                 # Entity types breakdown
                 entity_types = summary.get("entity_types", {})

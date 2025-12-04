@@ -388,7 +388,7 @@ def detect_communities(tool_context: ToolContext = None) -> dict:
 
 
 def predict_novel_links(
-    min_ml_score: float = 0.7,
+    min_ml_score: float = 0.5,
     max_predictions: int = 20,
     tool_context: ToolContext = None,
 ) -> dict:

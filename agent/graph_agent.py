@@ -709,7 +709,7 @@ def analyze_robustness(
 @requires_graph
 def get_predictions(
     tool_context: ToolContext,
-    min_score: float = 0.7
+    min_score: float = 0.5
 ) -> dict[str, Any]:
     """
     Get ML link predictions above a confidence threshold.

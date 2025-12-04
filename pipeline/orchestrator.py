@@ -112,7 +112,7 @@ class KGOrchestrator:
         self,
         user_query: str,
         max_articles: int = 50,
-    ) -> KnowledgeGraph:
+    ) -> tuple[KnowledgeGraph, PipelineInput]:
         """
         Build a new knowledge graph from a user query.
 
@@ -127,7 +127,8 @@ class KGOrchestrator:
             max_articles: Maximum number of articles to fetch.
 
         Returns:
-            Built KnowledgeGraph.
+            Tuple of (KnowledgeGraph, PipelineInput) containing the built graph
+            and accumulated pipeline input data for display purposes.
         """
         logger.info(f"KGOrchestrator.build: {user_query}")
 
@@ -159,7 +160,7 @@ class KGOrchestrator:
             saved_path = self._save_graph(user_query)
             logger.info(f"Graph saved to: {saved_path}")
 
-        return self._graph
+        return self._graph, self._accumulated_input
 
     async def expand(
         self,
