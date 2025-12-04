@@ -420,6 +420,47 @@ with tab_research:
             st.success(f"Knowledge graph built: {summary.get('node_count', 0)} nodes, {summary.get('edge_count', 0)} edges")
             st.info("Navigate to the **Chat** tab to query your knowledge graph!")
 
+            # Build details accordion
+            with st.expander("Build Details", expanded=False):
+                st.markdown(f"**Query:** {query_text}")
+                st.markdown(f"**Max Papers:** {max_papers}")
+
+                st.divider()
+
+                # Entity types breakdown
+                entity_types = summary.get("entity_types", {})
+                if entity_types:
+                    st.markdown("**Entity Types:**")
+                    for etype, count in sorted(entity_types.items(), key=lambda x: -x[1]):
+                        st.markdown(f"- {etype}: {count}")
+
+                # Relationship types breakdown
+                rel_types = summary.get("relationship_types", {})
+                if rel_types:
+                    st.markdown("**Relationship Types:**")
+                    for rtype, count in sorted(rel_types.items(), key=lambda x: -x[1]):
+                        st.markdown(f"- {rtype}: {count}")
+
+                st.divider()
+
+                # Evidence and ML stats
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Total Nodes", summary.get("node_count", 0))
+                col2.metric("Total Edges", summary.get("edge_count", 0))
+                col3.metric("ML Predictions", summary.get("ml_predicted_edges", 0))
+
+                # Evidence sources
+                evidence_sources = summary.get("evidence_sources", {})
+                if evidence_sources:
+                    st.markdown("**Evidence Sources:**")
+                    for source, count in sorted(evidence_sources.items(), key=lambda x: -x[1]):
+                        st.markdown(f"- {source}: {count}")
+
+                # Novel predictions
+                novel = summary.get("novel_predictions", 0)
+                if novel > 0:
+                    st.info(f"Novel predictions (ML-only, no literature evidence): {novel}")
+
         except Exception as e:
             st.error(f"Pipeline failed: {str(e)}")
             import traceback

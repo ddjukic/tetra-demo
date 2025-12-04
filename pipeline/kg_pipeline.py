@@ -219,6 +219,19 @@ class KGPipeline:
         """
         graph = KnowledgeGraph()
 
+        # Build entity type lookup from PubTator annotations for later use
+        # Store multiple case variants to handle LLM output variations
+        pubtator_types: dict[str, str] = {}
+        for pmid, annotations in annotations_by_pmid.items():
+            for ann in annotations:
+                entity_text = ann.get("entity_text", "")
+                entity_type = ann.get("entity_type", "unknown").lower()
+                if entity_text and entity_type != "unknown":
+                    # Store all case variants for robust lookup
+                    pubtator_types[entity_text] = entity_type
+                    pubtator_types[entity_text.lower()] = entity_type
+                    pubtator_types[entity_text.upper()] = entity_type
+
         # 1. Add ALL entities from PubTator NER annotations
         entity_to_pmids: dict[str, set[str]] = {}
         for pmid, annotations in annotations_by_pmid.items():
@@ -291,6 +304,27 @@ class KGPipeline:
             evidence_text = rel.get("evidence_text", "")
 
             if entity1 and entity2:
+                # Look up entity types from PubTator, fallback chain for case variations
+                e1_type = (
+                    pubtator_types.get(entity1)
+                    or pubtator_types.get(entity1.lower())
+                    or pubtator_types.get(entity1.upper())
+                    or "unknown"
+                )
+                e2_type = (
+                    pubtator_types.get(entity2)
+                    or pubtator_types.get(entity2.lower())
+                    or pubtator_types.get(entity2.upper())
+                    or "unknown"
+                )
+
+                # Pre-create entities with correct types BEFORE adding relationship
+                # This prevents add_relationship from creating them as "unknown"
+                if entity1 not in graph.entities:
+                    graph.add_entity(entity1, e1_type, entity1)
+                if entity2 not in graph.entities:
+                    graph.add_entity(entity2, e2_type, entity2)
+
                 rel_type_map = {
                     "activates": RelationshipType.ACTIVATES,
                     "inhibits": RelationshipType.INHIBITS,
