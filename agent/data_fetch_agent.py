@@ -22,6 +22,7 @@ from dotenv import load_dotenv
 
 from clients.string_client import StringClient
 from clients.pubmed_client import PubMedClient
+from pipeline.config import PipelineConfig
 from pipeline.models import PipelineInput
 
 # Load environment variables
@@ -54,6 +55,7 @@ class DataFetchAgent:
         self,
         string_client: StringClient | None = None,
         pubmed_client: PubMedClient | None = None,
+        config: PipelineConfig | None = None,
         model: str = "gemini-2.5-flash",
     ):
         """
@@ -62,12 +64,14 @@ class DataFetchAgent:
         Args:
             string_client: STRING database client. Created if not provided.
             pubmed_client: PubMed client. Created if not provided.
+            config: Pipeline configuration. Uses defaults if not provided.
             model: LLM model to use for reasoning.
         """
         self._string_client = string_client or StringClient()
         self._pubmed_client = pubmed_client or PubMedClient(
             api_key=os.getenv("NCBI_API_KEY")
         )
+        self._config = config or PipelineConfig()
         self._model = model
 
         # State for current fetch operation
@@ -231,35 +235,113 @@ class DataFetchAgent:
     async def _fetch_string_network(
         self,
         seed_proteins: list[str],
-        min_score: int = 700,
+        min_score: int | None = None,
+        extend_network: int | None = None,
     ) -> None:
         """
-        Fetch protein interactions from STRING.
+        Fetch protein interactions from STRING with optional network extension.
+
+        This method implements a "wider network" strategy:
+        1. First, get interaction partners to discover related proteins
+        2. Then, get the extended network with add_nodes to fill connections
+        3. Combine all unique interactions
+
+        This creates a richer network with more diversity, including G-proteins,
+        arrestins, and other related signaling proteins.
 
         Args:
             seed_proteins: List of protein/gene names.
-            min_score: Minimum interaction confidence score.
+            min_score: Minimum interaction confidence score. Defaults to config.
+            extend_network: Number of additional proteins to add. Defaults to config.
         """
+        # Use config defaults if not specified
+        min_score = min_score or self._config.string_min_score
+        extend_network = (
+            extend_network if extend_network is not None
+            else self._config.string_extend_network
+        )
+
         try:
-            interactions = await self._string_client.get_network(
+            all_interactions: list[dict[str, Any]] = []
+            all_proteins: set[str] = set(seed_proteins)
+
+            # Step 1: Get interaction partners if extension is enabled
+            if extend_network > 0:
+                logger.info(
+                    f"Fetching interaction partners for {len(seed_proteins)} seeds "
+                    f"(extend_network={extend_network})"
+                )
+                partners = await self._string_client.get_interaction_partners(
+                    proteins=seed_proteins,
+                    limit=extend_network,  # Partners per seed protein
+                    min_score=min_score,
+                )
+                all_interactions.extend(partners)
+
+                # Extract partner proteins
+                for interaction in partners:
+                    all_proteins.add(interaction.get("preferredName_A", ""))
+                    all_proteins.add(interaction.get("preferredName_B", ""))
+                all_proteins.discard("")
+
+                logger.info(
+                    f"Partners: {len(partners)} interactions, "
+                    f"{len(all_proteins) - len(seed_proteins)} new proteins discovered"
+                )
+
+            # Step 2: Get extended network with add_nodes
+            logger.info(
+                f"Fetching extended network (add_nodes={extend_network})"
+            )
+            extended = await self._string_client.get_network(
                 proteins=seed_proteins,
                 min_score=min_score,
                 network_type="physical",
+                add_nodes=extend_network,
             )
 
-            self._current_input.string_interactions = interactions
-            self._current_input.seed_proteins = seed_proteins
+            # Add new interactions (avoid duplicates by protein pair)
+            existing_pairs: set[tuple[str, str]] = set()
+            for interaction in all_interactions:
+                pair = (
+                    interaction.get("preferredName_A", ""),
+                    interaction.get("preferredName_B", "")
+                )
+                existing_pairs.add(pair)
+                existing_pairs.add((pair[1], pair[0]))  # Add reverse pair
 
-            # Log proteins found
-            proteins = set()
-            for interaction in interactions:
-                proteins.add(interaction.get("preferredName_A", ""))
-                proteins.add(interaction.get("preferredName_B", ""))
-            proteins.discard("")
+            for interaction in extended:
+                pair = (
+                    interaction.get("preferredName_A", ""),
+                    interaction.get("preferredName_B", "")
+                )
+                if pair not in existing_pairs:
+                    all_interactions.append(interaction)
+                    existing_pairs.add(pair)
+                    existing_pairs.add((pair[1], pair[0]))
+
+                # Extract proteins from extended network
+                all_proteins.add(interaction.get("preferredName_A", ""))
+                all_proteins.add(interaction.get("preferredName_B", ""))
+            all_proteins.discard("")
+
+            # Store results
+            self._current_input.string_interactions = all_interactions
+            # Store expanded protein list so PubMed query can use them
+            self._current_input.seed_proteins = sorted(all_proteins)
+
+            # Store metadata about the expansion
+            self._current_input.metadata["string_extension"] = {
+                "original_seeds": seed_proteins,
+                "extend_network": extend_network,
+                "min_score": min_score,
+                "expanded_proteins": len(all_proteins),
+                "total_interactions": len(all_interactions),
+            }
 
             logger.info(
-                f"STRING network: {len(interactions)} interactions, "
-                f"{len(proteins)} unique proteins"
+                f"STRING network expanded: {len(seed_proteins)} seeds -> "
+                f"{len(all_proteins)} proteins, {len(all_interactions)} interactions"
             )
 
         except Exception as e:
@@ -344,6 +426,7 @@ class DataFetchAgent:
 async def create_data_fetch_agent(
     string_client: StringClient | None = None,
     pubmed_client: PubMedClient | None = None,
+    config: PipelineConfig | None = None,
 ) -> DataFetchAgent:
     """
     Factory function to create a DataFetchAgent.
@@ -351,6 +434,7 @@ async def create_data_fetch_agent(
     Args:
         string_client: Optional STRING client.
         pubmed_client: Optional PubMed client.
+        config: Optional pipeline configuration.
 
     Returns:
         Configured DataFetchAgent instance.
@@ -358,4 +442,5 @@ async def create_data_fetch_agent(
     return DataFetchAgent(
         string_client=string_client,
         pubmed_client=pubmed_client,
+        config=config,
     )

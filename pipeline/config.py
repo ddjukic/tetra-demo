@@ -25,6 +25,7 @@ class PipelineConfig:
     Attributes:
         string_min_score: Minimum STRING confidence score (0-1000). Default 700 for high confidence.
         string_max_partners: Maximum interaction partners per protein to fetch from STRING.
+        string_extend_network: Number of additional proteins to add via STRING add_nodes. Default 10.
         pubmed_max_results: Maximum number of PubMed articles to retrieve.
         pubmed_date_filter: Optional PubMed date filter (e.g., "2020:2024[pdat]").
         pubmed_species_filter: Optional MeSH species filter (e.g., "humans[MeSH Terms]").
@@ -42,6 +43,7 @@ class PipelineConfig:
     # STRING network expansion settings
     string_min_score: int = 700  # High confidence threshold (0-1000)
     string_max_partners: int = 30  # Max interaction partners per protein
+    string_extend_network: int = 10  # Number of additional proteins to add via add_nodes
 
     # PubMed search settings
     pubmed_max_results: int = 50
@@ -75,6 +77,7 @@ class PipelineConfig:
         return {
             "string_min_score": self.string_min_score,
             "string_max_partners": self.string_max_partners,
+            "string_extend_network": self.string_extend_network,
             "pubmed_max_results": self.pubmed_max_results,
             "pubmed_date_filter": self.pubmed_date_filter,
             "pubmed_species_filter": self.pubmed_species_filter,
@@ -110,6 +113,7 @@ class PipelineConfig:
         known_fields = {
             "string_min_score",
             "string_max_partners",
+            "string_extend_network",
             "pubmed_max_results",
             "pubmed_date_filter",
             "pubmed_species_filter",
@@ -135,6 +139,7 @@ class PipelineConfig:
         Environment variables (all optional with defaults):
             TETRA_STRING_MIN_SCORE: Minimum STRING confidence score
             TETRA_STRING_MAX_PARTNERS: Maximum interaction partners
+            TETRA_STRING_EXTEND_NETWORK: Number of additional proteins to add
             TETRA_PUBMED_MAX_RESULTS: Maximum PubMed results
             TETRA_PUBMED_DATE_FILTER: PubMed date filter string
             TETRA_PUBMED_SPECIES_FILTER: PubMed species filter
@@ -181,6 +186,7 @@ class PipelineConfig:
         return cls(
             string_min_score=get_int("TETRA_STRING_MIN_SCORE", 700),
             string_max_partners=get_int("TETRA_STRING_MAX_PARTNERS", 30),
+            string_extend_network=get_int("TETRA_STRING_EXTEND_NETWORK", 10),
             pubmed_max_results=get_int("TETRA_PUBMED_MAX_RESULTS", 50),
             pubmed_date_filter=get_str_or_none("TETRA_PUBMED_DATE_FILTER", None),
             pubmed_species_filter=get_str_or_none(
@@ -211,6 +217,7 @@ class PipelineConfig:
         return PipelineConfig(
             string_min_score=self.string_min_score,
             string_max_partners=self.string_max_partners,
+            string_extend_network=self.string_extend_network,
             pubmed_max_results=self.pubmed_max_results,
             pubmed_date_filter=self.pubmed_date_filter,
             pubmed_species_filter=self.pubmed_species_filter,
@@ -229,7 +236,8 @@ class PipelineConfig:
         """Return a detailed string representation."""
         return (
             f"PipelineConfig(\n"
-            f"  STRING: min_score={self.string_min_score}, max_partners={self.string_max_partners}\n"
+            f"  STRING: min_score={self.string_min_score}, max_partners={self.string_max_partners}, "
+            f"extend_network={self.string_extend_network}\n"
             f"  PubMed: max_results={self.pubmed_max_results}, "
             f"date_filter={self.pubmed_date_filter}, species_filter={self.pubmed_species_filter}\n"
             f"  Mining: concurrent={self.mining_max_concurrent}, retries={self.mining_max_retries}, "

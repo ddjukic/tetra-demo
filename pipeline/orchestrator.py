@@ -22,6 +22,7 @@ from dotenv import load_dotenv
 from clients.pubmed_client import PubMedClient
 from clients.string_client import StringClient
 from models.knowledge_graph import KnowledgeGraph
+from pipeline.config import PipelineConfig
 from pipeline.kg_pipeline import KGPipeline
 from pipeline.models import PipelineInput, PipelineResult
 
@@ -60,6 +61,7 @@ class KGOrchestrator:
         self,
         fetch_agent: "DataFetchAgent | None" = None,
         pipeline: KGPipeline | None = None,
+        config: PipelineConfig | None = None,
         extractor_name: str = "cerebras",
     ):
         """
@@ -68,8 +70,12 @@ class KGOrchestrator:
         Args:
             fetch_agent: Data fetch agent. Created if not provided.
             pipeline: KG pipeline. Created if not provided.
+            config: Pipeline configuration. Created from env if not provided.
             extractor_name: LLM extractor for relationship mining.
         """
+        # Create or use provided config
+        self._config = config or PipelineConfig.from_env()
+
         # Create clients
         self._string_client = StringClient()
         self._pubmed_client = PubMedClient(api_key=os.getenv("NCBI_API_KEY"))
@@ -82,6 +88,7 @@ class KGOrchestrator:
             self._fetch_agent = DataFetchAgent(
                 string_client=self._string_client,
                 pubmed_client=self._pubmed_client,
+                config=self._config,
             )
         self._pipeline = pipeline or KGPipeline(extractor_name=extractor_name)
 
@@ -248,18 +255,20 @@ class KGOrchestrator:
 
 
 async def create_orchestrator(
+    config: PipelineConfig | None = None,
     extractor_name: str = "cerebras",
 ) -> KGOrchestrator:
     """
     Factory function to create a KGOrchestrator.
 
     Args:
+        config: Optional pipeline configuration.
         extractor_name: LLM extractor for relationship mining.
 
     Returns:
         Configured KGOrchestrator instance.
     """
-    return KGOrchestrator(extractor_name=extractor_name)
+    return KGOrchestrator(config=config, extractor_name=extractor_name)
 
 
 # Module-level orchestrator instance for use by the Q&A agent
