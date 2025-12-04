@@ -3,6 +3,7 @@ Agent module for the Scientific Knowledge Graph Agent.
 
 Provides:
 - AgentTools: Collection of tools for graph queries, ML predictions, and hypothesis generation
+- DataFetchAgent: LLM-driven data collection agent for hybrid architecture
 - OrchestratorAgent: OpenAI-based agent with function calling (legacy, requires openai)
 - ADKOrchestrator: Google ADK-based agent with Gemini (recommended)
 - create_kg_agent: Factory function for creating ADK orchestrator agent
@@ -29,13 +30,17 @@ from agent.graph_agent import (
 
 # Lazy imports for optional dependencies
 if TYPE_CHECKING:
+    from agent.data_fetch_agent import DataFetchAgent, create_data_fetch_agent
     from agent.orchestrator import OrchestratorAgent, SimpleOrchestratorAgent
     from agent.adk_orchestrator import ADKOrchestrator, create_kg_agent
 
 
 def __getattr__(name: str):
     """Lazy import for optional modules."""
-    if name in ("OrchestratorAgent", "SimpleOrchestratorAgent"):
+    if name in ("DataFetchAgent", "create_data_fetch_agent"):
+        from agent.data_fetch_agent import DataFetchAgent, create_data_fetch_agent
+        return {"DataFetchAgent": DataFetchAgent, "create_data_fetch_agent": create_data_fetch_agent}[name]
+    elif name in ("OrchestratorAgent", "SimpleOrchestratorAgent"):
         from agent.orchestrator import OrchestratorAgent, SimpleOrchestratorAgent
         return {"OrchestratorAgent": OrchestratorAgent, "SimpleOrchestratorAgent": SimpleOrchestratorAgent}[name]
     elif name in ("ADKOrchestrator", "create_kg_agent"):
@@ -47,6 +52,9 @@ def __getattr__(name: str):
 __all__ = [
     # Tools
     "AgentTools",
+    # Data Fetch Agent (hybrid architecture)
+    "DataFetchAgent",
+    "create_data_fetch_agent",
     # Legacy OpenAI agent (lazy loaded)
     "OrchestratorAgent",
     "SimpleOrchestratorAgent",

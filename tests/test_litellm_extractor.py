@@ -19,8 +19,8 @@ from extraction.litellm_extractor import (
     LiteLLMRelationshipExtractor,
     ADKLiteLLMRelationshipExtractor,
     create_extractor,
-    MODEL_PRICING,
 )
+from pipeline.metrics import MODEL_PRICING
 
 
 # =============================================================================

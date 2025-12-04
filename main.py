@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from ml.link_predictor import LinkPredictor
 from clients.string_client import StringClient
 from clients.pubmed_client import PubMedClient
-from extraction.relationship_extractor import RelationshipExtractor
+from extraction import create_batched_miner
 from extraction.relationship_inferrer import RelationshipInferrer
 from agent.tools import AgentTools
 from agent.adk_orchestrator import ADKOrchestrator
@@ -167,9 +167,9 @@ Examples:
     string_client = StringClient()
     pubmed_client = PubMedClient(api_key=ncbi_api_key)
 
-    # Initialize extractors
+    # Initialize extractors - use fast batched miner (gemini default)
     print("Initializing extractors...")
-    relationship_extractor = RelationshipExtractor()
+    relationship_miner = create_batched_miner(extractor_name="gemini")
     relationship_inferrer = RelationshipInferrer()
 
     # Initialize tools
@@ -178,7 +178,7 @@ Examples:
         link_predictor=link_predictor,
         string_client=string_client,
         pubmed_client=pubmed_client,
-        relationship_extractor=relationship_extractor,
+        relationship_miner=relationship_miner,
         relationship_inferrer=relationship_inferrer,
     )
 

@@ -13,7 +13,6 @@ import logging
 from typing import Any, Optional
 
 from google.adk.agents import LlmAgent
-from google.adk.planners import PlanReActPlanner
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 
@@ -43,7 +42,7 @@ def get_tools() -> AgentTools:
 # Tool Functions for ADK Agent
 # =============================================================================
 
-def get_string_network(seed_proteins: list[str], min_score: int = 700) -> dict:
+async def get_string_network(seed_proteins: list[str], min_score: int = 700) -> dict:
     """
     Fetch known protein interaction network from STRING database for seed proteins.
 
@@ -55,12 +54,10 @@ def get_string_network(seed_proteins: list[str], min_score: int = 700) -> dict:
         Dictionary with interactions, proteins_found, and count.
     """
     tools = get_tools()
-    return asyncio.get_event_loop().run_until_complete(
-        tools.get_string_network(seed_proteins, min_score)
-    )
+    return await tools.get_string_network(seed_proteins, min_score)
 
 
-def get_string_partners(proteins: list[str], limit: int = 30) -> dict:
+async def get_string_partners(proteins: list[str], limit: int = 30) -> dict:
     """
     Get interaction partners from STRING for proteins (expands the network).
 
@@ -72,12 +69,10 @@ def get_string_partners(proteins: list[str], limit: int = 30) -> dict:
         Dictionary with partners and count.
     """
     tools = get_tools()
-    return asyncio.get_event_loop().run_until_complete(
-        tools.get_string_partners(proteins, limit)
-    )
+    return await tools.get_string_partners(proteins, limit)
 
 
-def search_literature(query: str, max_results: int = 50) -> dict:
+async def search_literature(query: str, max_results: int = 50) -> dict:
     """
     Search PubMed for relevant biomedical literature.
 
@@ -89,12 +84,10 @@ def search_literature(query: str, max_results: int = 50) -> dict:
         Dictionary with articles, pmids, and count.
     """
     tools = get_tools()
-    return asyncio.get_event_loop().run_until_complete(
-        tools.search_literature(query, max_results)
-    )
+    return await tools.search_literature(query, max_results)
 
 
-def get_entity_annotations(pmids: list[str]) -> dict:
+async def get_entity_annotations(pmids: list[str]) -> dict:
     """
     Get NER annotations (genes, diseases, chemicals) from PubTator for articles.
 
@@ -105,12 +98,10 @@ def get_entity_annotations(pmids: list[str]) -> dict:
         Dictionary with annotations and annotations_by_pmid.
     """
     tools = get_tools()
-    return asyncio.get_event_loop().run_until_complete(
-        tools.get_entity_annotations(pmids)
-    )
+    return await tools.get_entity_annotations(pmids)
 
 
-def extract_relationships(articles: list[dict], annotations_by_pmid: dict) -> dict:
+async def extract_relationships(articles: list[dict], annotations_by_pmid: dict) -> dict:
     """
     Extract typed relationships between entities from abstracts using LLM.
 
@@ -122,9 +113,7 @@ def extract_relationships(articles: list[dict], annotations_by_pmid: dict) -> di
         Dictionary with relationships and count.
     """
     tools = get_tools()
-    return asyncio.get_event_loop().run_until_complete(
-        tools.extract_relationships(articles, annotations_by_pmid)
-    )
+    return await tools.extract_relationships(articles, annotations_by_pmid)
 
 
 def build_knowledge_graph(
@@ -164,7 +153,7 @@ def predict_novel_links(min_ml_score: float = 0.7, max_predictions: int = 20) ->
     return tools.predict_novel_links(min_ml_score, max_predictions)
 
 
-def infer_novel_relationships(predictions: list[dict], max_inferences: int = 5) -> dict:
+async def infer_novel_relationships(predictions: list[dict], max_inferences: int = 5) -> dict:
     """
     Use LLM to infer relationship types for top ML predictions.
 
@@ -176,9 +165,7 @@ def infer_novel_relationships(predictions: list[dict], max_inferences: int = 5) 
         Dictionary with inferences and count.
     """
     tools = get_tools()
-    return asyncio.get_event_loop().run_until_complete(
-        tools.infer_novel_relationships(predictions, max_inferences)
-    )
+    return await tools.infer_novel_relationships(predictions, max_inferences)
 
 
 def query_evidence(protein1: str, protein2: str) -> dict:
@@ -222,7 +209,7 @@ def get_protein_neighborhood(protein: str, max_neighbors: int = 10) -> dict:
     return tools.get_protein_neighborhood(protein, max_neighbors)
 
 
-def generate_hypothesis(protein1: str, protein2: str) -> dict:
+async def generate_hypothesis(protein1: str, protein2: str) -> dict:
     """
     Generate a detailed testable hypothesis for a predicted protein interaction.
 
@@ -234,9 +221,7 @@ def generate_hypothesis(protein1: str, protein2: str) -> dict:
         Structured hypothesis dictionary.
     """
     tools = get_tools()
-    return asyncio.get_event_loop().run_until_complete(
-        tools.generate_hypothesis(protein1, protein2)
-    )
+    return await tools.generate_hypothesis(protein1, protein2)
 
 
 def get_capabilities() -> dict:
@@ -325,7 +310,6 @@ def create_kg_agent(tools: AgentTools, model: str = "gemini-2.5-flash") -> LlmAg
             generate_hypothesis,
             get_capabilities,
         ],
-        planner=PlanReActPlanner(),
     )
 
     return agent
@@ -373,6 +357,18 @@ class ADKOrchestrator:
 
         self.current_user_id = "default_user"
         self.current_session_id = "default_session"
+        self._session_created = False
+
+    async def _ensure_session(self, user_id: str, session_id: str) -> None:
+        """Ensure session exists, create if needed."""
+        if not self._session_created:
+            await self.session_service.create_session(
+                app_name=self.app_name,
+                user_id=user_id,
+                session_id=session_id,
+            )
+            self._session_created = True
+            logger.debug(f"Created session: app={self.app_name}, user={user_id}, session={session_id}")
 
     async def run(
         self,
@@ -391,24 +387,49 @@ class ADKOrchestrator:
         Returns:
             Agent's final response as a string
         """
+        from google.genai import types
+
         user_id = user_id or self.current_user_id
         session_id = session_id or self.current_session_id
 
         try:
-            # Run the agent
-            response = await self.runner.run_async(
+            # Ensure session exists
+            await self._ensure_session(user_id, session_id)
+            # Prepare the user's message in ADK format
+            content = types.Content(role='user', parts=[types.Part(text=user_query)])
+
+            final_response_text = "Agent did not produce a final response."
+            accumulated_text = []  # Accumulate text from all events
+
+            # run_async returns an async generator - iterate over events
+            async for event in self.runner.run_async(
                 user_id=user_id,
                 session_id=session_id,
-                new_message={"role": "user", "parts": [{"text": user_query}]},
-            )
+                new_message=content,
+            ):
+                # Log intermediate events for debugging
+                logger.debug(f"Event: author={event.author}, final={event.is_final_response()}")
 
-            # Extract text from response
-            if response and hasattr(response, "text"):
-                return response.text
-            elif response and isinstance(response, dict):
-                return response.get("text", str(response))
-            else:
-                return str(response) if response else "No response generated."
+                # Accumulate text from events (not just final)
+                if event.content and event.content.parts:
+                    for part in event.content.parts:
+                        if hasattr(part, 'text') and part.text and part.text.strip():
+                            accumulated_text.append(part.text)
+
+                # Check for final response
+                if event.is_final_response():
+                    logger.debug(f"Final event: content={event.content}, actions={event.actions}")
+                    if accumulated_text:
+                        # Use accumulated text from all events
+                        final_response_text = "\n".join(accumulated_text)
+                        logger.debug(f"Accumulated {len(accumulated_text)} text parts")
+                    elif event.actions and event.actions.escalate:
+                        final_response_text = f"Agent escalated: {event.error_message or 'No specific message.'}"
+                    else:
+                        logger.warning(f"Final event has no accumulated text")
+                    break
+
+            return final_response_text
 
         except Exception as e:
             logger.error(f"Error in ADK agent: {e}")

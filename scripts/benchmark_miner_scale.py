@@ -1,27 +1,33 @@
 #!/usr/bin/env python3
 """
-Test batched mining at different scales.
+Test batched mining at different scales using the new BatchedLiteLLMMiner.
 
 Fetches real abstracts from PubMed and measures performance of the
-BatchedMiningOrchestrator at various scales (20, 50, 100 abstracts).
+BatchedLiteLLMMiner with multi-provider LLM support (Cerebras, Gemini, etc.)
+at various scales (20, 50, 100 abstracts).
 
 Run with: uv run python scripts/test_batched_mining.py
 
 Usage:
-    # Run full test suite
+    # Run full test suite with default extractor (cerebras)
     uv run python scripts/test_batched_mining.py
+
+    # Run with specific extractor
+    uv run python scripts/test_batched_mining.py --extractor gemini
 
     # Run with specific sizes
     uv run python scripts/test_batched_mining.py --sizes 20 50
 
     # Run with custom query
     uv run python scripts/test_batched_mining.py --query "BRCA1 breast cancer"
+
+    # Quick test with 5 abstracts
+    uv run python scripts/test_batched_mining.py --abstracts 5
 """
 
 import argparse
 import asyncio
 import json
-import os
 import sys
 import time
 from pathlib import Path
@@ -35,9 +41,10 @@ from dotenv import load_dotenv
 load_dotenv(project_root / ".env")
 
 from clients.pubmed_client import PubMedClient
-from pipeline.batched_mining import (
-    BatchedMiningConfig,
-    BatchedMiningOrchestrator,
+from extraction import (
+    BatchedLiteLLMMiner,
+    create_batched_miner,
+    get_config,
 )
 
 
@@ -106,6 +113,7 @@ async def test_batched_mining_scale(
     articles: list[dict],
     annotations: dict[str, list[dict]],
     n: int,
+    extractor_name: str,
 ) -> dict:
     """
     Test batched mining at a specific scale.
@@ -114,6 +122,7 @@ async def test_batched_mining_scale(
         articles: All fetched articles.
         annotations: All annotations.
         n: Number of abstracts to test with.
+        extractor_name: Name of extractor to use (cerebras, gemini, etc.)
 
     Returns:
         Test results dictionary.
@@ -124,66 +133,69 @@ async def test_batched_mining_scale(
     test_annotations = {pmid: annotations.get(pmid, []) for pmid in test_pmids}
 
     print(f"\n{'='*60}")
-    print(f"Testing with {n} abstracts")
+    print(f"Testing with {n} abstracts using {extractor_name}")
     print(f"{'='*60}")
 
-    # Create orchestrator with default config
-    config = BatchedMiningConfig(
-        target_tokens_per_chunk=5000,
-        min_chunks=3,
-        max_concurrent=5,
-        max_retries=3,
+    # Create miner using factory function
+    miner = create_batched_miner(
+        extractor_name=extractor_name,
+        evidence_threshold=0.65,
     )
-    orchestrator = BatchedMiningOrchestrator(config)
 
-    # Analyze
-    analysis = orchestrator.analyze_abstracts(test_articles)
-    print(f"\nAnalysis:")
-    print(f"  Total tokens: {analysis['total_tokens']}")
-    print(f"  Mean tokens/abstract: {analysis['mean_tokens']}")
-    print(f"  Min/Max tokens: {analysis['min_tokens']}/{analysis['max_tokens']}")
-    print(f"  Recommended chunks: {analysis['recommended_chunks']}")
+    # Get config for display
+    config = get_config()
+    batched_config = config.BATCHED
+    print(f"\nConfiguration:")
+    print(f"  Model: {miner.model}")
+    print(f"  Target tokens/chunk: {batched_config.TARGET_TOKENS_PER_CHUNK}")
+    print(f"  Min chunks: {batched_config.MIN_CHUNKS}")
+    print(f"  Max concurrent: {batched_config.MAX_CONCURRENT}")
 
     # Run mining
     print(f"\nRunning batched mining...")
     start = time.time()
-    result = await orchestrator.run(test_articles, test_annotations)
+    result = await miner.run(test_articles, test_annotations)
     duration = time.time() - start
 
     # Print results
     stats = result["statistics"]
     print(f"\nResults:")
     print(f"  Abstracts processed: {stats['total_abstracts']}")
-    print(f"  Chunks created: {stats['chunks_created']}")
+    print(f"  Chunks created: {stats['total_chunks']}")
     print(f"  Chunks processed: {stats['chunks_processed']}")
-    print(f"  Relationships (raw): {stats['relationships_raw']}")
-    print(f"  Relationships (deduped): {stats['relationships_extracted']}")
-    print(f"  Tokens used: {stats['tokens_used']}")
+    print(f"  Relationships (total): {stats['total_relationships']}")
+    print(f"  Relationships (valid): {stats['valid_relationships']}")
+    print(f"  Validation rate: {stats['validation_rate']:.1%}")
+    print(f"  PMID failures: {stats['pmid_failures']}")
+    print(f"  Evidence failures: {stats['evidence_failures']}")
+    print(f"  Tokens used: {stats['total_prompt_tokens'] + stats['total_completion_tokens']}")
     print(f"  Duration: {duration:.2f}s")
-    print(f"  Throughput: {stats['throughput_abstracts_per_sec']:.1f} abstracts/sec")
+    print(f"  Throughput: {stats['throughput_tok_per_sec']:.0f} tokens/sec")
 
     if result["errors"]:
         print(f"\nErrors ({len(result['errors'])}):")
         for err in result["errors"][:3]:
             print(f"  - {err[:100]}...")
 
-    # Show sample relationships
-    relationships = result["relationships"]
-    if relationships:
-        print(f"\nSample relationships ({min(5, len(relationships))} of {len(relationships)}):")
-        for rel in relationships[:5]:
-            print(f"  {rel.source_entity} --[{rel.relation_type}]--> {rel.target_entity}")
-            evidence = rel.evidence_sentence
+    # Show sample valid relationships
+    valid_rels = result["valid_relationships"]
+    if valid_rels:
+        print(f"\nSample valid relationships ({min(5, len(valid_rels))} of {len(valid_rels)}):")
+        for rel in valid_rels[:5]:
+            print(f"  {rel['entity1']} --[{rel['relationship']}]--> {rel['entity2']}")
+            evidence = rel.get("evidence_text", "")
             if len(evidence) > 100:
                 evidence = evidence[:100] + "..."
             print(f"    Evidence: {evidence}")
-            print(f"    PMID: {rel.pmid}, Confidence: {rel.confidence:.2f}")
+            print(f"    PMID: {rel['pmid']}, Confidence: {rel['confidence']:.2f}")
 
     return {
         "n": n,
-        "analysis": analysis,
+        "extractor": extractor_name,
+        "model": miner.model,
         "statistics": stats,
-        "relationships_count": len(relationships),
+        "valid_count": len(valid_rels),
+        "total_count": stats["total_relationships"],
         "duration": duration,
         "errors_count": len(result["errors"]),
     }
@@ -192,6 +204,7 @@ async def test_batched_mining_scale(
 async def run_scale_tests(
     query: str,
     sizes: list[int],
+    extractor_name: str,
 ) -> list[dict]:
     """
     Run batched mining tests at multiple scales.
@@ -199,6 +212,7 @@ async def run_scale_tests(
     Args:
         query: PubMed search query.
         sizes: List of test sizes (e.g., [20, 50, 100]).
+        extractor_name: Name of extractor to use.
 
     Returns:
         List of test results.
@@ -221,7 +235,9 @@ async def run_scale_tests(
     for n in sizes:
         if n <= len(articles):
             try:
-                result = await test_batched_mining_scale(articles, annotations, n)
+                result = await test_batched_mining_scale(
+                    articles, annotations, n, extractor_name
+                )
                 results.append(result)
             except Exception as e:
                 print(f"\nERROR testing with {n} abstracts: {e}")
@@ -243,34 +259,86 @@ def print_summary(results: list[dict]) -> None:
     print("SUMMARY")
     print(f"{'='*80}")
 
+    if results:
+        print(f"Extractor: {results[0].get('extractor', 'unknown')}")
+        print(f"Model: {results[0].get('model', 'unknown')}")
+        print()
+
     # Header
-    print(f"{'N':>6} | {'Chunks':>6} | {'Tokens':>8} | {'Rels':>6} | {'Duration':>10} | {'Throughput':>12}")
-    print(f"{'-'*6}-+-{'-'*6}-+-{'-'*8}-+-{'-'*6}-+-{'-'*10}-+-{'-'*12}")
+    print(f"{'N':>6} | {'Chunks':>6} | {'Tokens':>8} | {'Valid':>6} | {'Rate':>8} | {'Duration':>10} | {'Tok/s':>10}")
+    print(f"{'-'*6}-+-{'-'*6}-+-{'-'*8}-+-{'-'*6}-+-{'-'*8}-+-{'-'*10}-+-{'-'*10}")
 
     for r in results:
         stats = r["statistics"]
+        total_tokens = stats['total_prompt_tokens'] + stats['total_completion_tokens']
         print(
             f"{r['n']:>6} | "
-            f"{stats['chunks_created']:>6} | "
-            f"{stats['tokens_used']:>8} | "
-            f"{r['relationships_count']:>6} | "
+            f"{stats['total_chunks']:>6} | "
+            f"{total_tokens:>8} | "
+            f"{r['valid_count']:>6} | "
+            f"{stats['validation_rate']:>7.1%} | "
             f"{r['duration']:>8.2f}s | "
-            f"{stats['throughput_abstracts_per_sec']:>9.1f}/s"
+            f"{stats['throughput_tok_per_sec']:>8.0f}"
         )
 
     print(f"\nConclusion:")
     if len(results) >= 2:
         first = results[0]
         last = results[-1]
-        speedup = last["statistics"]["throughput_abstracts_per_sec"] / first["statistics"]["throughput_abstracts_per_sec"] if first["statistics"]["throughput_abstracts_per_sec"] > 0 else 1.0
-        print(f"  Throughput at {last['n']} abstracts: {last['statistics']['throughput_abstracts_per_sec']:.1f} abstracts/sec")
-        print(f"  Scaling factor: {speedup:.2f}x from {first['n']} to {last['n']} abstracts")
+        first_throughput = first["statistics"]["throughput_tok_per_sec"]
+        last_throughput = last["statistics"]["throughput_tok_per_sec"]
+        if first_throughput > 0:
+            speedup = last_throughput / first_throughput
+            print(f"  Throughput at {last['n']} abstracts: {last_throughput:.0f} tokens/sec")
+            print(f"  Scaling factor: {speedup:.2f}x from {first['n']} to {last['n']} abstracts")
+        print(f"  Overall validation rate: {last['statistics']['validation_rate']:.1%}")
+
+
+async def run_single_test(
+    query: str,
+    n: int,
+    extractor_name: str,
+) -> dict | None:
+    """
+    Run a single batched mining test.
+
+    Args:
+        query: PubMed search query.
+        n: Number of abstracts to test with.
+        extractor_name: Name of extractor to use.
+
+    Returns:
+        Test result dictionary or None on failure.
+    """
+    print(f"\nFetching {n} abstracts...")
+    articles = await fetch_abstracts(query, n + 5)  # Fetch extra for filtering
+
+    if len(articles) < n:
+        print(f"WARNING: Only found {len(articles)} articles, using all of them")
+        n = len(articles)
+
+    if not articles:
+        print("ERROR: No articles found")
+        return None
+
+    # Get annotations
+    pmids = [a.get("pmid", "") for a in articles]
+    annotations = await get_pubtator_annotations(pmids)
+
+    try:
+        result = await test_batched_mining_scale(articles, annotations, n, extractor_name)
+        return result
+    except Exception as e:
+        print(f"\nERROR testing: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
 
 
 async def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Test batched mining at different scales"
+        description="Test batched mining at different scales with LiteLLM multi-provider support"
     )
     parser.add_argument(
         "--query",
@@ -283,7 +351,19 @@ async def main() -> None:
         type=int,
         nargs="+",
         default=[20, 50, 100],
-        help="Test sizes (default: 20 50 100)",
+        help="Test sizes for scale tests (default: 20 50 100)",
+    )
+    parser.add_argument(
+        "--abstracts",
+        type=int,
+        help="Run single test with specific number of abstracts (overrides --sizes)",
+    )
+    parser.add_argument(
+        "--extractor",
+        type=str,
+        default="cerebras",
+        choices=["cerebras", "gemini", "openrouter"],
+        help="LLM extractor to use (default: cerebras)",
     )
     parser.add_argument(
         "--output",
@@ -294,28 +374,32 @@ async def main() -> None:
     args = parser.parse_args()
 
     print("=" * 60)
-    print("Batched Mining Scale Test")
+    print("Batched Mining Test (LiteLLM Multi-Provider)")
     print("=" * 60)
     print(f"Query: {args.query}")
-    print(f"Test sizes: {args.sizes}")
+    print(f"Extractor: {args.extractor}")
+
+    if args.abstracts:
+        print(f"Mode: Single test with {args.abstracts} abstracts")
+    else:
+        print(f"Mode: Scale test with sizes {args.sizes}")
 
     try:
-        results = await run_scale_tests(args.query, args.sizes)
+        if args.abstracts:
+            # Run single test
+            result = await run_single_test(args.query, args.abstracts, args.extractor)
+            results = [result] if result else []
+        else:
+            # Run scale tests
+            results = await run_scale_tests(args.query, args.sizes, args.extractor)
 
         print_summary(results)
 
         # Save results if output specified
         if args.output and results:
             output_path = Path(args.output)
-            # Convert to serializable format
-            serializable_results = []
-            for r in results:
-                sr = {**r}
-                sr["relationships_count"] = r["relationships_count"]
-                serializable_results.append(sr)
-
             with open(output_path, "w") as f:
-                json.dump(serializable_results, f, indent=2)
+                json.dump(results, f, indent=2)
             print(f"\nResults saved to: {output_path}")
 
         print("\n" + "=" * 60)

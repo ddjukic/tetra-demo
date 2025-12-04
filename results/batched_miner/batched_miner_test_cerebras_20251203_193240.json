@@ -1,0 +1,2957 @@
+{
+  "relationships": [
+    {
+      "entity1": "Almorexant",
+      "entity2": "Orexin",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "Almorexant is now mainly used as a commercial specific inhibitor of the orexin system in animal studies due to safety issues."
+    },
+    {
+      "entity1": "Filorexant",
+      "entity2": "Insomnia",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "Although filorexant has also shown a certain sleep-promoting effect, there are few clinical or experimental studies on sleep-related aspects of filorexant in recent years."
+    },
+    {
+      "entity1": "Seltorexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        6
+      ],
+      "evidence_text": "As for selective ORAs, orexin receptor 2 antagonist seltorexant still has not yet reached phase 3."
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "Insomnia",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "RECENT FINDINGS: Research on suvorexant in recent years gradually focus on comorbid insomnia, while lemborexant and daridorexant were still being validated in primary insomnia."
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "Insomnia",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "RECENT FINDINGS: Research on suvorexant in recent years gradually focus on comorbid insomnia, while lemborexant and daridorexant were still being validated in primary insomnia."
+    },
+    {
+      "entity1": "Daridorexant",
+      "entity2": "Insomnia",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "RECENT FINDINGS: Research on suvorexant in recent years gradually focus on comorbid insomnia, while lemborexant and daridorexant were still being validated in primary insomnia."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "HCRTR1",
+      "relationship": "binds_to",
+      "confidence": 0.9,
+      "pmid": "34052813",
+      "evidence_sentence_indices": [
+        1
+      ],
+      "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "HCRTR2",
+      "relationship": "binds_to",
+      "confidence": 0.9,
+      "pmid": "34052813",
+      "evidence_sentence_indices": [
+        1
+      ],
+      "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Narcolepsy",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "34052813",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Shortly after the discovery of this system, degeneration of hypocretin/orexin-producing neurons was implicated in the etiology of the sleep disorder narcolepsy."
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "Sleep Disorders",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "34052813",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "While HCRTR1/OX1R is associated with regulation of motivation, reward, and autonomic functions, HCRTR2/OX2R is strongly linked to sleep-wake control."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Sleep Disorders",
+      "relationship": "regulates",
+      "confidence": 0.9,
+      "pmid": "34052810",
+      "evidence_sentence_indices": [
+        1
+      ],
+      "evidence_text": "Orexins regulate a wide variety of biological functions, most notably the sleep-wake cycle, reward and stress processing, alertness, vigilance, and cognitive functioning."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Narcolepsy",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "34052810",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Anorexia nervosa",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "34052810",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Cognitive decline",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "34052810",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Neurodegenerative disease",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "34052810",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+    },
+    {
+      "entity1": "Sleep Disorders",
+      "entity2": "Alzheimer's disease",
+      "relationship": "cooccurs_with",
+      "confidence": 0.9,
+      "pmid": "37708433",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "Furthermore, evidence supports a bidirectional relationship between disrupted sleep and Alzheimer's disease (AD) or related dementias."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Alzheimer's disease",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "37708433",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "Dysregulation of the orexin system occurs in aging and AD, positioning ORAs as advantageous for these populations."
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "Dementia",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "37708433",
+      "evidence_sentence_indices": [
+        6
+      ],
+      "evidence_text": "Indeed, several clinical studies indicate that ORAs are efficacious hypnotics in older persons and dementia patients and, as in adults, are generally well tolerated."
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "Sleep Disorders",
+      "relationship": "regulates",
+      "confidence": 0.8,
+      "pmid": "37708433",
+      "evidence_sentence_indices": [
+        7
+      ],
+      "evidence_text": "ORAs are likely to be more effective when administered early in sleep/wake dysregulation to reestablish good sleep/wake-related behaviors and reduce the accumulation of dementia-associated proteinopathic substrates."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Alzheimer's disease",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Given the high prevalence of sleep disturbances in Alzheimer's disease (AD) and their reported involvement in AD pathophysiology, the orexin system is hypothesized to contribute to the disease pathogenesis."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Amyloid-beta",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "Specifically, recent evidence suggests that orexin's influence may extend beyond sleep regulation, potentially affecting amyloid-\u03b2 and tau pathologies."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Tau",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "Specifically, recent evidence suggests that orexin's influence may extend beyond sleep regulation, potentially affecting amyloid-\u03b2 and tau pathologies."
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "Chronic insomnia disorder",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "Dual orexin receptor antagonists (DORAs), namely suvorexant, lemborexant, and daridorexant, demonstrated efficacy in treating chronic insomnia disorder across diverse clinical populations."
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "Alzheimer's disease",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        5,
+        7
+      ],
+      "evidence_text": "Considering their stabilizing effects on sleep parameters and emerging evidence of a possible neuroprotective role, these agents represent a promising strategy for AD management. Overall, clinical studies support the use of DORAs to enhance sleep quality in patients with AD with comorbid sleep and circadian sleep-wake rhythm disorders."
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "Alzheimer's disease",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "Considering their stabilizing effects on sleep parameters and emerging evidence of a possible neuroprotective role, these agents represent a promising strategy for AD management."
+    },
+    {
+      "entity1": "Daridorexant",
+      "entity2": "Alzheimer's disease",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "Considering their stabilizing effects on sleep parameters and emerging evidence of a possible neuroprotective role, these agents represent a promising strategy for AD management."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "confidence": 0.9,
+      "pmid": "31782044",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2Rs and act on numerous physiological processes, such as sleep-wake regulation, feeding, reward, emotion, and motivation."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "confidence": 0.9,
+      "pmid": "31782044",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2Rs and act on numerous physiological processes, such as sleep-wake regulation, feeding, reward, emotion, and motivation."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Depression",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "31782044",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "In the present review, we discuss recent findings on the involvement of the orexin system in the pathophysiology of psychiatric disorders, including sleep disorders, depression, anxiety, and drug addiction."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Anxiety",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "31782044",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "In the present review, we discuss recent findings on the involvement of the orexin system in the pathophysiology of psychiatric disorders, including sleep disorders, depression, anxiety, and drug addiction."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Drug addiction",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "31782044",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "In the present review, we discuss recent findings on the involvement of the orexin system in the pathophysiology of psychiatric disorders, including sleep disorders, depression, anxiety, and drug addiction."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "NF-kappaB",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "ERK",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "p38",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "IL-1beta",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "TNF-alpha",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "IL-6",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "iNOS",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "GFAP",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "Bcl-2",
+      "relationship": "activates",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "Bax",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "Cytochrome C",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "caspase-9",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "caspase-3",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+    },
+    {
+      "entity1": "TAK-861",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "confidence": 0.95,
+      "pmid": "39242684",
+      "evidence_sentence_indices": [
+        6
+      ],
+      "evidence_text": "Here, we show that a novel OX2R-selective agonist, TAK-861 [N-{(2S,3R)-4,4-Difluoro-1-(2-hydroxy-2-methylpropanoyl)-2-[(2,3',5'-trifluoro[1,1'-biphenyl]-3-yl)methyl]pyrrolidin-3-yl}ethanesulfonamide], activates OX2R with a half-maximal effective concentration of 2.5\u00a0nM and promotes wakefulness at 1\u00a0mg/kg in mice and monkeys, suggesting ~\u2009tenfold higher potency and lower effective dosage than TAK-994."
+    },
+    {
+      "entity1": "TAK-861",
+      "entity2": "cataplexy",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "39242684",
+      "evidence_sentence_indices": [
+        7
+      ],
+      "evidence_text": "Similar to TAK-994, TAK-861 substantially ameliorates wakefulness fragmentation and cataplexy-like episodes in orexin/ataxin-3 and orexin-tTA;TetO DTA mice (NT1 mouse models)."
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "confidence": 0.85,
+      "pmid": "37494485",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "METHODS: We conducted a phase 2, randomized, placebo-controlled trial of TAK-994, an oral orexin receptor 2-selective agonist, in patients with narcolepsy type 1."
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "cataplexy",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "37494485",
+      "evidence_sentence_indices": [
+        13
+      ],
+      "evidence_text": "Weekly incidences of cataplexy at week 8 were 0.27 in the 30-mg group, 1.14 in the 90-mg group, 0.88 in the 180-mg group, and 5.83 in the placebo group (rate ratio vs."
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "sleepiness",
+      "relationship": "inhibits",
+      "confidence": 0.85,
+      "pmid": "37494485",
+      "evidence_sentence_indices": [
+        11,
+        12
+      ],
+      "evidence_text": "Least-squares mean changes to week 8 in the ESS score were -12.2 in the 30-mg group, -13.5 in the 90-mg group, -15.1 in the 180-mg group, and -2.1 in the placebo group (difference vs. placebo, -10.1 in the 30-mg group, -11.4 in the 90-mg group, and -13.0 in the 180-mg group)."
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "hepatotoxic effects",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "37494485",
+      "evidence_sentence_indices": [
+        15,
+        16
+      ],
+      "evidence_text": "A total of 44 of 56 patients (79%) receiving TAK-994 had adverse events, most commonly urinary urgency or frequency. Clinically important elevations in liver-enzyme levels occurred in 5 patients, and drug-induced liver injury meeting Hy's law criteria occurred in 3 patients."
+    },
+    {
+      "entity1": "HCRTR1",
+      "entity2": "lactate",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "39119889",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production and brain-derived neurotrophic factor (BDNF) expression by hypoxia-inducible factor-1\u03b1 (HIF-1\u03b1), thus impairing adult hippocampal neuroplasticity, and cognitive impairment in CUMS model."
+    },
+    {
+      "entity1": "HCRTR1",
+      "entity2": "BDNF",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "39119889",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production and brain-derived neurotrophic factor (BDNF) expression by hypoxia-inducible factor-1\u03b1 (HIF-1\u03b1), thus impairing adult hippocampal neuroplasticity, and cognitive impairment in CUMS model."
+    },
+    {
+      "entity1": "hypocretin-1",
+      "entity2": "lactate",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "39119889",
+      "evidence_sentence_indices": [
+        4,
+        6
+      ],
+      "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production and brain-derived neurotrophic factor (BDNF) expression by hypoxia-inducible factor-1\u03b1 (HIF-1\u03b1), thus impairing adult hippocampal neuroplasticity, and cognitive impairment in CUMS model. The direct effect of hypocretin-1 on hippocampal lactate production and cognitive behavior is further confirmed by intraventricular injection of hypocretin-1 and microPET-CT in rats."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "Orexin-A",
+      "relationship": "regulates",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Our previous study showed that MSZRD can improve the gastrointestinal discomfort related insomnia by regulating Orexin-A."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "5-HT",
+      "relationship": "regulates",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "5HT1A receptor",
+      "relationship": "regulates",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "DA",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "norepinephrine",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "GABA",
+      "relationship": "regulates",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        13
+      ],
+      "evidence_text": "Importantly, serum GABA concentration was increased by treatment with MSZRD (P\u00a0<\u00a00.05), as reflected by a decreased Glu/GABA ratio (P\u00a0<\u00a00.05)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "Glu",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        13
+      ],
+      "evidence_text": "Importantly, serum GABA concentration was increased by treatment with MSZRD (P\u00a0<\u00a00.05), as reflected by a decreased Glu/GABA ratio (P\u00a0<\u00a00.05)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "CORT",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        14
+      ],
+      "evidence_text": "Moreover, MSZRD decreased the levels of CORT, ACTH, and CRH related hormones in HPA axis (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "ACTH",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        14
+      ],
+      "evidence_text": "Moreover, MSZRD decreased the levels of CORT, ACTH, and CRH related hormones in HPA axis (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "CRH",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        14
+      ],
+      "evidence_text": "Moreover, MSZRD decreased the levels of CORT, ACTH, and CRH related hormones in HPA axis (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "Orexin-A",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        15
+      ],
+      "evidence_text": "At the same time, MSZRD significantly downregulated the serum Orexin-A content in insomnia mice (P\u00a0<\u00a00.05), as well as hypothalamic OX2R expression (P\u00a0<\u00a00.05)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        15
+      ],
+      "evidence_text": "At the same time, MSZRD significantly downregulated the serum Orexin-A content in insomnia mice (P\u00a0<\u00a00.05), as well as hypothalamic OX2R expression (P\u00a0<\u00a00.05)."
+    },
+    {
+      "entity1": "sleep disorders",
+      "entity2": "epilepsy",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "It is documented that sleep disorders are associated with epilepsy."
+    },
+    {
+      "entity1": "sleep disorders",
+      "entity2": "epileptic seizures",
+      "relationship": "regulates",
+      "confidence": 0.8,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "The origin, suppression, and spread of seizures are affected by sleep."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "sleep disorders",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        7
+      ],
+      "evidence_text": "Meanwhile, orexin, a wake-promoting neuropeptide, provides a bidirectional effect on both sleep and epilepsy."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "epilepsy",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        7
+      ],
+      "evidence_text": "Meanwhile, orexin, a wake-promoting neuropeptide, provides a bidirectional effect on both sleep and epilepsy."
+    },
+    {
+      "entity1": "OX1R",
+      "entity2": "Orexin",
+      "relationship": "binds_to",
+      "confidence": 0.95,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        8
+      ],
+      "evidence_text": "Orexin and its cognate receptors, orexin receptor type 1 (OX1R) and type 2 (OX2R), orchestrate their effects by activating various downstream signaling pathways."
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "Orexin",
+      "relationship": "binds_to",
+      "confidence": 0.95,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        8
+      ],
+      "evidence_text": "Orexin and its cognate receptors, orexin receptor type 1 (OX1R) and type 2 (OX2R), orchestrate their effects by activating various downstream signaling pathways."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "psychiatric disorders",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        9
+      ],
+      "evidence_text": "Although orexin was considered a therapeutic target in insomnia shortly after its discovery, its potential usefulness for psychiatric disorders and epileptic seizures has been suggested in the pre-clinical studies."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "epileptic seizures",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        9
+      ],
+      "evidence_text": "Although orexin was considered a therapeutic target in insomnia shortly after its discovery, its potential usefulness for psychiatric disorders and epileptic seizures has been suggested in the pre-clinical studies."
+    }
+  ],
+  "valid_relationships": [
+    {
+      "entity1": "Almorexant",
+      "entity2": "Orexin",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "Almorexant is now mainly used as a commercial specific inhibitor of the orexin system in animal studies due to safety issues."
+    },
+    {
+      "entity1": "Filorexant",
+      "entity2": "Insomnia",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "Although filorexant has also shown a certain sleep-promoting effect, there are few clinical or experimental studies on sleep-related aspects of filorexant in recent years."
+    },
+    {
+      "entity1": "Seltorexant",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        6
+      ],
+      "evidence_text": "As for selective ORAs, orexin receptor 2 antagonist seltorexant still has not yet reached phase 3."
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "Insomnia",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "RECENT FINDINGS: Research on suvorexant in recent years gradually focus on comorbid insomnia, while lemborexant and daridorexant were still being validated in primary insomnia."
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "Insomnia",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "RECENT FINDINGS: Research on suvorexant in recent years gradually focus on comorbid insomnia, while lemborexant and daridorexant were still being validated in primary insomnia."
+    },
+    {
+      "entity1": "Daridorexant",
+      "entity2": "Insomnia",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "35972717",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "RECENT FINDINGS: Research on suvorexant in recent years gradually focus on comorbid insomnia, while lemborexant and daridorexant were still being validated in primary insomnia."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "HCRTR1",
+      "relationship": "binds_to",
+      "confidence": 0.9,
+      "pmid": "34052813",
+      "evidence_sentence_indices": [
+        1
+      ],
+      "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "HCRTR2",
+      "relationship": "binds_to",
+      "confidence": 0.9,
+      "pmid": "34052813",
+      "evidence_sentence_indices": [
+        1
+      ],
+      "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Narcolepsy",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "34052813",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Shortly after the discovery of this system, degeneration of hypocretin/orexin-producing neurons was implicated in the etiology of the sleep disorder narcolepsy."
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "Sleep Disorders",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "34052813",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "While HCRTR1/OX1R is associated with regulation of motivation, reward, and autonomic functions, HCRTR2/OX2R is strongly linked to sleep-wake control."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Sleep Disorders",
+      "relationship": "regulates",
+      "confidence": 0.9,
+      "pmid": "34052810",
+      "evidence_sentence_indices": [
+        1
+      ],
+      "evidence_text": "Orexins regulate a wide variety of biological functions, most notably the sleep-wake cycle, reward and stress processing, alertness, vigilance, and cognitive functioning."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Narcolepsy",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "34052810",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Anorexia nervosa",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "34052810",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Cognitive decline",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "34052810",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Neurodegenerative disease",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "34052810",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+    },
+    {
+      "entity1": "Sleep Disorders",
+      "entity2": "Alzheimer's disease",
+      "relationship": "cooccurs_with",
+      "confidence": 0.9,
+      "pmid": "37708433",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "Furthermore, evidence supports a bidirectional relationship between disrupted sleep and Alzheimer's disease (AD) or related dementias."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Alzheimer's disease",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "37708433",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "Dysregulation of the orexin system occurs in aging and AD, positioning ORAs as advantageous for these populations."
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "Dementia",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "37708433",
+      "evidence_sentence_indices": [
+        6
+      ],
+      "evidence_text": "Indeed, several clinical studies indicate that ORAs are efficacious hypnotics in older persons and dementia patients and, as in adults, are generally well tolerated."
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "Sleep Disorders",
+      "relationship": "regulates",
+      "confidence": 0.8,
+      "pmid": "37708433",
+      "evidence_sentence_indices": [
+        7
+      ],
+      "evidence_text": "ORAs are likely to be more effective when administered early in sleep/wake dysregulation to reestablish good sleep/wake-related behaviors and reduce the accumulation of dementia-associated proteinopathic substrates."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Alzheimer's disease",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Given the high prevalence of sleep disturbances in Alzheimer's disease (AD) and their reported involvement in AD pathophysiology, the orexin system is hypothesized to contribute to the disease pathogenesis."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Amyloid-beta",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "Specifically, recent evidence suggests that orexin's influence may extend beyond sleep regulation, potentially affecting amyloid-\u03b2 and tau pathologies."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Tau",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        3
+      ],
+      "evidence_text": "Specifically, recent evidence suggests that orexin's influence may extend beyond sleep regulation, potentially affecting amyloid-\u03b2 and tau pathologies."
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "Chronic insomnia disorder",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "Dual orexin receptor antagonists (DORAs), namely suvorexant, lemborexant, and daridorexant, demonstrated efficacy in treating chronic insomnia disorder across diverse clinical populations."
+    },
+    {
+      "entity1": "Suvorexant",
+      "entity2": "Alzheimer's disease",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        5,
+        7
+      ],
+      "evidence_text": "Considering their stabilizing effects on sleep parameters and emerging evidence of a possible neuroprotective role, these agents represent a promising strategy for AD management. Overall, clinical studies support the use of DORAs to enhance sleep quality in patients with AD with comorbid sleep and circadian sleep-wake rhythm disorders."
+    },
+    {
+      "entity1": "Lemborexant",
+      "entity2": "Alzheimer's disease",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "Considering their stabilizing effects on sleep parameters and emerging evidence of a possible neuroprotective role, these agents represent a promising strategy for AD management."
+    },
+    {
+      "entity1": "Daridorexant",
+      "entity2": "Alzheimer's disease",
+      "relationship": "associated_with",
+      "confidence": 0.85,
+      "pmid": "39365407",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "Considering their stabilizing effects on sleep parameters and emerging evidence of a possible neuroprotective role, these agents represent a promising strategy for AD management."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX1R",
+      "relationship": "binds_to",
+      "confidence": 0.9,
+      "pmid": "31782044",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2Rs and act on numerous physiological processes, such as sleep-wake regulation, feeding, reward, emotion, and motivation."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "OX2R",
+      "relationship": "binds_to",
+      "confidence": 0.9,
+      "pmid": "31782044",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2Rs and act on numerous physiological processes, such as sleep-wake regulation, feeding, reward, emotion, and motivation."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Depression",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "31782044",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "In the present review, we discuss recent findings on the involvement of the orexin system in the pathophysiology of psychiatric disorders, including sleep disorders, depression, anxiety, and drug addiction."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Anxiety",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "31782044",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "In the present review, we discuss recent findings on the involvement of the orexin system in the pathophysiology of psychiatric disorders, including sleep disorders, depression, anxiety, and drug addiction."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "Drug addiction",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "31782044",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "In the present review, we discuss recent findings on the involvement of the orexin system in the pathophysiology of psychiatric disorders, including sleep disorders, depression, anxiety, and drug addiction."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "NF-kappaB",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "ERK",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "p38",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "IL-1beta",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "TNF-alpha",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "IL-6",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "iNOS",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "GFAP",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        11
+      ],
+      "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "Bcl-2",
+      "relationship": "activates",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "Bax",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "Cytochrome C",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "caspase-9",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+    },
+    {
+      "entity1": "Orexin-A",
+      "entity2": "caspase-3",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "34358627",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+    },
+    {
+      "entity1": "TAK-861",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "confidence": 0.95,
+      "pmid": "39242684",
+      "evidence_sentence_indices": [
+        6
+      ],
+      "evidence_text": "Here, we show that a novel OX2R-selective agonist, TAK-861 [N-{(2S,3R)-4,4-Difluoro-1-(2-hydroxy-2-methylpropanoyl)-2-[(2,3',5'-trifluoro[1,1'-biphenyl]-3-yl)methyl]pyrrolidin-3-yl}ethanesulfonamide], activates OX2R with a half-maximal effective concentration of 2.5\u00a0nM and promotes wakefulness at 1\u00a0mg/kg in mice and monkeys, suggesting ~\u2009tenfold higher potency and lower effective dosage than TAK-994."
+    },
+    {
+      "entity1": "TAK-861",
+      "entity2": "cataplexy",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "39242684",
+      "evidence_sentence_indices": [
+        7
+      ],
+      "evidence_text": "Similar to TAK-994, TAK-861 substantially ameliorates wakefulness fragmentation and cataplexy-like episodes in orexin/ataxin-3 and orexin-tTA;TetO DTA mice (NT1 mouse models)."
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "OX2R",
+      "relationship": "activates",
+      "confidence": 0.85,
+      "pmid": "37494485",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "METHODS: We conducted a phase 2, randomized, placebo-controlled trial of TAK-994, an oral orexin receptor 2-selective agonist, in patients with narcolepsy type 1."
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "cataplexy",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "37494485",
+      "evidence_sentence_indices": [
+        13
+      ],
+      "evidence_text": "Weekly incidences of cataplexy at week 8 were 0.27 in the 30-mg group, 1.14 in the 90-mg group, 0.88 in the 180-mg group, and 5.83 in the placebo group (rate ratio vs."
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "sleepiness",
+      "relationship": "inhibits",
+      "confidence": 0.85,
+      "pmid": "37494485",
+      "evidence_sentence_indices": [
+        11,
+        12
+      ],
+      "evidence_text": "Least-squares mean changes to week 8 in the ESS score were -12.2 in the 30-mg group, -13.5 in the 90-mg group, -15.1 in the 180-mg group, and -2.1 in the placebo group (difference vs. placebo, -10.1 in the 30-mg group, -11.4 in the 90-mg group, and -13.0 in the 180-mg group)."
+    },
+    {
+      "entity1": "TAK-994",
+      "entity2": "hepatotoxic effects",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "37494485",
+      "evidence_sentence_indices": [
+        15,
+        16
+      ],
+      "evidence_text": "A total of 44 of 56 patients (79%) receiving TAK-994 had adverse events, most commonly urinary urgency or frequency. Clinically important elevations in liver-enzyme levels occurred in 5 patients, and drug-induced liver injury meeting Hy's law criteria occurred in 3 patients."
+    },
+    {
+      "entity1": "HCRTR1",
+      "entity2": "lactate",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "39119889",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production and brain-derived neurotrophic factor (BDNF) expression by hypoxia-inducible factor-1\u03b1 (HIF-1\u03b1), thus impairing adult hippocampal neuroplasticity, and cognitive impairment in CUMS model."
+    },
+    {
+      "entity1": "HCRTR1",
+      "entity2": "BDNF",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "39119889",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production and brain-derived neurotrophic factor (BDNF) expression by hypoxia-inducible factor-1\u03b1 (HIF-1\u03b1), thus impairing adult hippocampal neuroplasticity, and cognitive impairment in CUMS model."
+    },
+    {
+      "entity1": "hypocretin-1",
+      "entity2": "lactate",
+      "relationship": "inhibits",
+      "confidence": 0.9,
+      "pmid": "39119889",
+      "evidence_sentence_indices": [
+        4,
+        6
+      ],
+      "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production and brain-derived neurotrophic factor (BDNF) expression by hypoxia-inducible factor-1\u03b1 (HIF-1\u03b1), thus impairing adult hippocampal neuroplasticity, and cognitive impairment in CUMS model. The direct effect of hypocretin-1 on hippocampal lactate production and cognitive behavior is further confirmed by intraventricular injection of hypocretin-1 and microPET-CT in rats."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "Orexin-A",
+      "relationship": "regulates",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        2
+      ],
+      "evidence_text": "Our previous study showed that MSZRD can improve the gastrointestinal discomfort related insomnia by regulating Orexin-A."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "5-HT",
+      "relationship": "regulates",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "5HT1A receptor",
+      "relationship": "regulates",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "DA",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "norepinephrine",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        12
+      ],
+      "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "GABA",
+      "relationship": "regulates",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        13
+      ],
+      "evidence_text": "Importantly, serum GABA concentration was increased by treatment with MSZRD (P\u00a0<\u00a00.05), as reflected by a decreased Glu/GABA ratio (P\u00a0<\u00a00.05)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "Glu",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        13
+      ],
+      "evidence_text": "Importantly, serum GABA concentration was increased by treatment with MSZRD (P\u00a0<\u00a00.05), as reflected by a decreased Glu/GABA ratio (P\u00a0<\u00a00.05)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "CORT",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        14
+      ],
+      "evidence_text": "Moreover, MSZRD decreased the levels of CORT, ACTH, and CRH related hormones in HPA axis (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "ACTH",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        14
+      ],
+      "evidence_text": "Moreover, MSZRD decreased the levels of CORT, ACTH, and CRH related hormones in HPA axis (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "CRH",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        14
+      ],
+      "evidence_text": "Moreover, MSZRD decreased the levels of CORT, ACTH, and CRH related hormones in HPA axis (P\u00a0<\u00a00.05, 0.01)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "Orexin-A",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        15
+      ],
+      "evidence_text": "At the same time, MSZRD significantly downregulated the serum Orexin-A content in insomnia mice (P\u00a0<\u00a00.05), as well as hypothalamic OX2R expression (P\u00a0<\u00a00.05)."
+    },
+    {
+      "entity1": "MSZRD",
+      "entity2": "OX2R",
+      "relationship": "inhibits",
+      "confidence": 0.95,
+      "pmid": "34509822",
+      "evidence_sentence_indices": [
+        15
+      ],
+      "evidence_text": "At the same time, MSZRD significantly downregulated the serum Orexin-A content in insomnia mice (P\u00a0<\u00a00.05), as well as hypothalamic OX2R expression (P\u00a0<\u00a00.05)."
+    },
+    {
+      "entity1": "sleep disorders",
+      "entity2": "epilepsy",
+      "relationship": "associated_with",
+      "confidence": 0.9,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        4
+      ],
+      "evidence_text": "It is documented that sleep disorders are associated with epilepsy."
+    },
+    {
+      "entity1": "sleep disorders",
+      "entity2": "epileptic seizures",
+      "relationship": "regulates",
+      "confidence": 0.8,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        5
+      ],
+      "evidence_text": "The origin, suppression, and spread of seizures are affected by sleep."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "sleep disorders",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        7
+      ],
+      "evidence_text": "Meanwhile, orexin, a wake-promoting neuropeptide, provides a bidirectional effect on both sleep and epilepsy."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "epilepsy",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        7
+      ],
+      "evidence_text": "Meanwhile, orexin, a wake-promoting neuropeptide, provides a bidirectional effect on both sleep and epilepsy."
+    },
+    {
+      "entity1": "OX1R",
+      "entity2": "Orexin",
+      "relationship": "binds_to",
+      "confidence": 0.95,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        8
+      ],
+      "evidence_text": "Orexin and its cognate receptors, orexin receptor type 1 (OX1R) and type 2 (OX2R), orchestrate their effects by activating various downstream signaling pathways."
+    },
+    {
+      "entity1": "OX2R",
+      "entity2": "Orexin",
+      "relationship": "binds_to",
+      "confidence": 0.95,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        8
+      ],
+      "evidence_text": "Orexin and its cognate receptors, orexin receptor type 1 (OX1R) and type 2 (OX2R), orchestrate their effects by activating various downstream signaling pathways."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "psychiatric disorders",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        9
+      ],
+      "evidence_text": "Although orexin was considered a therapeutic target in insomnia shortly after its discovery, its potential usefulness for psychiatric disorders and epileptic seizures has been suggested in the pre-clinical studies."
+    },
+    {
+      "entity1": "Orexin",
+      "entity2": "epileptic seizures",
+      "relationship": "associated_with",
+      "confidence": 0.8,
+      "pmid": "37003137",
+      "evidence_sentence_indices": [
+        9
+      ],
+      "evidence_text": "Although orexin was considered a therapeutic target in insomnia shortly after its discovery, its potential usefulness for psychiatric disorders and epileptic seizures has been suggested in the pre-clinical studies."
+    }
+  ],
+  "validation_results": [
+    {
+      "relationship": {
+        "entity1": "Almorexant",
+        "entity2": "Orexin",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "35972717",
+        "evidence_sentence_indices": [
+          4
+        ],
+        "evidence_text": "Almorexant is now mainly used as a commercial specific inhibitor of the orexin system in animal studies due to safety issues."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Filorexant",
+        "entity2": "Insomnia",
+        "relationship": "associated_with",
+        "confidence": 0.8,
+        "pmid": "35972717",
+        "evidence_sentence_indices": [
+          5
+        ],
+        "evidence_text": "Although filorexant has also shown a certain sleep-promoting effect, there are few clinical or experimental studies on sleep-related aspects of filorexant in recent years."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Seltorexant",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "35972717",
+        "evidence_sentence_indices": [
+          6
+        ],
+        "evidence_text": "As for selective ORAs, orexin receptor 2 antagonist seltorexant still has not yet reached phase 3."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "Insomnia",
+        "relationship": "associated_with",
+        "confidence": 0.8,
+        "pmid": "35972717",
+        "evidence_sentence_indices": [
+          3
+        ],
+        "evidence_text": "RECENT FINDINGS: Research on suvorexant in recent years gradually focus on comorbid insomnia, while lemborexant and daridorexant were still being validated in primary insomnia."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Lemborexant",
+        "entity2": "Insomnia",
+        "relationship": "associated_with",
+        "confidence": 0.8,
+        "pmid": "35972717",
+        "evidence_sentence_indices": [
+          3
+        ],
+        "evidence_text": "RECENT FINDINGS: Research on suvorexant in recent years gradually focus on comorbid insomnia, while lemborexant and daridorexant were still being validated in primary insomnia."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Daridorexant",
+        "entity2": "Insomnia",
+        "relationship": "associated_with",
+        "confidence": 0.8,
+        "pmid": "35972717",
+        "evidence_sentence_indices": [
+          3
+        ],
+        "evidence_text": "RECENT FINDINGS: Research on suvorexant in recent years gradually focus on comorbid insomnia, while lemborexant and daridorexant were still being validated in primary insomnia."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "HCRTR1",
+        "relationship": "binds_to",
+        "confidence": 0.9,
+        "pmid": "34052813",
+        "evidence_sentence_indices": [
+          1
+        ],
+        "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "HCRTR2",
+        "relationship": "binds_to",
+        "confidence": 0.9,
+        "pmid": "34052813",
+        "evidence_sentence_indices": [
+          1
+        ],
+        "evidence_text": "The hypocretins/orexins are two excitatory neuropeptides, alternately called HCRT1 or orexin-A and HCRT2 or orexin-B, that are the endogenous ligands for two G-protein-coupled receptors, HCRTR1/OX1R and HCRTR2/OX2R."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Narcolepsy",
+        "relationship": "associated_with",
+        "confidence": 0.9,
+        "pmid": "34052813",
+        "evidence_sentence_indices": [
+          2
+        ],
+        "evidence_text": "Shortly after the discovery of this system, degeneration of hypocretin/orexin-producing neurons was implicated in the etiology of the sleep disorder narcolepsy."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OX2R",
+        "entity2": "Sleep Disorders",
+        "relationship": "associated_with",
+        "confidence": 0.85,
+        "pmid": "34052813",
+        "evidence_sentence_indices": [
+          5
+        ],
+        "evidence_text": "While HCRTR1/OX1R is associated with regulation of motivation, reward, and autonomic functions, HCRTR2/OX2R is strongly linked to sleep-wake control."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Sleep Disorders",
+        "relationship": "regulates",
+        "confidence": 0.9,
+        "pmid": "34052810",
+        "evidence_sentence_indices": [
+          1
+        ],
+        "evidence_text": "Orexins regulate a wide variety of biological functions, most notably the sleep-wake cycle, reward and stress processing, alertness, vigilance, and cognitive functioning."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Narcolepsy",
+        "relationship": "associated_with",
+        "confidence": 0.9,
+        "pmid": "34052810",
+        "evidence_sentence_indices": [
+          2
+        ],
+        "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Anorexia nervosa",
+        "relationship": "associated_with",
+        "confidence": 0.85,
+        "pmid": "34052810",
+        "evidence_sentence_indices": [
+          2
+        ],
+        "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Cognitive decline",
+        "relationship": "associated_with",
+        "confidence": 0.85,
+        "pmid": "34052810",
+        "evidence_sentence_indices": [
+          2
+        ],
+        "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Neurodegenerative disease",
+        "relationship": "associated_with",
+        "confidence": 0.85,
+        "pmid": "34052810",
+        "evidence_sentence_indices": [
+          2
+        ],
+        "evidence_text": "Alterations of central and peripheral orexin levels are linked to conditions such as narcolepsy, anorexia nervosa, age-related cognitive decline, and neurodegenerative disease."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Sleep Disorders",
+        "entity2": "Alzheimer's disease",
+        "relationship": "cooccurs_with",
+        "confidence": 0.9,
+        "pmid": "37708433",
+        "evidence_sentence_indices": [
+          3
+        ],
+        "evidence_text": "Furthermore, evidence supports a bidirectional relationship between disrupted sleep and Alzheimer's disease (AD) or related dementias."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Alzheimer's disease",
+        "relationship": "associated_with",
+        "confidence": 0.9,
+        "pmid": "37708433",
+        "evidence_sentence_indices": [
+          5
+        ],
+        "evidence_text": "Dysregulation of the orexin system occurs in aging and AD, positioning ORAs as advantageous for these populations."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "Dementia",
+        "relationship": "associated_with",
+        "confidence": 0.85,
+        "pmid": "37708433",
+        "evidence_sentence_indices": [
+          6
+        ],
+        "evidence_text": "Indeed, several clinical studies indicate that ORAs are efficacious hypnotics in older persons and dementia patients and, as in adults, are generally well tolerated."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "Sleep Disorders",
+        "relationship": "regulates",
+        "confidence": 0.8,
+        "pmid": "37708433",
+        "evidence_sentence_indices": [
+          7
+        ],
+        "evidence_text": "ORAs are likely to be more effective when administered early in sleep/wake dysregulation to reestablish good sleep/wake-related behaviors and reduce the accumulation of dementia-associated proteinopathic substrates."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Alzheimer's disease",
+        "relationship": "associated_with",
+        "confidence": 0.9,
+        "pmid": "39365407",
+        "evidence_sentence_indices": [
+          2
+        ],
+        "evidence_text": "Given the high prevalence of sleep disturbances in Alzheimer's disease (AD) and their reported involvement in AD pathophysiology, the orexin system is hypothesized to contribute to the disease pathogenesis."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Amyloid-beta",
+        "relationship": "associated_with",
+        "confidence": 0.85,
+        "pmid": "39365407",
+        "evidence_sentence_indices": [
+          3
+        ],
+        "evidence_text": "Specifically, recent evidence suggests that orexin's influence may extend beyond sleep regulation, potentially affecting amyloid-\u03b2 and tau pathologies."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Tau",
+        "relationship": "associated_with",
+        "confidence": 0.85,
+        "pmid": "39365407",
+        "evidence_sentence_indices": [
+          3
+        ],
+        "evidence_text": "Specifically, recent evidence suggests that orexin's influence may extend beyond sleep regulation, potentially affecting amyloid-\u03b2 and tau pathologies."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "Chronic insomnia disorder",
+        "relationship": "associated_with",
+        "confidence": 0.9,
+        "pmid": "39365407",
+        "evidence_sentence_indices": [
+          4
+        ],
+        "evidence_text": "Dual orexin receptor antagonists (DORAs), namely suvorexant, lemborexant, and daridorexant, demonstrated efficacy in treating chronic insomnia disorder across diverse clinical populations."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Suvorexant",
+        "entity2": "Alzheimer's disease",
+        "relationship": "associated_with",
+        "confidence": 0.85,
+        "pmid": "39365407",
+        "evidence_sentence_indices": [
+          5,
+          7
+        ],
+        "evidence_text": "Considering their stabilizing effects on sleep parameters and emerging evidence of a possible neuroprotective role, these agents represent a promising strategy for AD management. Overall, clinical studies support the use of DORAs to enhance sleep quality in patients with AD with comorbid sleep and circadian sleep-wake rhythm disorders."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Lemborexant",
+        "entity2": "Alzheimer's disease",
+        "relationship": "associated_with",
+        "confidence": 0.85,
+        "pmid": "39365407",
+        "evidence_sentence_indices": [
+          5
+        ],
+        "evidence_text": "Considering their stabilizing effects on sleep parameters and emerging evidence of a possible neuroprotective role, these agents represent a promising strategy for AD management."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Daridorexant",
+        "entity2": "Alzheimer's disease",
+        "relationship": "associated_with",
+        "confidence": 0.85,
+        "pmid": "39365407",
+        "evidence_sentence_indices": [
+          5
+        ],
+        "evidence_text": "Considering their stabilizing effects on sleep parameters and emerging evidence of a possible neuroprotective role, these agents represent a promising strategy for AD management."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "OX1R",
+        "relationship": "binds_to",
+        "confidence": 0.9,
+        "pmid": "31782044",
+        "evidence_sentence_indices": [
+          2
+        ],
+        "evidence_text": "Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2Rs and act on numerous physiological processes, such as sleep-wake regulation, feeding, reward, emotion, and motivation."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "OX2R",
+        "relationship": "binds_to",
+        "confidence": 0.9,
+        "pmid": "31782044",
+        "evidence_sentence_indices": [
+          2
+        ],
+        "evidence_text": "Orexins bind and activate their associated G protein-coupled orexin type 1 receptors (OX1Rs) and OX2Rs and act on numerous physiological processes, such as sleep-wake regulation, feeding, reward, emotion, and motivation."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Depression",
+        "relationship": "associated_with",
+        "confidence": 0.9,
+        "pmid": "31782044",
+        "evidence_sentence_indices": [
+          4
+        ],
+        "evidence_text": "In the present review, we discuss recent findings on the involvement of the orexin system in the pathophysiology of psychiatric disorders, including sleep disorders, depression, anxiety, and drug addiction."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Anxiety",
+        "relationship": "associated_with",
+        "confidence": 0.9,
+        "pmid": "31782044",
+        "evidence_sentence_indices": [
+          4
+        ],
+        "evidence_text": "In the present review, we discuss recent findings on the involvement of the orexin system in the pathophysiology of psychiatric disorders, including sleep disorders, depression, anxiety, and drug addiction."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "Drug addiction",
+        "relationship": "associated_with",
+        "confidence": 0.9,
+        "pmid": "31782044",
+        "evidence_sentence_indices": [
+          4
+        ],
+        "evidence_text": "In the present review, we discuss recent findings on the involvement of the orexin system in the pathophysiology of psychiatric disorders, including sleep disorders, depression, anxiety, and drug addiction."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "NF-kappaB",
+        "relationship": "inhibits",
+        "confidence": 0.95,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          11
+        ],
+        "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "ERK",
+        "relationship": "inhibits",
+        "confidence": 0.95,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          11
+        ],
+        "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "p38",
+        "relationship": "inhibits",
+        "confidence": 0.95,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          11
+        ],
+        "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "IL-1beta",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          11
+        ],
+        "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "TNF-alpha",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          11
+        ],
+        "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "IL-6",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          11
+        ],
+        "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "iNOS",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          11
+        ],
+        "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "GFAP",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          11
+        ],
+        "evidence_text": "OXA decreased inflammatory mediators, inhibited astrocyte activation and nuclear translocation of NF-\u03baB and phosphorylation of NF-\u03baB, MAPK/ERK and MAPK/p38."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "Bcl-2",
+        "relationship": "activates",
+        "confidence": 0.9,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          12
+        ],
+        "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "Bax",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          12
+        ],
+        "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "Cytochrome C",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          12
+        ],
+        "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "caspase-9",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          12
+        ],
+        "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin-A",
+        "entity2": "caspase-3",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "34358627",
+        "evidence_sentence_indices": [
+          12
+        ],
+        "evidence_text": "Besides, OXA suppressed apoptosis via upregulating the ratio of Bcl-2/Bax and downregulating cytochrome C, cleaved-caspase-9 and cleaved caspase-3."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "TAK-861",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "confidence": 0.95,
+        "pmid": "39242684",
+        "evidence_sentence_indices": [
+          6
+        ],
+        "evidence_text": "Here, we show that a novel OX2R-selective agonist, TAK-861 [N-{(2S,3R)-4,4-Difluoro-1-(2-hydroxy-2-methylpropanoyl)-2-[(2,3',5'-trifluoro[1,1'-biphenyl]-3-yl)methyl]pyrrolidin-3-yl}ethanesulfonamide], activates OX2R with a half-maximal effective concentration of 2.5\u00a0nM and promotes wakefulness at 1\u00a0mg/kg in mice and monkeys, suggesting ~\u2009tenfold higher potency and lower effective dosage than TAK-994."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "TAK-861",
+        "entity2": "cataplexy",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "39242684",
+        "evidence_sentence_indices": [
+          7
+        ],
+        "evidence_text": "Similar to TAK-994, TAK-861 substantially ameliorates wakefulness fragmentation and cataplexy-like episodes in orexin/ataxin-3 and orexin-tTA;TetO DTA mice (NT1 mouse models)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "TAK-994",
+        "entity2": "OX2R",
+        "relationship": "activates",
+        "confidence": 0.85,
+        "pmid": "37494485",
+        "evidence_sentence_indices": [
+          2
+        ],
+        "evidence_text": "METHODS: We conducted a phase 2, randomized, placebo-controlled trial of TAK-994, an oral orexin receptor 2-selective agonist, in patients with narcolepsy type 1."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "TAK-994",
+        "entity2": "cataplexy",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "37494485",
+        "evidence_sentence_indices": [
+          13
+        ],
+        "evidence_text": "Weekly incidences of cataplexy at week 8 were 0.27 in the 30-mg group, 1.14 in the 90-mg group, 0.88 in the 180-mg group, and 5.83 in the placebo group (rate ratio vs."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "TAK-994",
+        "entity2": "sleepiness",
+        "relationship": "inhibits",
+        "confidence": 0.85,
+        "pmid": "37494485",
+        "evidence_sentence_indices": [
+          11,
+          12
+        ],
+        "evidence_text": "Least-squares mean changes to week 8 in the ESS score were -12.2 in the 30-mg group, -13.5 in the 90-mg group, -15.1 in the 180-mg group, and -2.1 in the placebo group (difference vs. placebo, -10.1 in the 30-mg group, -11.4 in the 90-mg group, and -13.0 in the 180-mg group)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "TAK-994",
+        "entity2": "hepatotoxic effects",
+        "relationship": "associated_with",
+        "confidence": 0.8,
+        "pmid": "37494485",
+        "evidence_sentence_indices": [
+          15,
+          16
+        ],
+        "evidence_text": "A total of 44 of 56 patients (79%) receiving TAK-994 had adverse events, most commonly urinary urgency or frequency. Clinically important elevations in liver-enzyme levels occurred in 5 patients, and drug-induced liver injury meeting Hy's law criteria occurred in 3 patients."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "HCRTR1",
+        "entity2": "lactate",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "39119889",
+        "evidence_sentence_indices": [
+          4
+        ],
+        "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production and brain-derived neurotrophic factor (BDNF) expression by hypoxia-inducible factor-1\u03b1 (HIF-1\u03b1), thus impairing adult hippocampal neuroplasticity, and cognitive impairment in CUMS model."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "HCRTR1",
+        "entity2": "BDNF",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "39119889",
+        "evidence_sentence_indices": [
+          4
+        ],
+        "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production and brain-derived neurotrophic factor (BDNF) expression by hypoxia-inducible factor-1\u03b1 (HIF-1\u03b1), thus impairing adult hippocampal neuroplasticity, and cognitive impairment in CUMS model."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "hypocretin-1",
+        "entity2": "lactate",
+        "relationship": "inhibits",
+        "confidence": 0.9,
+        "pmid": "39119889",
+        "evidence_sentence_indices": [
+          4,
+          6
+        ],
+        "evidence_text": "Excessive hypocretin-1 conducted with hypocretin receptor 1 (HCRTR1) reduced lactate production and brain-derived neurotrophic factor (BDNF) expression by hypoxia-inducible factor-1\u03b1 (HIF-1\u03b1), thus impairing adult hippocampal neuroplasticity, and cognitive impairment in CUMS model. The direct effect of hypocretin-1 on hippocampal lactate production and cognitive behavior is further confirmed by intraventricular injection of hypocretin-1 and microPET-CT in rats."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "Orexin-A",
+        "relationship": "regulates",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          2
+        ],
+        "evidence_text": "Our previous study showed that MSZRD can improve the gastrointestinal discomfort related insomnia by regulating Orexin-A."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "5-HT",
+        "relationship": "regulates",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          12
+        ],
+        "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "5HT1A receptor",
+        "relationship": "regulates",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          12
+        ],
+        "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "DA",
+        "relationship": "inhibits",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          12
+        ],
+        "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "norepinephrine",
+        "relationship": "inhibits",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          12
+        ],
+        "evidence_text": "Furthermore, MSZRD effectively increased the content of 5-HT and 5-HTR1A protein in the hypothalamus of insomnia mice (P\u00a0<\u00a00.05, 0.01), while downregulated the content of DA and NE (P\u00a0<\u00a00.05, 0.01)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "GABA",
+        "relationship": "regulates",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          13
+        ],
+        "evidence_text": "Importantly, serum GABA concentration was increased by treatment with MSZRD (P\u00a0<\u00a00.05), as reflected by a decreased Glu/GABA ratio (P\u00a0<\u00a00.05)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "Glu",
+        "relationship": "inhibits",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          13
+        ],
+        "evidence_text": "Importantly, serum GABA concentration was increased by treatment with MSZRD (P\u00a0<\u00a00.05), as reflected by a decreased Glu/GABA ratio (P\u00a0<\u00a00.05)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "CORT",
+        "relationship": "inhibits",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          14
+        ],
+        "evidence_text": "Moreover, MSZRD decreased the levels of CORT, ACTH, and CRH related hormones in HPA axis (P\u00a0<\u00a00.05, 0.01)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "ACTH",
+        "relationship": "inhibits",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          14
+        ],
+        "evidence_text": "Moreover, MSZRD decreased the levels of CORT, ACTH, and CRH related hormones in HPA axis (P\u00a0<\u00a00.05, 0.01)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "CRH",
+        "relationship": "inhibits",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          14
+        ],
+        "evidence_text": "Moreover, MSZRD decreased the levels of CORT, ACTH, and CRH related hormones in HPA axis (P\u00a0<\u00a00.05, 0.01)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "Orexin-A",
+        "relationship": "inhibits",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          15
+        ],
+        "evidence_text": "At the same time, MSZRD significantly downregulated the serum Orexin-A content in insomnia mice (P\u00a0<\u00a00.05), as well as hypothalamic OX2R expression (P\u00a0<\u00a00.05)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "MSZRD",
+        "entity2": "OX2R",
+        "relationship": "inhibits",
+        "confidence": 0.95,
+        "pmid": "34509822",
+        "evidence_sentence_indices": [
+          15
+        ],
+        "evidence_text": "At the same time, MSZRD significantly downregulated the serum Orexin-A content in insomnia mice (P\u00a0<\u00a00.05), as well as hypothalamic OX2R expression (P\u00a0<\u00a00.05)."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "sleep disorders",
+        "entity2": "epilepsy",
+        "relationship": "associated_with",
+        "confidence": 0.9,
+        "pmid": "37003137",
+        "evidence_sentence_indices": [
+          4
+        ],
+        "evidence_text": "It is documented that sleep disorders are associated with epilepsy."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "sleep disorders",
+        "entity2": "epileptic seizures",
+        "relationship": "regulates",
+        "confidence": 0.8,
+        "pmid": "37003137",
+        "evidence_sentence_indices": [
+          5
+        ],
+        "evidence_text": "The origin, suppression, and spread of seizures are affected by sleep."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "sleep disorders",
+        "relationship": "associated_with",
+        "confidence": 0.8,
+        "pmid": "37003137",
+        "evidence_sentence_indices": [
+          7
+        ],
+        "evidence_text": "Meanwhile, orexin, a wake-promoting neuropeptide, provides a bidirectional effect on both sleep and epilepsy."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "epilepsy",
+        "relationship": "associated_with",
+        "confidence": 0.8,
+        "pmid": "37003137",
+        "evidence_sentence_indices": [
+          7
+        ],
+        "evidence_text": "Meanwhile, orexin, a wake-promoting neuropeptide, provides a bidirectional effect on both sleep and epilepsy."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OX1R",
+        "entity2": "Orexin",
+        "relationship": "binds_to",
+        "confidence": 0.95,
+        "pmid": "37003137",
+        "evidence_sentence_indices": [
+          8
+        ],
+        "evidence_text": "Orexin and its cognate receptors, orexin receptor type 1 (OX1R) and type 2 (OX2R), orchestrate their effects by activating various downstream signaling pathways."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "OX2R",
+        "entity2": "Orexin",
+        "relationship": "binds_to",
+        "confidence": 0.95,
+        "pmid": "37003137",
+        "evidence_sentence_indices": [
+          8
+        ],
+        "evidence_text": "Orexin and its cognate receptors, orexin receptor type 1 (OX1R) and type 2 (OX2R), orchestrate their effects by activating various downstream signaling pathways."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "psychiatric disorders",
+        "relationship": "associated_with",
+        "confidence": 0.8,
+        "pmid": "37003137",
+        "evidence_sentence_indices": [
+          9
+        ],
+        "evidence_text": "Although orexin was considered a therapeutic target in insomnia shortly after its discovery, its potential usefulness for psychiatric disorders and epileptic seizures has been suggested in the pre-clinical studies."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    },
+    {
+      "relationship": {
+        "entity1": "Orexin",
+        "entity2": "epileptic seizures",
+        "relationship": "associated_with",
+        "confidence": 0.8,
+        "pmid": "37003137",
+        "evidence_sentence_indices": [
+          9
+        ],
+        "evidence_text": "Although orexin was considered a therapeutic target in insomnia shortly after its discovery, its potential usefulness for psychiatric disorders and epileptic seizures has been suggested in the pre-clinical studies."
+      },
+      "pmid_valid": true,
+      "evidence_valid": true,
+      "evidence_similarity": 1.0,
+      "is_valid": true,
+      "error_message": null
+    }
+  ],
+  "statistics": {
+    "total_abstracts": 15,
+    "total_chunks": 3,
+    "chunks_processed": 3,
+    "total_relationships": 73,
+    "valid_relationships": 73,
+    "invalid_relationships": 0,
+    "pmid_failures": 0,
+    "evidence_failures": 0,
+    "validation_rate": 1.0,
+    "total_prompt_tokens": 7805,
+    "total_completion_tokens": 13040,
+    "total_latency_ms": 9916.238784790039,
+    "wall_clock_ms": 4133.6798667907715,
+    "throughput_tok_per_sec": 2102.107507936676
+  },
+  "errors": []
+}

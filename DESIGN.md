@@ -691,7 +691,16 @@ Based on the scaling study finding that smaller chunks improve verbatim extracti
 - Validation becomes simple bounds checking
 - 100% verbatim evidence by construction
 
-**Failure Mode:** The only failures (2 out of 88) were invalid indices - model cited sentence 6 when PMID only had 4 sentences. This is easily detectable.
+**Failure Mode (2.3% Loss):**
+The only failures are **hallucinated sentence indices** - model cites indices that don't exist:
+```
+PMID 38295907: Model cited [2, 6, 8] but abstract only has 4 sentences
+- 2 relationships failed (same PMID, same invalid indices)
+- Root cause: Index hallucination, not paraphrasing
+- Easily detectable via bounds checking
+```
+
+This is a fundamentally different (and rarer) failure mode than paraphrasing - the model occasionally "sees" more sentences than exist, likely due to context mixing across abstracts in the chunk.
 
 **Implementation Files:**
 - `extraction/config.toml` - Updated prompts with numbered sentence format
@@ -715,7 +724,188 @@ MAX_TOKENS = 8192  # Higher for multi-abstract output
 
 ---
 
-## 11. Future Enhancements (Post-Demo)
+## 11. Google ADK Integration & Optimizations
+
+### 11.1 Architecture Decision: Google ADK over OpenAI API
+
+**Context:** Original design used OpenAI Python SDK. Decision made to switch to Google ADK (Agent Development Kit) for better Gemini integration.
+
+**Decision:** Use Google ADK with `LlmAgent` and `PlanReActPlanner`
+
+**Rationale:**
+| Factor | OpenAI SDK | Google ADK |
+|--------|-----------|------------|
+| **Model access** | GPT-4 only | Native Gemini 2.5 Flash/Pro |
+| **Agent framework** | Manual tool orchestration | Built-in planning + reasoning |
+| **Tool execution** | Custom implementation | Native function tool support |
+| **Session management** | Manual | `InMemorySessionService` |
+
+**Key Components:**
+- `LlmAgent` - Core agent with instruction and tools
+- `PlanReActPlanner` - Planning and reasoning strategy
+- `Runner` - Async execution with event streaming
+- `InMemorySessionService` - Conversation session management
+
+### 11.2 ADK Response Accumulation Fix
+
+**Problem:** ADK spreads response text across multiple events, not just the final one. Naive implementation only captured final event, resulting in empty responses.
+
+**Symptom:** "Agent did not produce a final response" for complex multi-tool queries.
+
+**Root Cause:**
+```python
+# WRONG: Only looking at final event
+if event.is_final_response():
+    if event.content and event.content.parts:
+        # Final event often has empty parts!
+        ...
+```
+
+**Solution:** Accumulate text from ALL events during iteration:
+```python
+accumulated_text = []
+
+async for event in self.runner.run_async(...):
+    # Accumulate text from ALL events
+    if event.content and event.content.parts:
+        for part in event.content.parts:
+            if hasattr(part, 'text') and part.text and part.text.strip():
+                accumulated_text.append(part.text)
+
+    if event.is_final_response():
+        final_response = "\n".join(accumulated_text)
+        break
+```
+
+**File:** `agent/adk_orchestrator.py:403-432`
+
+### 11.3 Extraction Performance Optimization
+
+**Problem:** Initial pipeline used `RelationshipExtractor` (sync Gemini SDK with `run_in_executor`), taking ~7s per article.
+
+**Impact:**
+- 5 articles: 70.3s (including agent overhead)
+- 10 articles: Would be ~100-140s
+
+**Solution:** Replace with `BatchedLiteLLMMiner`:
+- Token-aware chunking for batch processing
+- LiteLLM multi-provider support
+- Sentence-index based evidence extraction (97.7% validation)
+- Parallel chunk processing
+
+**Performance After Fix:**
+| Scale | Old Time | New Time | Improvement |
+|-------|----------|----------|-------------|
+| 5 articles | 70.3s | ~28s | 2.5x faster |
+| 10 articles | ~140s | 56.5s | 2.5x faster |
+
+**Files Changed:**
+- `agent/tools.py:30-54` - Updated imports and constructor
+- `agent/tools.py:624-667` - Simplified `extract_relationships()` to use miner
+- `main.py:34,172,181` - Use `create_batched_miner()` factory
+
+### 11.4 Updated Tool Architecture
+
+**Before (Slow):**
+```
+AgentTools.__init__(
+    relationship_extractor: RelationshipExtractor  # sync Gemini, 7s/article
+)
+```
+
+**After (Fast):**
+```
+AgentTools.__init__(
+    relationship_miner: BatchedLiteLLMMiner  # async LiteLLM, batched
+)
+```
+
+**Key Difference:** `extract_relationships()` now delegates to `relationship_miner.run()` which:
+1. Chunks abstracts by token count
+2. Processes chunks in parallel (semaphore-controlled)
+3. Returns validated relationships with provenance
+
+### 11.5 Planner Removal Optimization
+
+**Problem:** `PlanReActPlanner` adds multiple LLM reasoning cycles per tool call.
+
+**Solution:** Remove planner entirely - let the model do native function calling.
+
+```python
+# Before (slow)
+agent = LlmAgent(..., planner=PlanReActPlanner())
+
+# After (faster)
+agent = LlmAgent(...)  # No planner
+```
+
+**Result:** Simple STRING query dropped from ~15s to ~4.7s.
+
+### 11.6 Critical Bottleneck: LLM Context Processing
+
+**Discovery:** The real bottleneck is NOT tool execution but LLM processing of tool outputs.
+
+**Server Log Evidence (10 articles pipeline):**
+```
+21:54:38,918 - LLM call sent (after extraction tool completed)
+21:56:18,806 - Response received (100 seconds later!)
+```
+
+**Root Cause:** ADK passes ALL tool output through the orchestrating LLM. When `extract_relationships` returns 50+ relationships with evidence sentences, the model takes **100+ seconds** to process that context.
+
+**Timeline Breakdown:**
+| Component | Duration | Notes |
+|-----------|----------|-------|
+| STRING network | ~0.5s | API call |
+| PubMed search | ~1.5s | API call |
+| PubTator annotations | ~0.5s | API call |
+| Relationship extraction | ~8-10s | Batched LLM (fast!) |
+| **LLM context processing** | **~100s** | **BOTTLENECK** |
+| Total | ~107s | |
+
+**Key Insight:** The extraction tools are fast. The problem is passing large JSON payloads through the orchestrating LLM for "reasoning".
+
+### 11.7 Architecture Problem
+
+Current flow (slow):
+```
+User Query → LLM → Tool Call → [Tool executes, returns JSON]
+                             → LLM processes entire JSON (~100s)
+                             → LLM decides next tool
+                             → ... repeat
+```
+
+The LLM sees and "thinks about" every relationship, every PMID, every evidence sentence. This is wasteful - the LLM doesn't need to see raw data to orchestrate.
+
+**Solution Direction:** State-based data flow where LLM only sees summaries.
+
+### 11.6 Configuration
+
+**ADK Orchestrator Settings:**
+```python
+ADKOrchestrator(
+    tools=tools,
+    model="gemini-2.5-flash",  # Fast, cost-effective
+    app_name="tetra_kg_agent",
+)
+```
+
+**Batched Miner Settings (via `main.py`):**
+```python
+relationship_miner = create_batched_miner(
+    extractor_name="gemini",  # Uses gemini/gemini-2.5-flash via LiteLLM
+)
+```
+
+### 11.8 Next Step: State-Based Data Flow
+
+**Solution direction:** Use ADK's `ToolContext.state` to pass data between tools without LLM mediation. Tools write full data to state, return only summaries to LLM.
+
+**Status:** In progress - validating approach.
+
+---
+
+## 12. Future Enhancements (Post-Demo)
 
 1. **Entity Resolution** - UMLS/UniProt canonical IDs
 2. **GNN Upgrade** - GraphSAGE for better predictions

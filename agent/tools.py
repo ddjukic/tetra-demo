@@ -7,13 +7,13 @@ for building and querying biological knowledge graphs.
 
 import asyncio
 import logging
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Protocol
 
 from ml.link_predictor import LinkPredictor
 from clients.string_client import StringClient
 from clients.pubmed_client import PubMedClient
-from extraction.relationship_extractor import RelationshipExtractor
 from extraction.relationship_inferrer import RelationshipInferrer, HypothesisGenerator
+from extraction import BatchedLiteLLMMiner
 from models.knowledge_graph import (
     KnowledgeGraph,
     RelationshipType,
@@ -32,7 +32,7 @@ class AgentTools:
         link_predictor: LinkPredictor,
         string_client: StringClient,
         pubmed_client: PubMedClient,
-        relationship_extractor: RelationshipExtractor,
+        relationship_miner: BatchedLiteLLMMiner,
         relationship_inferrer: RelationshipInferrer,
     ):
         """
@@ -42,13 +42,13 @@ class AgentTools:
             link_predictor: Trained ML link predictor
             string_client: STRING database API client
             pubmed_client: PubMed/PubTator API client
-            relationship_extractor: LLM relationship extraction
+            relationship_miner: Fast batched LLM relationship extraction
             relationship_inferrer: LLM relationship inference
         """
         self.link_predictor = link_predictor
         self.string_client = string_client
         self.pubmed_client = pubmed_client
-        self.relationship_extractor = relationship_extractor
+        self.relationship_miner = relationship_miner
         self.relationship_inferrer = relationship_inferrer
         self.hypothesis_generator = HypothesisGenerator()
         self.current_graph: Optional[KnowledgeGraph] = None
@@ -627,7 +627,7 @@ class AgentTools:
         annotations_by_pmid: dict[str, list[dict]],
     ) -> dict[str, Any]:
         """
-        Extract typed relationships from abstracts using LLM.
+        Extract typed relationships from abstracts using fast batched LLM miner.
 
         Args:
             articles: List of article dictionaries with pmid, abstract
@@ -637,53 +637,26 @@ class AgentTools:
             Dictionary with relationships and count.
         """
         try:
-            # Prepare batch extraction input
-            extraction_inputs = []
-            for article in articles:
-                pmid = article.get("pmid", "")
-                abstract = article.get("abstract", "")
-
-                if not abstract:
-                    continue
-
-                # Get entity pairs from annotations
-                annots = annotations_by_pmid.get(pmid, [])
-                gene_entities = [
-                    a.get("entity_text", "")
-                    for a in annots
-                    if a.get("entity_type") == "Gene"
-                ]
-                gene_entities = list(set(gene_entities))
-
-                # Generate pairs
-                entity_pairs = []
-                for i, e1 in enumerate(gene_entities):
-                    for e2 in gene_entities[i + 1:]:
-                        entity_pairs.append((e1, e2))
-
-                if entity_pairs:
-                    extraction_inputs.append({
-                        "pmid": pmid,
-                        "abstract": abstract,
-                        "entity_pairs": entity_pairs,
-                    })
-
-            if not extraction_inputs:
+            if not articles:
                 return {
                     "relationships": [],
                     "count": 0,
-                    "message": "No entity pairs to extract from",
+                    "message": "No articles provided",
                 }
 
-            # Batch extraction
-            relationships = await self.relationship_extractor.batch_extract(
-                abstracts=extraction_inputs,
-                max_concurrent=5,
-            )
+            # Run batched extraction using the fast miner
+            result = await self.relationship_miner.run(articles, annotations_by_pmid)
+
+            # Return validated relationships for the knowledge graph
+            valid_relationships = result.get("valid_relationships", [])
+            stats = result.get("statistics", {})
 
             return {
-                "relationships": relationships,
-                "count": len(relationships),
+                "relationships": valid_relationships,
+                "count": len(valid_relationships),
+                "total_extracted": stats.get("total_relationships", 0),
+                "validation_rate": stats.get("validation_rate", 0),
+                "duration_seconds": stats.get("duration", 0),
             }
         except Exception as e:
             logger.error(f"Error extracting relationships: {e}")
@@ -702,6 +675,7 @@ class AgentTools:
         string_interactions: list[dict[str, Any]],
         literature_relationships: list[dict[str, Any]],
         entities: dict[str, list[dict]],
+        annotations_by_pmid: dict[str, list[dict]] | None = None,
     ) -> dict[str, Any]:
         """
         Build evidence-backed knowledge graph from all sources.
@@ -710,14 +684,55 @@ class AgentTools:
             string_interactions: Interactions from STRING
             literature_relationships: Extracted relationships from literature
             entities: Dict mapping entity type to list of entity dicts
+            annotations_by_pmid: NER annotations from PubTator, keyed by PMID
 
         Returns:
             Dictionary with summary and statistics.
         """
         try:
             self.current_graph = KnowledgeGraph()
+            annotations_by_pmid = annotations_by_pmid or {}
 
-            # Add entities from annotations
+            # 1. Add ALL entities from PubTator NER annotations
+            # PubMed client returns: entity_text, entity_type, entity_id
+            entity_to_pmids: dict[str, set[str]] = {}  # Track which PMIDs each entity appears in
+            for pmid, annotations in annotations_by_pmid.items():
+                for ann in annotations:
+                    entity_text = ann.get("entity_text", "")
+                    entity_type = ann.get("entity_type", "unknown").lower()
+                    entity_ncbi_id = ann.get("entity_id", "")
+
+                    if entity_text:
+                        self.current_graph.add_entity(
+                            entity_id=entity_text,
+                            entity_type=entity_type,
+                            name=entity_text,
+                            entity_ncbi_id=entity_ncbi_id,
+                        )
+                        # Track PMIDs for co-occurrence
+                        if entity_text not in entity_to_pmids:
+                            entity_to_pmids[entity_text] = set()
+                        entity_to_pmids[entity_text].add(pmid)
+
+            # 2. Create co-occurrence edges (entities in same PMID)
+            for pmid, annotations in annotations_by_pmid.items():
+                entities_in_pmid = list(set(ann.get("entity_text", "") for ann in annotations if ann.get("entity_text")))
+                # Create edges between all pairs of entities in same PMID
+                for i, e1 in enumerate(entities_in_pmid):
+                    for e2 in entities_in_pmid[i+1:]:
+                        if e1 and e2 and e1 != e2:
+                            self.current_graph.add_relationship(
+                                source=e1,
+                                target=e2,
+                                rel_type=RelationshipType.COOCCURS_WITH,
+                                evidence=[{
+                                    "source_type": EvidenceSource.LITERATURE.value,
+                                    "source_id": f"PMID:{pmid}",
+                                    "confidence": 0.3,  # Low confidence for co-occurrence
+                                }],
+                            )
+
+            # 3. Add entities from LLM extraction (may overlap with NER)
             for entity_type, entity_list in entities.items():
                 for entity in entity_list:
                     entity_id = entity.get("entity_text") or entity.get("name", "")
@@ -729,7 +744,7 @@ class AgentTools:
                             entity_ncbi_id=entity.get("entity_id", ""),
                         )
 
-            # Add STRING interactions
+            # 4. Add STRING interactions (high confidence)
             for interaction in string_interactions:
                 protein_a = interaction.get("preferredName_A", "")
                 protein_b = interaction.get("preferredName_B", "")
@@ -750,7 +765,7 @@ class AgentTools:
                         }],
                     )
 
-            # Add literature relationships
+            # 5. Add typed literature relationships (enrich/override co-occurrence)
             for rel in literature_relationships:
                 entity1 = rel.get("entity1", "")
                 entity2 = rel.get("entity2", "")

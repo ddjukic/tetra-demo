@@ -4,39 +4,52 @@ Pipeline infrastructure for the scientific knowledge graph multi-agent system.
 This package provides configuration management, metrics tracking, reporting,
 and orchestration for the knowledge graph construction pipeline phases.
 
+Hybrid Architecture:
+    The pipeline now uses a hybrid architecture that separates:
+    - Data Fetching (LLM-driven): DataFetchAgent constructs queries intelligently
+    - Data Processing (Deterministic): KGPipeline runs extraction and graph building
+
+    The KGOrchestrator coordinates both components.
+
 Modules:
     config: Pipeline configuration with PipelineConfig dataclass
     metrics: Token usage tracking, phase metrics, and pipeline reporting
+    models: Data models for pipeline input/output (PipelineInput, PipelineResult)
+    kg_pipeline: Deterministic KG processing pipeline
+    orchestrator: Coordination of data fetching and processing
     string_expansion: STRING database network expansion (Phase 1)
     query_agent: LLM-powered PubMed query construction (Phase 2)
     parallel_extraction: Parallel co-occurrence and LLM relationship extraction
 
-Example:
-    >>> from pipeline import PipelineConfig, PipelineReport, TokenUsage
+Example - Hybrid Architecture:
+    >>> from pipeline import KGOrchestrator, PipelineInput
     >>>
-    >>> # Create configuration from environment
-    >>> config = PipelineConfig.from_env()
+    >>> # Create orchestrator
+    >>> orchestrator = KGOrchestrator(extractor_name="cerebras")
     >>>
-    >>> # Start a pipeline report
-    >>> report = PipelineReport.create()
-    >>> metrics = report.start_phase("string_expansion")
+    >>> # Build a knowledge graph
+    >>> graph = await orchestrator.build("Build a KG for the orexin pathway")
+    >>> print(f"Built graph with {graph.to_summary()['node_count']} nodes")
     >>>
-    >>> # Track token usage
-    >>> usage = TokenUsage.create(
-    ...     phase="relationship_mining",
-    ...     step="paper_1",
-    ...     prompt_tokens=1000,
-    ...     completion_tokens=250,
-    ...     latency_ms=450.5,
-    ...     model="gemini-2.0-flash-exp"
-    ... )
-    >>> report.add_token_usage("relationship_mining", usage)
-    >>>
-    >>> # Finalize and get summary
-    >>> report.finalize()
-    >>> print(report.summary_text())
+    >>> # Expand the graph
+    >>> await orchestrator.expand("Add narcolepsy disease associations")
 
-Pipeline Flow Example:
+Example - Direct Pipeline Usage:
+    >>> from pipeline import KGPipeline, PipelineInput
+    >>>
+    >>> # Create input with pre-fetched data
+    >>> input_data = PipelineInput(
+    ...     articles=articles,
+    ...     annotations=annotations_by_pmid,
+    ...     string_interactions=string_data,
+    ... )
+    >>>
+    >>> # Run pipeline
+    >>> pipeline = KGPipeline(extractor_name="cerebras")
+    >>> result = await pipeline.run(input_data)
+    >>> print(f"Extracted {result.relationships_valid} relationships")
+
+Legacy Example - Phase-based Pipeline:
     >>> from pipeline import PipelineConfig, PipelineReport
     >>> from pipeline.string_expansion import expand_string_network
     >>> from pipeline.query_agent import construct_pubmed_query
@@ -58,24 +71,6 @@ Pipeline Flow Example:
     ...     config=config,
     ...     report=report,
     ... )
-
-Parallel Extraction Example:
-    >>> from pipeline import (
-    ...     run_parallel_extraction,
-    ...     CoOccurrenceEdge,
-    ...     ExtractionResult,
-    ...     annotations_list_to_dict,
-    ... )
-    >>>
-    >>> # Run parallel extraction (co-occurrence + LLM)
-    >>> result = await run_parallel_extraction(
-    ...     articles=articles,
-    ...     annotations=annotations_dict,
-    ...     config=config,
-    ...     report=report,
-    ... )
-    >>> print(f"Found {len(result.cooccurrence_edges)} co-occurrence edges")
-    >>> print(f"Found {len(result.llm_relationships)} LLM relationships")
 """
 
 from pipeline.config import PipelineConfig
@@ -85,6 +80,20 @@ from pipeline.metrics import (
     PipelineReport,
     TokenUsage,
     estimate_cost,
+)
+from pipeline.models import (
+    PipelineInput,
+    PipelineResult,
+)
+from pipeline.kg_pipeline import (
+    KGPipeline,
+    run_kg_pipeline,
+)
+from pipeline.orchestrator import (
+    KGOrchestrator,
+    create_orchestrator,
+    get_orchestrator,
+    set_orchestrator,
 )
 from pipeline.parallel_extraction import (
     CoOccurrenceEdge,
@@ -115,6 +124,15 @@ from pipeline.merge import (
     filter_high_confidence_edges,
 )
 
+# Import batched miner from extraction for convenience
+from extraction.batched_litellm_miner import (
+    BatchedLiteLLMMiner,
+    run_batched_mining,
+    create_batched_miner,
+    MiningStatistics,
+    ExtractedRelationship,
+)
+
 __all__ = [
     # Configuration
     "PipelineConfig",
@@ -125,6 +143,17 @@ __all__ = [
     # Utilities
     "estimate_cost",
     "MODEL_PRICING",
+    # Hybrid Architecture - Data Models
+    "PipelineInput",
+    "PipelineResult",
+    # Hybrid Architecture - Pipeline
+    "KGPipeline",
+    "run_kg_pipeline",
+    # Hybrid Architecture - Orchestrator
+    "KGOrchestrator",
+    "create_orchestrator",
+    "get_orchestrator",
+    "set_orchestrator",
     # Phase 1: STRING Expansion
     "STRINGExpansionResult",
     "expand_string_network",
@@ -149,4 +178,10 @@ __all__ = [
     "deduplicate_edges",
     "get_merge_summary",
     "filter_high_confidence_edges",
+    # Batched Mining (from extraction)
+    "BatchedLiteLLMMiner",
+    "run_batched_mining",
+    "create_batched_miner",
+    "MiningStatistics",
+    "ExtractedRelationship",
 ]
