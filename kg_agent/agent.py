@@ -23,7 +23,6 @@ load_dotenv(project_root / ".env")
 from google.adk.agents import LlmAgent
 from google.adk.tools import ToolContext
 
-from ml.link_predictor import LinkPredictor
 from pipeline.orchestrator import KGOrchestrator, get_orchestrator, set_orchestrator
 from models.knowledge_graph import KnowledgeGraph, RelationshipType, EvidenceSource
 
@@ -31,10 +30,30 @@ from models.knowledge_graph import KnowledgeGraph, RelationshipType, EvidenceSou
 # Initialize Dependencies at Module Load
 # =============================================================================
 
-_link_predictor_path = project_root / "models" / "link_predictor_v2.pkl"
-if _link_predictor_path.exists():
-    _link_predictor = LinkPredictor.load(str(_link_predictor_path))
-else:
+# Load link predictor (PyG preferred with GPU support, gensim as fallback)
+_pyg_model_path = project_root / "models" / "pyg_link_predictor.pkl"
+_gensim_model_path = project_root / "models" / "gensim_link_predictor.pkl"
+_link_predictor = None
+
+# Try PyG first (requires torch, torch_geometric from [gpu] extras)
+if _pyg_model_path.exists():
+    try:
+        from ml.pyg_link_predictor import PyGLinkPredictor
+        _link_predictor = PyGLinkPredictor.load(str(_pyg_model_path))
+    except ImportError:
+        pass  # PyTorch not installed, will try gensim
+
+# Fallback to gensim-based predictor
+if _link_predictor is None and _gensim_model_path.exists():
+    try:
+        from ml.link_predictor import LinkPredictor
+        _link_predictor = LinkPredictor.load(str(_gensim_model_path))
+    except Exception:
+        pass
+
+# Last resort: create empty predictor that returns no predictions
+if _link_predictor is None:
+    from ml.link_predictor import LinkPredictor
     _link_predictor = LinkPredictor()
 
 # Create and set the orchestrator

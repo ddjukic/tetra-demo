@@ -64,21 +64,35 @@ def run_async(coro):
 
 @st.cache_resource(show_spinner="Loading link predictor model...")
 def load_link_predictor():
-    """Load the pre-trained link predictor model."""
-    from ml.link_predictor import LinkPredictor
+    """Load the pre-trained link predictor model (PyG or legacy)."""
+    # Try PyG model first (preferred - GPU accelerated)
+    # Requires torch and torch-geometric: uv sync --extra gpu
+    pyg_model_path = _project_root / "models" / "pyg_link_predictor.pkl"
 
-    model_path = _project_root / "models" / "link_predictor_v2.pkl"
+    if pyg_model_path.exists():
+        try:
+            from ml.pyg_link_predictor import PyGLinkPredictor
+            predictor = PyGLinkPredictor.load(str(pyg_model_path), device="cpu")
+            return predictor
+        except ImportError:
+            # torch/torch-geometric not installed - fall through to legacy
+            pass
+        except Exception as e:
+            st.warning(f"Failed to load PyG link predictor: {e}")
 
-    if not model_path.exists():
-        st.warning(f"Link predictor model not found at {model_path}")
-        return None
+    # Fallback to legacy gensim model
+    legacy_model_path = _project_root / "models" / "gensim_link_predictor.pkl"
 
-    try:
-        predictor = LinkPredictor.load(str(model_path))
-        return predictor
-    except Exception as e:
-        st.error(f"Failed to load link predictor: {e}")
-        return None
+    if legacy_model_path.exists():
+        try:
+            from ml.link_predictor import LinkPredictor
+            predictor = LinkPredictor.load(str(legacy_model_path))
+            return predictor
+        except Exception as e:
+            st.warning(f"Failed to load legacy link predictor: {e}")
+
+    # No model found
+    return None
 
 
 @st.cache_resource(show_spinner="Initializing demo knowledge graph...")

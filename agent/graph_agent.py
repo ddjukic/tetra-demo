@@ -8,11 +8,12 @@ Features:
 - Natural language queries about the knowledge graph
 - Graph Data Science algorithms (centrality, communities, paths)
 - Drug discovery algorithms (DIAMOnD, network proximity, synergy, robustness)
-- ML link predictions with hypothesis generation
+- ML link predictions with hypothesis generation (PyG + ensemble support)
 - Multi-step ReAct planning for complex queries
 
 Architecture:
 - Module-level graph cache for fast tool access
+- Module-level link predictor for PyG ML predictions
 - ToolContext for session state management
 - @requires_graph decorator ensures graph is loaded before tool execution
 - PlanReActPlanner for structured reasoning: Thought -> Action -> Observation -> Repeat
@@ -21,7 +22,8 @@ Architecture:
 import asyncio
 import logging
 from functools import wraps
-from typing import Any, Optional
+from pathlib import Path
+from typing import Any, Optional, Protocol
 
 from google.adk.agents import LlmAgent
 from google.adk.planners import PlanReActPlanner
@@ -33,6 +35,202 @@ from google.genai import types
 from models.knowledge_graph import KnowledgeGraph
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# Link Predictor Protocol (for type hints without hard dependency)
+# =============================================================================
+
+
+class LinkPredictorProtocol(Protocol):
+    """Protocol for link predictors (PyGLinkPredictor or EnsemblePredictor)."""
+
+    def predict(self, protein_pairs: list[tuple[str, str]]) -> list[dict]:
+        """Predict interaction probabilities for protein pairs."""
+        ...
+
+
+# =============================================================================
+# Module-Level Link Predictor Cache
+# =============================================================================
+
+_link_predictor: Optional[LinkPredictorProtocol] = None
+_ensemble_predictor: Optional[Any] = None  # For PyGEnsembleLinkPredictor
+
+
+def set_link_predictor(predictor: LinkPredictorProtocol) -> None:
+    """
+    Set the active link predictor for ML predictions.
+
+    Args:
+        predictor: PyGLinkPredictor or compatible predictor instance
+    """
+    global _link_predictor
+    _link_predictor = predictor
+    logger.info("Link predictor set for ML predictions")
+
+
+def get_link_predictor() -> Optional[LinkPredictorProtocol]:
+    """Get the active link predictor."""
+    return _link_predictor
+
+
+def set_ensemble_predictor(predictor: Any) -> None:
+    """
+    Set the ensemble predictor for multi-model predictions.
+
+    Args:
+        predictor: PyGEnsembleLinkPredictor instance
+    """
+    global _ensemble_predictor
+    _ensemble_predictor = predictor
+    logger.info("Ensemble predictor set with multiple PyG models")
+
+
+def get_ensemble_predictor() -> Optional[Any]:
+    """Get the active ensemble predictor."""
+    return _ensemble_predictor
+
+
+def load_pyg_predictor(
+    model_path: str = "models/pyg_link_predictor.pkl",
+    device: str = "auto"
+) -> Optional[LinkPredictorProtocol]:
+    """
+    Load PyGLinkPredictor from saved model file.
+
+    Args:
+        model_path: Path to saved PyGLinkPredictor model
+        device: Device to use ('auto', 'mps', 'cuda', 'cpu')
+
+    Returns:
+        Loaded PyGLinkPredictor or None if loading fails
+    """
+    global _link_predictor
+
+    if not Path(model_path).exists():
+        logger.warning(f"PyG model not found at {model_path}")
+        return None
+
+    try:
+        from ml.pyg_link_predictor import PyGLinkPredictor
+        predictor = PyGLinkPredictor.load(model_path, device=device)
+        _link_predictor = predictor
+        logger.info(f"Loaded PyGLinkPredictor from {model_path} on device {predictor.device}")
+        return predictor
+    except Exception as e:
+        logger.error(f"Failed to load PyGLinkPredictor: {e}")
+        return None
+
+
+def load_pyg_ensemble(
+    model_dir: str = "models",
+    device: str = "auto"
+) -> Optional[Any]:
+    """
+    Load PyG ensemble predictor with multiple models (balanced, structural, homophily).
+
+    Args:
+        model_dir: Directory containing PyG model files
+        device: Device to use ('auto', 'mps', 'cuda', 'cpu')
+
+    Returns:
+        PyGEnsembleLinkPredictor or None if loading fails
+    """
+    global _ensemble_predictor, _link_predictor
+
+    model_configs = [
+        {"name": "balanced", "path": f"{model_dir}/pyg_link_predictor.pkl"},
+        {"name": "structural", "path": f"{model_dir}/pyg_link_predictor_structural.pkl"},
+        {"name": "homophily", "path": f"{model_dir}/pyg_link_predictor_homophily.pkl"},
+    ]
+
+    # Filter to existing models
+    existing_configs = [c for c in model_configs if Path(c["path"]).exists()]
+
+    if not existing_configs:
+        logger.warning(f"No PyG models found in {model_dir}")
+        return None
+
+    try:
+        from ml.pyg_link_predictor import PyGLinkPredictor
+
+        # Create ensemble-like wrapper
+        class PyGEnsembleLinkPredictor:
+            """Ensemble of PyG link predictors for robust predictions."""
+
+            def __init__(self, configs: list[dict], device: str):
+                self.models: list[tuple[str, PyGLinkPredictor]] = []
+                for config in configs:
+                    try:
+                        model = PyGLinkPredictor.load(config["path"], device=device)
+                        self.models.append((config["name"], model))
+                        logger.info(f"Loaded ensemble model '{config['name']}' from {config['path']}")
+                    except Exception as e:
+                        logger.warning(f"Failed to load {config['path']}: {e}")
+
+                if not self.models:
+                    raise ValueError("No models could be loaded for ensemble")
+
+            def predict(self, protein_pairs: list[tuple[str, str]]) -> list[dict]:
+                """Get ensemble predictions averaging across all models."""
+                if not self.models:
+                    return [{"error": "No models loaded"} for _ in protein_pairs]
+
+                results = []
+                for pair in protein_pairs:
+                    model_predictions = []
+                    errors = []
+
+                    for name, model in self.models:
+                        pred = model.predict([pair])[0]
+                        if pred.get("error"):
+                            errors.append({"model": name, "error": pred["error"]})
+                        else:
+                            model_predictions.append({
+                                "model": name,
+                                "score": pred["ml_score"],
+                                "in_string": pred.get("in_string", False),
+                            })
+
+                    if model_predictions:
+                        scores = [p["score"] for p in model_predictions]
+                        mean_score = sum(scores) / len(scores)
+                        std_score = (sum((s - mean_score) ** 2 for s in scores) / len(scores)) ** 0.5
+
+                        results.append({
+                            "protein1": pair[0],
+                            "protein2": pair[1],
+                            "ml_score": mean_score,
+                            "model_scores": model_predictions,
+                            "score_std": std_score,
+                            "in_string": model_predictions[0]["in_string"],
+                            "num_models": len(model_predictions),
+                            "errors": errors if errors else None,
+                        })
+                    else:
+                        results.append({
+                            "protein1": pair[0],
+                            "protein2": pair[1],
+                            "ml_score": 0.0,
+                            "error": "; ".join([f"{e['model']}: {e['error']}" for e in errors]),
+                        })
+
+                return results
+
+            def predict_single(self, protein1: str, protein2: str) -> dict:
+                """Get detailed ensemble prediction for a single pair."""
+                return self.predict([(protein1, protein2)])[0]
+
+        ensemble = PyGEnsembleLinkPredictor(existing_configs, device)
+        _ensemble_predictor = ensemble
+        _link_predictor = ensemble  # Use ensemble as default predictor
+        logger.info(f"Loaded PyG ensemble with {len(ensemble.models)} models")
+        return ensemble
+
+    except Exception as e:
+        logger.error(f"Failed to load PyG ensemble: {e}")
+        return None
 
 
 # =============================================================================
@@ -541,6 +739,196 @@ def get_predictions(
 
 
 @requires_graph
+def predict_interaction(
+    tool_context: ToolContext,
+    protein1: str,
+    protein2: str
+) -> dict[str, Any]:
+    """
+    Predict interaction probability between two proteins using PyG ML model.
+
+    Uses trained PyTorch Geometric Node2Vec link predictor to compute
+    the probability that two proteins interact. If ensemble mode is enabled,
+    returns predictions from multiple models (balanced, structural, homophily).
+
+    Args:
+        tool_context: ADK tool context (injected by framework)
+        protein1: First protein name (e.g., "BRCA1", "TP53")
+        protein2: Second protein name
+
+    Returns:
+        Dictionary with:
+        - protein1: First protein name
+        - protein2: Second protein name
+        - ml_score: Predicted interaction probability (0-1)
+        - in_string: Whether the interaction exists in STRING database
+        - model_scores: Individual model predictions (if ensemble mode)
+        - confidence: Interpretation of the prediction strength
+        - error: Error message if prediction failed
+    """
+    predictor = get_link_predictor()
+
+    if predictor is None:
+        return {
+            "protein1": protein1,
+            "protein2": protein2,
+            "ml_score": None,
+            "error": "No ML predictor loaded. Call load_pyg_predictor() or load_pyg_ensemble() first.",
+            "suggestion": "Load the PyG link predictor using load_pyg_predictor('models/pyg_link_predictor.pkl')"
+        }
+
+    try:
+        result = predictor.predict([(protein1, protein2)])[0]
+
+        if result.get("error"):
+            return {
+                "protein1": protein1,
+                "protein2": protein2,
+                "ml_score": None,
+                "error": result["error"],
+            }
+
+        ml_score = result.get("ml_score", 0.0)
+
+        # Interpret the prediction
+        if ml_score >= 0.8:
+            confidence = "high"
+            interpretation = f"Strong prediction of interaction (score={ml_score:.3f})"
+        elif ml_score >= 0.6:
+            confidence = "moderate"
+            interpretation = f"Moderate prediction of interaction (score={ml_score:.3f})"
+        elif ml_score >= 0.4:
+            confidence = "low"
+            interpretation = f"Weak/uncertain prediction (score={ml_score:.3f})"
+        else:
+            confidence = "very_low"
+            interpretation = f"Low interaction likelihood (score={ml_score:.3f})"
+
+        response = {
+            "protein1": protein1,
+            "protein2": protein2,
+            "ml_score": round(ml_score, 4),
+            "in_string": result.get("in_string", False),
+            "confidence": confidence,
+            "interpretation": interpretation,
+        }
+
+        # Add ensemble details if available
+        if "model_scores" in result:
+            response["model_scores"] = result["model_scores"]
+            response["score_std"] = round(result.get("score_std", 0.0), 4)
+            response["num_models"] = result.get("num_models", 1)
+
+            # Enhanced interpretation for ensemble
+            if result.get("score_std", 0) > 0.1:
+                response["interpretation"] += f" (models disagree, std={result['score_std']:.3f})"
+            else:
+                response["interpretation"] += " (models agree)"
+
+        return response
+
+    except Exception as e:
+        logger.error(f"Prediction failed for {protein1}-{protein2}: {e}")
+        return {
+            "protein1": protein1,
+            "protein2": protein2,
+            "ml_score": None,
+            "error": str(e),
+        }
+
+
+@requires_graph
+def predict_batch_interactions(
+    tool_context: ToolContext,
+    protein_pairs: list[list[str]]
+) -> dict[str, Any]:
+    """
+    Predict interaction probabilities for multiple protein pairs.
+
+    Efficiently batch-processes multiple protein pairs using the PyG model.
+
+    Args:
+        tool_context: ADK tool context (injected by framework)
+        protein_pairs: List of [protein1, protein2] pairs
+
+    Returns:
+        Dictionary with:
+        - predictions: List of prediction results
+        - count: Number of predictions made
+        - avg_score: Average prediction score
+        - high_confidence: Number of high-confidence predictions (>= 0.7)
+    """
+    predictor = get_link_predictor()
+
+    if predictor is None:
+        return {
+            "predictions": [],
+            "count": 0,
+            "error": "No ML predictor loaded. Call load_pyg_predictor() or load_pyg_ensemble() first."
+        }
+
+    try:
+        # Convert list of lists to list of tuples
+        pairs = [(p[0], p[1]) for p in protein_pairs if len(p) >= 2]
+
+        if not pairs:
+            return {
+                "predictions": [],
+                "count": 0,
+                "error": "No valid protein pairs provided."
+            }
+
+        results = predictor.predict(pairs)
+
+        # Process results
+        valid_predictions = []
+        scores = []
+
+        for result in results:
+            if not result.get("error"):
+                ml_score = result.get("ml_score", 0.0)
+                scores.append(ml_score)
+                valid_predictions.append({
+                    "protein1": result["protein1"],
+                    "protein2": result["protein2"],
+                    "ml_score": round(ml_score, 4),
+                    "in_string": result.get("in_string", False),
+                })
+            else:
+                valid_predictions.append({
+                    "protein1": result.get("protein1"),
+                    "protein2": result.get("protein2"),
+                    "ml_score": None,
+                    "error": result["error"],
+                })
+
+        # Sort by score descending
+        valid_predictions.sort(
+            key=lambda x: x.get("ml_score") or 0.0,
+            reverse=True
+        )
+
+        avg_score = sum(scores) / len(scores) if scores else 0.0
+        high_confidence = sum(1 for s in scores if s >= 0.7)
+
+        return {
+            "predictions": valid_predictions[:50],  # Limit to 50
+            "count": len(valid_predictions),
+            "avg_score": round(avg_score, 4),
+            "high_confidence": high_confidence,
+            "interpretation": f"Processed {len(pairs)} pairs. {high_confidence} high-confidence predictions (>= 0.7)."
+        }
+
+    except Exception as e:
+        logger.error(f"Batch prediction failed: {e}")
+        return {
+            "predictions": [],
+            "count": 0,
+            "error": str(e),
+        }
+
+
+@requires_graph
 def generate_hypothesis(
     tool_context: ToolContext,
     protein1: str,
@@ -550,7 +938,8 @@ def generate_hypothesis(
     Generate a testable hypothesis for a predicted interaction.
 
     Creates a structured hypothesis for a potential protein-protein
-    interaction, including supporting context from the network.
+    interaction, including supporting context from the network and
+    ML prediction scores from PyG models.
 
     Args:
         tool_context: ADK tool context (injected by framework)
@@ -560,11 +949,48 @@ def generate_hypothesis(
     Returns:
         Dictionary with:
         - hypothesis: Structured hypothesis statement
+        - ml_prediction: PyG model prediction scores
         - supporting_evidence: Network context supporting the prediction
         - suggested_experiments: Validation experiments to test the hypothesis
         - confidence_factors: Factors contributing to prediction confidence
     """
     graph = _get_graph(tool_context)
+
+    # Get ML prediction from PyG model if available
+    ml_prediction = None
+    ml_confidence = "unknown"
+    predictor = get_link_predictor()
+
+    if predictor is not None:
+        try:
+            pred_result = predictor.predict([(protein1, protein2)])[0]
+            if not pred_result.get("error"):
+                ml_score = pred_result.get("ml_score", 0.0)
+                ml_prediction = {
+                    "score": round(ml_score, 4),
+                    "in_string": pred_result.get("in_string", False),
+                }
+
+                # Add ensemble details if available
+                if "model_scores" in pred_result:
+                    ml_prediction["model_scores"] = pred_result["model_scores"]
+                    ml_prediction["score_std"] = round(pred_result.get("score_std", 0.0), 4)
+                    ml_prediction["num_models"] = pred_result.get("num_models", 1)
+
+                # Determine confidence level
+                if ml_score >= 0.8:
+                    ml_confidence = "high"
+                elif ml_score >= 0.6:
+                    ml_confidence = "moderate"
+                elif ml_score >= 0.4:
+                    ml_confidence = "low"
+                else:
+                    ml_confidence = "very_low"
+            else:
+                ml_prediction = {"error": pred_result.get("error")}
+        except Exception as e:
+            logger.warning(f"ML prediction failed for hypothesis: {e}")
+            ml_prediction = {"error": str(e)}
 
     # Get context from the graph
     p1_summary = graph.get_entity_interactions_summary(protein1)
@@ -593,10 +1019,39 @@ def generate_hypothesis(
     # Check for existing evidence
     existing_rel = graph.get_relationship(protein1, protein2)
 
+    # Generate hypothesis statement based on ML score
+    if ml_prediction and ml_prediction.get("score"):
+        ml_score = ml_prediction["score"]
+        if ml_score >= 0.7:
+            hypothesis_stmt = (
+                f"Based on network topology analysis (ML score: {ml_score:.2f}), "
+                f"{protein1} and {protein2} are predicted to functionally interact. "
+                "This may occur through shared pathway components or direct binding."
+            )
+        elif ml_score >= 0.5:
+            hypothesis_stmt = (
+                f"{protein1} and {protein2} show moderate likelihood of interaction "
+                f"(ML score: {ml_score:.2f}), potentially through indirect mechanisms "
+                "or shared protein complexes."
+            )
+        else:
+            hypothesis_stmt = (
+                f"{protein1} and {protein2} show weak evidence for direct interaction "
+                f"(ML score: {ml_score:.2f}), but may have functional relationships "
+                "worth investigating."
+            )
+    else:
+        hypothesis_stmt = (
+            f"{protein1} and {protein2} may functionally interact, "
+            "potentially through shared pathway components or protein complexes."
+        )
+
     hypothesis = {
         "protein1": protein1,
         "protein2": protein2,
-        "hypothesis_statement": f"{protein1} and {protein2} may functionally interact, potentially through shared pathway components or protein complexes.",
+        "hypothesis_statement": hypothesis_stmt,
+        "ml_prediction": ml_prediction,
+        "ml_confidence": ml_confidence,
         "supporting_evidence": {
             "protein1_context": p1_summary[:500] if len(p1_summary) > 500 else p1_summary,
             "protein2_context": p2_summary[:500] if len(p2_summary) > 500 else p2_summary,
@@ -612,11 +1067,43 @@ def generate_hypothesis(
             "RNA-seq after perturbation of one protein"
         ],
         "confidence_factors": {
+            "ml_score": ml_prediction.get("score") if ml_prediction else None,
+            "ml_confidence": ml_confidence,
             "shared_neighbors_count": len(shared_neighbors),
             "path_distance": path_result.distance if path_result.distance > 0 else "disconnected",
             "has_supporting_evidence": existing_rel is not None
         }
     }
+
+    # Add interpretation based on ensemble model agreement
+    if ml_prediction and ml_prediction.get("model_scores"):
+        scores = [m["score"] for m in ml_prediction["model_scores"]]
+        structural_score = next(
+            (m["score"] for m in ml_prediction["model_scores"] if m["model"] == "structural"),
+            None
+        )
+        homophily_score = next(
+            (m["score"] for m in ml_prediction["model_scores"] if m["model"] == "homophily"),
+            None
+        )
+
+        if structural_score is not None and homophily_score is not None:
+            if abs(structural_score - homophily_score) > 0.15:
+                if structural_score > homophily_score:
+                    hypothesis["model_interpretation"] = (
+                        "Structural model scores higher than homophily model, suggesting "
+                        "a role-based rather than neighborhood-based relationship."
+                    )
+                else:
+                    hypothesis["model_interpretation"] = (
+                        "Homophily model scores higher than structural model, suggesting "
+                        "proteins share similar local network neighborhoods."
+                    )
+            else:
+                hypothesis["model_interpretation"] = (
+                    "All models agree on prediction, suggesting consistent evidence "
+                    "across different network perspectives."
+                )
 
     return hypothesis
 
@@ -698,9 +1185,20 @@ You help researchers explore and analyze relationships between proteins, genes, 
    - Drug synergy prediction (predict_synergy)
    - Target robustness analysis (analyze_robustness)
 
-4. **ML Predictions**:
-   - Get novel link predictions (get_predictions)
-   - Generate hypotheses for predictions (generate_hypothesis)
+4. **ML Link Predictions** (PyTorch Geometric):
+   - Predict interaction between two proteins (predict_interaction) - Uses PyG Node2Vec model
+   - Batch predict multiple protein pairs (predict_batch_interactions)
+   - Get novel link predictions from graph (get_predictions)
+   - Generate testable hypotheses with ML scores (generate_hypothesis)
+
+## ML Prediction Models
+
+The system uses PyTorch Geometric Node2Vec models trained on STRING physical interactions:
+- **Balanced model** (p=1, q=1): Standard random walks for general predictions
+- **Structural model** (p=1, q=0.5): DFS-like walks capturing global structural roles
+- **Homophily model** (p=1, q=2): BFS-like walks capturing local neighborhood similarity
+
+When ensemble mode is enabled, predictions average across all three models with interpretation of model agreement/disagreement.
 
 ## ReAct Reasoning Process
 
@@ -718,6 +1216,8 @@ For each query, follow this structured reasoning:
 - When asked about specific entities, check if they exist using query_evidence or get_entity_neighborhood.
 - For "important" or "central" proteins, use compute_centrality with pagerank or betweenness.
 - For drug discovery questions, combine multiple tools (e.g., DIAMOnD + proximity + synergy).
+- **For novel interaction predictions**, use predict_interaction to get ML confidence scores.
+- **For hypothesis generation**, use generate_hypothesis which includes ML predictions automatically.
 - Always explain the biological significance of your findings.
 - Distinguish between experimentally validated relationships and ML predictions.
 - Suggest follow-up analyses when relevant.
@@ -729,13 +1229,19 @@ For each query, follow this structured reasoning:
 -> Use compute_centrality with pagerank, then detect_communities to see if they cluster.
 
 "Is there a connection between BRCA1 and TP53?"
--> Use query_evidence first, then find_path if no direct relationship.
+-> Use query_evidence first, then predict_interaction to get ML score if no direct relationship.
 
 "Would targeting both EGFR and KRAS be synergistic for cancer?"
 -> Use predict_synergy with relevant disease genes, analyze_robustness for each target.
 
 "Find disease module genes starting from known Alzheimer's genes."
 -> Use run_diamond with the known genes as seeds, then compute_centrality on the module.
+
+"Predict if CDK1 interacts with AURKA"
+-> Use predict_interaction to get ML-based interaction probability and model agreement.
+
+"Generate a hypothesis for potential CDK2-CCNE1 interaction"
+-> Use generate_hypothesis which includes ML predictions, network context, and suggested experiments.
 
 Remember: You are helping scientists make discoveries. Be thorough, accurate, and highlight actionable insights.
 """
@@ -761,22 +1267,28 @@ def create_graph_agent(model: str = "gemini-2.5-flash") -> LlmAgent:
     agent = LlmAgent(
         model=model,
         name="graph_query_agent",
-        description="Expert biomedical knowledge graph analyst for drug discovery research",
+        description="Expert biomedical knowledge graph analyst for drug discovery research with PyG ML predictions",
         instruction=GRAPH_AGENT_INSTRUCTION,
         planner=planner,
         tools=[
+            # Graph exploration
             get_graph_summary,
             query_evidence,
             find_path,
+            get_entity_neighborhood,
+            # Importance analysis
             compute_centrality,
             detect_communities,
+            # Drug discovery algorithms
             run_diamond,
             calculate_proximity,
             predict_synergy,
             analyze_robustness,
+            # ML predictions (PyG)
+            predict_interaction,
+            predict_batch_interactions,
             get_predictions,
             generate_hypothesis,
-            get_entity_neighborhood,
         ],
     )
 
@@ -1003,10 +1515,23 @@ class GraphAgentManager:
 # =============================================================================
 
 __all__ = [
+    # Graph cache functions
     "set_active_graph",
     "get_active_graph",
     "clear_graph_cache",
+    # Link predictor functions
+    "set_link_predictor",
+    "get_link_predictor",
+    "set_ensemble_predictor",
+    "get_ensemble_predictor",
+    "load_pyg_predictor",
+    "load_pyg_ensemble",
+    # Agent creation
     "create_graph_agent",
     "GraphAgentManager",
     "GRAPH_AGENT_INSTRUCTION",
+    # Tool functions (for direct use)
+    "predict_interaction",
+    "predict_batch_interactions",
+    "generate_hypothesis",
 ]
