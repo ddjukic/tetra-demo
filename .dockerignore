@@ -57,6 +57,7 @@ data/string/*.txt
 # Documentation
 *.md
 !README.md
+!DESIGN.md
 docs/
 
 # Scripts (not needed in runtime)
