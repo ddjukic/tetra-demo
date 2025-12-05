@@ -905,7 +905,111 @@ relationship_miner = create_batched_miner(
 
 ---
 
-## 12. Future Enhancements (Post-Demo)
+## 12. Entity Grounding
+
+We use INDRA/Gilda (https://grounding.indra.bio) to normalize entity names to standard database identifiers, primarily HGNC IDs for gene/protein entities.
+
+### 12.1 Why Entity Grounding?
+
+Scientific literature uses many synonyms for the same gene/protein:
+- "LEP" and "Leptin" both refer to the same gene (HGNC:6553)
+- "TNF" and "tumor necrosis factor" are the same gene (HGNC:11892)
+- "orexin" and "HCRT" refer to hypocretin
+
+Without grounding, the knowledge graph creates duplicate nodes for the same biological entity, fragmenting evidence and obscuring the true network topology.
+
+### 12.2 Architecture
+
+```
+Entity Names (from literature)
+        |
+        v
++-----------------------------------+
+|     INDRA/Gilda Grounding API     |
+|  POST /ground_multi               |
+|  [{"text": "LEP"}, {"text": "Leptin"}]
++-----------------------------------+
+        |
+        v
++-----------------------------------+
+|     Grounding Results             |
+|  LEP -> HGNC:6553 (LEP)           |
+|  Leptin -> HGNC:6553 (LEP)        |
++-----------------------------------+
+        |
+        v
++-----------------------------------+
+|     Entity Deduplication          |
+|  Merge nodes with same HGNC ID    |
+|  Keep canonical name, add aliases |
++-----------------------------------+
+```
+
+### 12.3 Implementation
+
+**GildaClient** (`clients/gilda_client.py`):
+- Async httpx client for Gilda API
+- In-memory caching to avoid redundant API calls
+- Prefers HGNC results for gene/protein entities
+- Batch grounding via `/ground_multi` endpoint
+
+**KnowledgeGraph Integration** (`models/knowledge_graph.py`):
+- `ground_entities(gilda_client)`: Batch grounds all protein/gene entities
+- `deduplicate_by_hgnc()`: Merges entities with identical HGNC IDs
+- Stores grounding metadata: `grounded_db`, `grounded_id`, `grounded_entry_name`, `hgnc_id`
+
+### 12.4 Usage
+
+```python
+from clients.gilda_client import GildaClient
+from models.knowledge_graph import KnowledgeGraph
+
+# Load graph
+kg = KnowledgeGraph.load("graphs/orexin_signaling.graphml")
+
+# Ground entities
+async with GildaClient() as gilda:
+    grounding_stats = await kg.ground_entities(gilda)
+    print(f"Grounded {grounding_stats['grounded']}/{grounding_stats['total_entities']} entities")
+
+# Deduplicate by HGNC ID
+dedup_stats = kg.deduplicate_by_hgnc()
+print(f"Merged {len(dedup_stats['merged_groups'])} synonym groups")
+```
+
+### 12.5 Limitations
+
+- **Gene vs Chemical ambiguity**: Some entities like "ghrelin" resolve to CHEBI (chemical)
+  while the gene symbol "GHRL" resolves to HGNC. We currently prefer HGNC for PPI analysis,
+  which may miss some peptide hormone mentions.
+
+- **Non-human genes**: HGNC is human-focused. Cross-species gene mentions (e.g., mouse gene
+  symbols like "Hcrtr1") may not ground correctly to their human orthologs.
+
+- **Novel genes**: Recently discovered genes or genes with unofficial symbols may not be
+  in the grounding database yet.
+
+- **Context-dependent meanings**: Gene symbols can have multiple meanings depending on
+  context (e.g., "LEP" could be leptin gene or lymphocyte expansion panel in different
+  contexts). Gilda uses score-based ranking but cannot fully disambiguate without context.
+
+- **Grounding coverage**: Not all entities will ground successfully. The `grounded_db`
+  field being None indicates the entity could not be normalized.
+
+### 12.6 Grounding Statistics
+
+Typical grounding results for a knowledge graph built from PubMed literature:
+
+| Metric | Typical Range |
+|--------|--------------|
+| Total groundable entities | 50-200 |
+| Successfully grounded | 60-80% |
+| HGNC grounded | 40-60% |
+| Deduplicated (synonym merges) | 5-15% |
+
+---
+
+## 13. Future Enhancements (Post-Demo)
 
 1. **Entity Resolution** - UMLS/UniProt canonical IDs
 2. **GNN Upgrade** - GraphSAGE for better predictions

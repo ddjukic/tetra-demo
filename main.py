@@ -120,8 +120,8 @@ Examples:
     parser.add_argument(
         "--link-predictor", "-l",
         type=str,
-        default="models/link_predictor_v2.pkl",
-        help="Path to link predictor model (default: models/link_predictor_v2.pkl)",
+        default="models/pyg_link_predictor.pkl",
+        help="Path to link predictor model (default: models/pyg_link_predictor.pkl)",
     )
     parser.add_argument(
         "--verbose", "-v",

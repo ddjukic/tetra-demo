@@ -388,22 +388,35 @@ def detect_communities(tool_context: ToolContext = None) -> dict:
 
 
 def predict_novel_links(
-    min_ml_score: float = 0.5,
-    max_predictions: int = 20,
+    min_ml_score: float = 0.3,
+    max_enrichment: int = 50,
+    max_novel: int = 50,
     tool_context: ToolContext = None,
 ) -> dict:
     """
-    Apply ML link predictor to find novel protein-protein interactions.
+    Combined link enrichment and novel prediction tool.
 
-    Identifies protein pairs that don't have existing relationships
-    but are predicted to interact based on network topology.
+    This tool evaluates ALL protein pairs not currently in the graph and categorizes
+    them into two types:
+
+    1. **Enrichment** (in_string=True): Known STRING interactions that were not in the
+       original graph. These are high-confidence edges from the STRING database.
+
+    2. **Novel Predictions** (in_string=False, score >= threshold): ML-predicted
+       interactions that are NOT in STRING - truly novel hypotheses.
+
+    Both categories are added to the graph with appropriate metadata for visualization:
+    - Enrichment edges: link_category="enrichment" (for green coloring)
+    - Novel prediction edges: link_category="novel_prediction" (for orange coloring)
 
     Args:
-        min_ml_score: Minimum prediction score (0-1). Default 0.7.
-        max_predictions: Maximum predictions to return. Default 20.
+        min_ml_score: Minimum ML score for novel predictions (0-1). Default 0.3.
+            Enrichment edges are added regardless of score since they have STRING evidence.
+        max_enrichment: Maximum enrichment edges to add. Default 50.
+        max_novel: Maximum novel predictions to add. Default 50.
 
     Returns:
-        Ranked list of predicted novel interactions.
+        Structured response with enrichment and novel_predictions lists, plus stats.
     """
     orchestrator = get_orchestrator()
     graph = orchestrator.graph
@@ -420,45 +433,121 @@ def predict_novel_links(
 
     if len(proteins) < 2:
         return {
-            "predictions": [],
-            "count": 0,
+            "status": "error",
             "message": "Not enough proteins for prediction",
+            "enrichment": [],
+            "novel_predictions": [],
+            "stats": {
+                "total_pairs_evaluated": 0,
+                "enrichment_count": 0,
+                "novel_prediction_count": 0,
+                "proteins_not_in_string": 0,
+            },
         }
 
-    # Generate pairs not already in graph
+    # Generate ALL pairs not already in graph (no sampling limit)
     candidate_pairs = []
     for i, p1 in enumerate(proteins):
         for p2 in proteins[i + 1:]:
             existing = graph.get_relationship(p1, p2)
-            if not existing:
+            reverse_existing = graph.get_relationship(p2, p1)
+            if not existing and not reverse_existing:
                 candidate_pairs.append((p1, p2))
 
     if not candidate_pairs:
         return {
-            "predictions": [],
-            "count": 0,
+            "status": "success",
             "message": "All protein pairs already have relationships",
+            "enrichment": [],
+            "novel_predictions": [],
+            "stats": {
+                "total_pairs_evaluated": 0,
+                "enrichment_count": 0,
+                "novel_prediction_count": 0,
+                "proteins_not_in_string": 0,
+            },
         }
 
-    # Run predictions
-    pairs_to_predict = candidate_pairs[:max_predictions * 3]
-    predictions = _link_predictor.predict(pairs_to_predict)
+    # Run predictions on ALL candidate pairs
+    try:
+        predictions = _link_predictor.predict(candidate_pairs)
+    except ValueError as e:
+        return {
+            "status": "error",
+            "message": f"Link predictor not available: {e}",
+            "enrichment": [],
+            "novel_predictions": [],
+            "stats": {
+                "total_pairs_evaluated": len(candidate_pairs),
+                "enrichment_count": 0,
+                "novel_prediction_count": 0,
+                "proteins_not_in_string": 0,
+            },
+        }
 
-    # Filter by score and sort
-    filtered = [
-        p for p in predictions
-        if p.get("ml_score", 0) >= min_ml_score and not p.get("error")
-    ]
-    filtered.sort(key=lambda x: x.get("ml_score", 0), reverse=True)
-    top_predictions = filtered[:max_predictions]
+    # Separate into enrichment vs novel predictions
+    enrichment_results = []
+    novel_results = []
+    proteins_not_in_string = 0
 
-    # Add predictions to graph as hypothesized relationships
-    for pred in top_predictions:
+    for pred in predictions:
+        if pred.get("error"):
+            # Count proteins not found in STRING
+            if "Unknown protein" in str(pred.get("error", "")):
+                proteins_not_in_string += 1
+            continue
+
+        ml_score = pred.get("ml_score", 0.0)
+        in_string = pred.get("in_string", False)
+
+        if in_string:
+            # Enrichment: Known STRING interaction not in graph
+            enrichment_results.append({
+                "protein1": pred["protein1"],
+                "protein2": pred["protein2"],
+                "ml_score": round(ml_score, 4),
+                "in_string": True,
+            })
+        elif ml_score >= min_ml_score:
+            # Novel prediction: Not in STRING but ML predicts interaction
+            novel_results.append({
+                "protein1": pred["protein1"],
+                "protein2": pred["protein2"],
+                "ml_score": round(ml_score, 4),
+                "in_string": False,
+            })
+
+    # Sort by ML score (highest first)
+    enrichment_results.sort(key=lambda x: x["ml_score"], reverse=True)
+    novel_results.sort(key=lambda x: x["ml_score"], reverse=True)
+
+    # Limit results
+    top_enrichment = enrichment_results[:max_enrichment]
+    top_novel = novel_results[:max_novel]
+
+    # Add enrichment edges to graph
+    for pred in top_enrichment:
+        graph.add_relationship(
+            source=pred["protein1"],
+            target=pred["protein2"],
+            rel_type=RelationshipType.INTERACTS_WITH,
+            ml_score=pred["ml_score"],
+            link_category="enrichment",
+            evidence=[{
+                "source_type": EvidenceSource.STRING.value,
+                "source_id": "string_enrichment",
+                "confidence": pred["ml_score"],
+            }],
+        )
+
+    # Add novel predictions to graph
+    for pred in top_novel:
         graph.add_relationship(
             source=pred["protein1"],
             target=pred["protein2"],
             rel_type=RelationshipType.HYPOTHESIZED,
             ml_score=pred["ml_score"],
+            link_category="novel_prediction",
             evidence=[{
                 "source_type": EvidenceSource.ML_PREDICTED.value,
                 "source_id": "link_predictor",
@@ -467,9 +556,18 @@ def predict_novel_links(
         )
 
     return {
-        "predictions": top_predictions,
-        "count": len(top_predictions),
-        "total_candidates": len(candidate_pairs),
+        "status": "success",
+        "message": f"Added {len(top_enrichment)} enrichment edges and {len(top_novel)} novel predictions",
+        "enrichment": top_enrichment,
+        "novel_predictions": top_novel,
+        "stats": {
+            "total_pairs_evaluated": len(candidate_pairs),
+            "enrichment_count": len(top_enrichment),
+            "novel_prediction_count": len(top_novel),
+            "proteins_not_in_string": proteins_not_in_string,
+            "total_enrichment_available": len(enrichment_results),
+            "total_novel_available": len(novel_results),
+        },
     }
 
 
@@ -614,7 +712,10 @@ Use `expand_graph(query)` to add more data:
 
 ## Analysis Tools
 
-- `predict_novel_links()` - ML-based link prediction
+- `predict_novel_links()` - Combined link enrichment + novel prediction:
+  - **Enrichment**: Adds known STRING interactions not in graph (green edges)
+  - **Novel Predictions**: ML-predicted interactions not in STRING (orange edges)
+  - Returns both categories with stats for visualization
 - `run_diamond_module(seed_genes)` - Disease module detection
 - `calculate_drug_disease_proximity(drug_targets, disease_genes)` - Drug efficacy prediction
 

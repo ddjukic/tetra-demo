@@ -874,6 +874,305 @@ class KnowledgeGraph:
         return annotated
 
     # =========================================================================
+    # Entity Grounding: INDRA/Gilda Integration
+    # =========================================================================
+
+    def get_groundable_entities(self) -> list[str]:
+        """Get list of entity IDs that can be grounded (proteins/genes).
+
+        Returns:
+            List of entity IDs with type 'protein' or 'gene'.
+        """
+        groundable_types = {EntityType.PROTEIN.value, EntityType.GENE.value}
+        return [
+            entity_id for entity_id, data in self.entities.items()
+            if data.get("type") in groundable_types
+        ]
+
+    async def ground_entities(
+        self,
+        gilda_client: Any,
+        entity_types: list[str] | None = None,
+        min_score: float = 0.5,
+    ) -> dict[str, Any]:
+        """Ground all protein/gene entities using INDRA/Gilda.
+
+        Batch-grounds entities and updates their metadata with grounding info.
+
+        Args:
+            gilda_client: GildaClient instance for API calls.
+            entity_types: Types to ground (default: ['protein', 'gene']).
+            min_score: Minimum grounding score to accept.
+
+        Returns:
+            Dictionary with grounding statistics:
+                - total_entities: Number of entities processed
+                - grounded: Number successfully grounded
+                - ungrounded: Number that failed grounding
+                - hgnc_grounded: Number grounded to HGNC specifically
+                - grounding_map: Dict mapping entity_id to grounding result
+        """
+        if entity_types is None:
+            entity_types = [EntityType.PROTEIN.value, EntityType.GENE.value]
+
+        # Collect entities to ground
+        entities_to_ground = [
+            entity_id for entity_id, data in self.entities.items()
+            if data.get("type") in entity_types
+        ]
+
+        if not entities_to_ground:
+            return {
+                "total_entities": 0,
+                "grounded": 0,
+                "ungrounded": 0,
+                "hgnc_grounded": 0,
+                "grounding_map": {},
+            }
+
+        # Get entity names for grounding (use 'name' field, fall back to ID)
+        texts_to_ground = [
+            self.entities[eid].get("name", eid) for eid in entities_to_ground
+        ]
+
+        # Batch ground
+        results = await gilda_client.ground_batch(texts_to_ground)
+
+        # Update entities with grounding info
+        grounded_count = 0
+        hgnc_count = 0
+        grounding_map: dict[str, dict[str, Any] | None] = {}
+
+        for entity_id, text in zip(entities_to_ground, texts_to_ground):
+            grounding = results.get(text)
+
+            if grounding and grounding.score >= min_score:
+                # Store grounding info in entity
+                self.entities[entity_id]["grounded_db"] = grounding.db
+                self.entities[entity_id]["grounded_id"] = grounding.id
+                self.entities[entity_id]["grounded_entry_name"] = grounding.entry_name
+                self.entities[entity_id]["grounding_score"] = grounding.score
+
+                # Set hgnc_id if grounded to HGNC
+                if grounding.db == "HGNC":
+                    self.entities[entity_id]["hgnc_id"] = grounding.full_id
+                    hgnc_count += 1
+
+                # Update graph node attributes
+                self.graph.nodes[entity_id].update({
+                    "grounded_db": grounding.db,
+                    "grounded_id": grounding.id,
+                    "grounded_entry_name": grounding.entry_name,
+                    "grounding_score": grounding.score,
+                })
+                if grounding.db == "HGNC":
+                    self.graph.nodes[entity_id]["hgnc_id"] = grounding.full_id
+
+                grounded_count += 1
+                grounding_map[entity_id] = {
+                    "db": grounding.db,
+                    "id": grounding.id,
+                    "entry_name": grounding.entry_name,
+                    "score": grounding.score,
+                    "full_id": grounding.full_id,
+                }
+            else:
+                grounding_map[entity_id] = None
+
+        return {
+            "total_entities": len(entities_to_ground),
+            "grounded": grounded_count,
+            "ungrounded": len(entities_to_ground) - grounded_count,
+            "hgnc_grounded": hgnc_count,
+            "grounding_map": grounding_map,
+        }
+
+    def deduplicate_by_hgnc(self) -> dict[str, Any]:
+        """Merge entities that share the same HGNC ID.
+
+        Entities with identical HGNC IDs are considered synonyms and merged.
+        The entity with the canonical HGNC entry_name becomes the primary.
+        Other entities become aliases.
+
+        Returns:
+            Dictionary with deduplication statistics:
+                - original_count: Entity count before deduplication
+                - final_count: Entity count after deduplication
+                - merged_groups: List of merged entity groups
+                - edges_remapped: Number of edges remapped to canonical IDs
+        """
+        # Group entities by HGNC ID
+        hgnc_groups: dict[str, list[str]] = {}
+        for entity_id, data in self.entities.items():
+            hgnc_id = data.get("hgnc_id")
+            if hgnc_id:
+                if hgnc_id not in hgnc_groups:
+                    hgnc_groups[hgnc_id] = []
+                hgnc_groups[hgnc_id].append(entity_id)
+
+        original_count = len(self.entities)
+        merged_groups: list[dict[str, Any]] = []
+        edges_remapped = 0
+
+        # Process each group that has more than one entity
+        for hgnc_id, entity_ids in hgnc_groups.items():
+            if len(entity_ids) <= 1:
+                continue
+
+            # Find canonical entity (prefer HGNC entry_name match)
+            canonical_id = None
+            canonical_entry = None
+
+            for eid in entity_ids:
+                entry_name = self.entities[eid].get("grounded_entry_name", "")
+                if entry_name:
+                    canonical_entry = entry_name
+                    # If entity_id matches entry_name, it's canonical
+                    if eid.upper() == entry_name.upper():
+                        canonical_id = eid
+                        break
+
+            # If no exact match, prefer the entry_name as new canonical
+            if canonical_id is None and canonical_entry:
+                # Check if entry_name exists as an entity
+                if canonical_entry in self.entities:
+                    canonical_id = canonical_entry
+                else:
+                    # Pick first entity alphabetically
+                    canonical_id = sorted(entity_ids)[0]
+            elif canonical_id is None:
+                canonical_id = sorted(entity_ids)[0]
+
+            aliases_to_merge = [eid for eid in entity_ids if eid != canonical_id]
+
+            if not aliases_to_merge:
+                continue
+
+            merged_groups.append({
+                "hgnc_id": hgnc_id,
+                "canonical": canonical_id,
+                "merged": aliases_to_merge,
+            })
+
+            # Merge aliases into canonical entity
+            canonical_data = self.entities[canonical_id]
+            existing_aliases = set(canonical_data.get("aliases", []))
+
+            for alias_id in aliases_to_merge:
+                # Add alias ID and its aliases to canonical
+                existing_aliases.add(alias_id)
+                alias_data = self.entities.get(alias_id, {})
+                for a in alias_data.get("aliases", []):
+                    existing_aliases.add(a)
+
+                # Remap edges involving this alias
+                edges_remapped += self._remap_edges(alias_id, canonical_id)
+
+                # Remove alias entity
+                del self.entities[alias_id]
+                if alias_id in self.graph:
+                    self.graph.remove_node(alias_id)
+
+            # Update canonical with merged aliases
+            canonical_data["aliases"] = list(existing_aliases)
+            self.graph.nodes[canonical_id]["aliases"] = str(list(existing_aliases))
+
+        return {
+            "original_count": original_count,
+            "final_count": len(self.entities),
+            "merged_groups": merged_groups,
+            "edges_remapped": edges_remapped,
+        }
+
+    def _remap_edges(self, old_id: str, new_id: str) -> int:
+        """Remap all edges from old_id to new_id.
+
+        Args:
+            old_id: Entity ID to replace.
+            new_id: Entity ID to use instead.
+
+        Returns:
+            Number of edges remapped.
+        """
+        remapped = 0
+        relationships_to_update: list[tuple[tuple[str, str, str], dict[str, Any]]] = []
+        relationships_to_remove: list[tuple[str, str, str]] = []
+
+        for rel_key, data in list(self.relationships.items()):
+            src, tgt, rel_type = rel_key
+            new_src, new_tgt = src, tgt
+
+            if src == old_id:
+                new_src = new_id
+            if tgt == old_id:
+                new_tgt = new_id
+
+            if new_src != src or new_tgt != tgt:
+                relationships_to_remove.append(rel_key)
+                new_key = (new_src, new_tgt, rel_type)
+
+                # Update data
+                new_data = data.copy()
+                new_data["source"] = new_src
+                new_data["target"] = new_tgt
+                relationships_to_update.append((new_key, new_data))
+                remapped += 1
+
+        # Apply updates
+        for old_key in relationships_to_remove:
+            del self.relationships[old_key]
+
+        for new_key, new_data in relationships_to_update:
+            if new_key in self.relationships:
+                # Merge with existing relationship
+                existing = self.relationships[new_key]
+                existing_evidence = existing.get("evidence", [])
+                new_evidence = new_data.get("evidence", [])
+                existing_ids = {e.get("source_id") for e in existing_evidence}
+                for ev in new_evidence:
+                    if ev.get("source_id") not in existing_ids:
+                        existing_evidence.append(ev)
+                existing["evidence"] = existing_evidence
+            else:
+                self.relationships[new_key] = new_data
+
+        # Update NetworkX graph edges (node removal handles this)
+        return remapped
+
+    def get_grounding_summary(self) -> dict[str, Any]:
+        """Get summary of entity grounding status.
+
+        Returns:
+            Dictionary with grounding statistics.
+        """
+        total = 0
+        grounded = 0
+        hgnc_grounded = 0
+        by_db: dict[str, int] = {}
+
+        groundable_types = {EntityType.PROTEIN.value, EntityType.GENE.value}
+
+        for entity_id, data in self.entities.items():
+            if data.get("type") not in groundable_types:
+                continue
+
+            total += 1
+            db = data.get("grounded_db")
+            if db:
+                grounded += 1
+                by_db[db] = by_db.get(db, 0) + 1
+                if db == "HGNC":
+                    hgnc_grounded += 1
+
+        return {
+            "total_groundable": total,
+            "grounded": grounded,
+            "ungrounded": total - grounded,
+            "hgnc_grounded": hgnc_grounded,
+            "by_database": by_db,
+        }
+
+    # =========================================================================
     # Drug Discovery: DIAMOnD Algorithm
     # Based on: Ghiassian et al. (2015) PLoS Computational Biology
     # =========================================================================
