@@ -11,6 +11,7 @@ Run with: adk api_server kg_agent/ --port 8080
 
 import os
 import sys
+import logging
 from pathlib import Path
 
 # Add project root to path for imports
@@ -19,6 +20,72 @@ sys.path.insert(0, str(project_root))
 
 from dotenv import load_dotenv
 load_dotenv(project_root / ".env")
+
+# =============================================================================
+# Langfuse Observability Setup (must be before ADK imports)
+# =============================================================================
+
+def _setup_langfuse_tracing():
+    """
+    Configure Langfuse tracing for ADK agents via OpenTelemetry.
+
+    Uses OpenInference instrumentation to capture ADK agent calls,
+    tool executions, and LLM requests/responses.
+    """
+    langfuse_secret = os.environ.get("LANGFUSE_SECRET_KEY")
+    langfuse_public = os.environ.get("LANGFUSE_PUBLIC_KEY")
+    langfuse_url = os.environ.get("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
+
+    if not langfuse_secret or not langfuse_public:
+        logging.getLogger(__name__).info(
+            "Langfuse credentials not found, tracing disabled. "
+            "Set LANGFUSE_SECRET_KEY and LANGFUSE_PUBLIC_KEY to enable."
+        )
+        return False
+
+    try:
+        from opentelemetry import trace
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+        from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+        from openinference.instrumentation.google_adk import GoogleADKInstrumentor
+
+        # Configure OTLP exporter for Langfuse
+        otlp_endpoint = f"{langfuse_url}/api/public/otel/v1/traces"
+
+        import base64
+        auth_string = f"{langfuse_public}:{langfuse_secret}"
+        auth_bytes = base64.b64encode(auth_string.encode()).decode()
+
+        exporter = OTLPSpanExporter(
+            endpoint=otlp_endpoint,
+            headers={"Authorization": f"Basic {auth_bytes}"}
+        )
+
+        provider = TracerProvider()
+        provider.add_span_processor(SimpleSpanProcessor(exporter))
+        trace.set_tracer_provider(provider)
+
+        GoogleADKInstrumentor().instrument()
+
+        logging.getLogger(__name__).info(
+            f"Langfuse tracing enabled - traces will be sent to {langfuse_url}"
+        )
+        return True
+
+    except ImportError as e:
+        logging.getLogger(__name__).warning(
+            f"Langfuse dependencies not installed, tracing disabled: {e}"
+        )
+        return False
+    except Exception as e:
+        logging.getLogger(__name__).warning(
+            f"Failed to initialize Langfuse tracing: {e}"
+        )
+        return False
+
+# Initialize tracing before ADK imports
+_LANGFUSE_ENABLED = _setup_langfuse_tracing()
 
 from google.adk.agents import LlmAgent
 from google.adk.tools import ToolContext
