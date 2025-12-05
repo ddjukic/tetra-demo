@@ -23,7 +23,9 @@ from dotenv import load_dotenv
 from clients.string_client import StringClient
 from clients.pubmed_client import PubMedClient
 from pipeline.config import PipelineConfig
+from pipeline.metrics import PipelineReport
 from pipeline.models import PipelineInput
+from pipeline.query_agent import construct_pubmed_query
 
 # Load environment variables
 project_root = Path(__file__).parent.parent
@@ -77,6 +79,9 @@ class DataFetchAgent:
         # State for current fetch operation
         self._current_input: PipelineInput | None = None
 
+        # Report for tracking LLM usage in query construction
+        self._report: PipelineReport | None = None
+
     async def fetch(
         self,
         user_query: str,
@@ -100,10 +105,11 @@ class DataFetchAgent:
         """
         logger.info(f"DataFetchAgent starting: {user_query}")
 
-        # Initialize fresh input
+        # Initialize fresh input and report
         self._current_input = PipelineInput(
             metadata={"user_query": user_query}
         )
+        self._report = PipelineReport.create()
 
         # Step 1: Extract seed proteins from the query
         seed_proteins = await self._extract_seed_proteins(user_query)
@@ -167,11 +173,82 @@ class DataFetchAgent:
 
     async def _construct_pubmed_query(self, user_query: str) -> str:
         """
-        Construct an optimal PubMed query.
+        Construct an optimal PubMed query using LLM.
 
-        Uses expanded proteins from STRING network plus topic terms.
-        Strategy: (topic_terms) OR (gene1 OR gene2 OR ...) to find articles
-        that mention ANY of our proteins of interest.
+        Uses the LLM-based query construction agent from pipeline.query_agent
+        to build an intelligent PubMed search query based on the expanded
+        protein list and user's research focus.
+
+        Falls back to deterministic construction if LLM fails.
+
+        Args:
+            user_query: The original user query (research focus).
+
+        Returns:
+            PubMed query string.
+        """
+        # Get proteins from current input
+        proteins = []
+        if self._current_input and self._current_input.seed_proteins:
+            proteins = self._current_input.seed_proteins
+
+        if not proteins:
+            # Fallback if no proteins available
+            logger.warning("No proteins available for query construction, using simple query")
+            query = f'({user_query}) AND humans[MeSH Terms] AND 2020:2025[pdat]'
+            self._current_input.pubmed_query = query
+            return query
+
+        # Try LLM-based query construction
+        try:
+            logger.info(
+                f"Using LLM to construct PubMed query for {len(proteins)} proteins"
+            )
+
+            result = await construct_pubmed_query(
+                proteins=proteins,
+                research_focus=user_query,
+                config=self._config,
+                report=self._report,
+            )
+
+            query = result.query
+            logger.info(
+                f"LLM constructed query ({result.query_length} chars): {query[:100]}..."
+            )
+
+            if result.was_refined:
+                logger.info(
+                    f"Query was refined from {result.original_length} to {result.query_length} chars"
+                )
+
+            # Store query construction metadata
+            self._current_input.metadata["query_construction"] = {
+                "method": "llm",
+                "query_length": result.query_length,
+                "was_refined": result.was_refined,
+                "token_usage": result.token_usage.to_dict(),
+            }
+
+            self._current_input.pubmed_query = query
+            return query
+
+        except Exception as e:
+            logger.warning(f"LLM query construction failed: {e}. Using fallback.")
+            return await self._construct_pubmed_query_fallback(user_query)
+
+    async def _construct_pubmed_query_fallback(self, user_query: str) -> str:
+        """
+        Fallback deterministic PubMed query construction.
+
+        Used when LLM-based construction fails (no API key, network error, etc.).
+        Uses simple heuristics to build a query from available proteins.
+
+        Args:
+            user_query: The original user query.
+
+        Returns:
+            PubMed query string.
         """
         import re
         query_lower = user_query.lower()
@@ -185,10 +262,8 @@ class DataFetchAgent:
                 topic_term = topic
 
         # Build gene query from expanded STRING proteins
-        # Prioritize original seeds, then add discovered proteins
-        # Keep query short to avoid 414 URI Too Long errors
         gene_query = None
-        max_genes_in_query = 8  # PubMed has URL length limits
+        max_genes_in_query = 15  # Increased from 8 for better coverage
 
         if self._current_input and self._current_input.seed_proteins:
             # Get original seeds from metadata (if available)
@@ -201,7 +276,6 @@ class DataFetchAgent:
             # Prioritize: original seeds first, then discovered proteins
             all_proteins = self._current_input.seed_proteins
             if original_seeds:
-                # Put original seeds first
                 priority_proteins = [p for p in all_proteins if p in original_seeds]
                 other_proteins = [p for p in all_proteins if p not in original_seeds]
                 proteins = priority_proteins + other_proteins
@@ -210,15 +284,13 @@ class DataFetchAgent:
 
             proteins = proteins[:max_genes_in_query]
             if proteins:
-                # Use [tiab] (title/abstract) for gene names - more flexible than [Gene Name]
                 gene_terms = [f'"{p}"[tiab]' for p in proteins]
                 gene_query = " OR ".join(gene_terms)
                 logger.info(
-                    f"PubMed query using {len(proteins)} proteins: {proteins}"
+                    f"Fallback query using {len(proteins)} proteins: {proteins}"
                 )
 
-        # Construct query: (topic OR genes) to maximize article retrieval
-        # Articles matching EITHER the topic OR mentioning any of our proteins
+        # Construct query
         query_parts = []
         if topic_term:
             query_parts.append(f'"{topic_term}"[tiab]')
@@ -228,11 +300,20 @@ class DataFetchAgent:
         if query_parts:
             base_query = " OR ".join(query_parts)
         else:
-            # Fallback to user query if we couldn't extract anything
             base_query = user_query
 
-        # Add filters for homo sapiens and recent articles (2020+)
-        query = f'({base_query}) AND humans[MeSH Terms] AND 2020:2025[pdat]'
+        # Use config values for filters if available, otherwise defaults
+        species_filter = self._config.pubmed_species_filter or "humans[MeSH Terms]"
+        date_filter = self._config.pubmed_date_filter or "2020:2025[pdat]"
+
+        query = f'({base_query}) AND {species_filter} AND {date_filter}'
+
+        # Store fallback metadata
+        self._current_input.metadata["query_construction"] = {
+            "method": "fallback",
+            "query_length": len(query),
+        }
+
         self._current_input.pubmed_query = query
         return query
 
