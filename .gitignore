@@ -59,3 +59,7 @@ wandb/
 
 # Large model files
 models/*.pkl
+
+# Generated outputs
+graphs/
+results/

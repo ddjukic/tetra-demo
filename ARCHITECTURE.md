@@ -16,14 +16,15 @@ flowchart TB
     end
 
     subgraph DataSources["Data Sources"]
-        string["STRING DB<br/>Curated PPIs"]
-        pubmed["PubMed/PubTator<br/>Literature + NER"]
+        string["STRING DB<br/>Curated PPIs<br/>(API only)"]
+        query_llm["Query Construction<br/>⚡ LLM (Gemini)"]
+        pubmed["PubMed/PubTator<br/>Literature + NER<br/>(API only)"]
     end
 
     subgraph Processing["Processing Pipeline"]
-        extraction["Relationship Extraction<br/>LLM + Co-occurrence"]
-        grounding["Entity Grounding<br/>INDRA/Gilda → HGNC"]
-        merge["Evidence Merge<br/>Multi-source Fusion"]
+        extraction["Relationship Extraction<br/>⚡ LLM (LiteLLM)<br/>+ Co-occurrence (Python)"]
+        grounding["Entity Grounding<br/>INDRA/Gilda → HGNC<br/>(API only)"]
+        merge["Evidence Merge<br/>Multi-source Fusion<br/>(Deterministic)"]
     end
 
     subgraph ML["Machine Learning"]
@@ -37,7 +38,8 @@ flowchart TB
     end
 
     seeds --> string
-    seeds --> pubmed
+    string --> query_llm
+    query_llm --> pubmed
     string --> merge
     pubmed --> extraction
     extraction --> merge
@@ -61,10 +63,12 @@ flowchart TB
 
     subgraph AgentLayer["Agent Layer (Google ADK)"]
         orchestrator["ADKOrchestrator<br/>agent/adk_orchestrator.py"]
+        data_fetch["DataFetchAgent<br/>agent/data_fetch_agent.py"]
         tools_module["Module Functions<br/>(ADK Discovery)"]
         tools_class["AgentTools Class<br/>agent/tools.py"]
 
         orchestrator --> tools_module
+        orchestrator --> data_fetch
         tools_module -->|"get_tools()"| tools_class
     end
 
@@ -74,10 +78,14 @@ flowchart TB
         gilda_client["GildaClient<br/>clients/gilda_client.py"]
     end
 
+    subgraph PipelineLayer["Pipeline Layer"]
+        query_agent["QueryAgent ⚡LLM<br/>pipeline/query_agent.py"]
+    end
+
     subgraph ExtractionLayer["Extraction Layer"]
-        batched_miner["BatchedLiteLLMMiner<br/>extraction/batched_litellm_miner.py"]
+        batched_miner["BatchedLiteLLMMiner ⚡LLM<br/>extraction/batched_litellm_miner.py"]
         config_loader["ConfigLoader<br/>extraction/config_loader.py"]
-        inferrer["RelationshipInferrer<br/>extraction/relationship_inferrer.py"]
+        inferrer["RelationshipInferrer ⚡LLM<br/>extraction/relationship_inferrer.py"]
 
         batched_miner --> config_loader
     end
@@ -108,6 +116,10 @@ flowchart TB
     cli --> orchestrator
     streamlit --> orchestrator
 
+    data_fetch --> string_client
+    data_fetch --> pubmed_client
+    data_fetch --> query_agent
+
     tools_class --> string_client
     tools_class --> pubmed_client
     tools_class --> gilda_client
@@ -118,6 +130,7 @@ flowchart TB
     string_client --> string_api
     pubmed_client --> pubmed_api
     gilda_client --> gilda_api
+    query_agent --> llm_api
     batched_miner --> llm_api
     inferrer --> llm_api
 ```
@@ -162,6 +175,18 @@ flowchart LR
     p4b --> Phase5
     Phase5 --> Phase6 --> Phase7
 ```
+
+**LLM Usage Summary:**
+| Phase | Component | Uses LLM? | Details |
+|-------|-----------|-----------|---------|
+| 1 | STRING Expansion | ❌ No | REST API to string-db.org |
+| 2 | Query Construction | ⚡ **Yes** | Gemini via `google.generativeai` |
+| 3 | PubMed Fetch | ❌ No | NCBI E-utilities + PubTator3 APIs |
+| 4A | Co-occurrence | ❌ No | Pure Python (entity pairs in same PMID) |
+| 4B | Relationship Mining | ⚡ **Yes** | LiteLLM (Cerebras/Gemini/GPT-4) |
+| 5 | Graph Merge | ❌ No | Deterministic fusion + INDRA/Gilda API |
+| 6 | Link Prediction | ❌ No | ML model (Node2Vec + LogReg) |
+| 7 | Summary | ❌ No | Aggregation only |
 
 ---
 
@@ -469,6 +494,7 @@ tetra_v1/
 │
 ├── agent/
 │   ├── adk_orchestrator.py         # ADK agent + module functions
+│   ├── data_fetch_agent.py         # Data fetching orchestrator (STRING + PubMed)
 │   ├── tools.py                    # AgentTools class (stateful)
 │   └── graph_agent.py              # GraphRAG Q&A agent
 │
@@ -478,10 +504,10 @@ tetra_v1/
 │   └── gilda_client.py             # INDRA/Gilda grounding (async)
 │
 ├── extraction/
-│   ├── batched_litellm_miner.py    # Batched relationship extraction
+│   ├── batched_litellm_miner.py    # ⚡LLM Batched relationship extraction (LiteLLM)
 │   ├── config.toml                 # Prompts + schema definitions
 │   ├── config_loader.py            # Provider routing
-│   └── relationship_inferrer.py    # LLM relationship inference
+│   └── relationship_inferrer.py    # ⚡LLM relationship inference
 │
 ├── models/
 │   └── knowledge_graph.py          # NetworkX graph + algorithms
@@ -493,7 +519,8 @@ tetra_v1/
 ├── pipeline/
 │   ├── config.py                   # PipelineConfig
 │   ├── metrics.py                  # TokenUsage, statistics
-│   └── merge.py                    # Evidence aggregation
+│   ├── merge.py                    # Evidence aggregation
+│   └── query_agent.py              # ⚡LLM PubMed query construction (Gemini)
 │
 ├── frontend/
 │   └── app.py                      # Streamlit UI

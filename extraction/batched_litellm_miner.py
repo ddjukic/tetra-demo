@@ -691,6 +691,29 @@ class BatchedLiteLLMMiner:
 
         Numbers sentences in each abstract and populates chunk.sentence_map.
 
+        EXAMPLE:
+        ## ENTITIES TO LOOK FOR
+        HCRTR1, HCRTR2, narcolepsy, orexin-A, orexin-B, sleep-wake regulation
+
+        ## RELATIONSHIP TYPES
+        ACTIVATES, INHIBITS, ASSOCIATED_WITH, REGULATES, BINDS_TO, COOCCURS_WITH
+
+        ## ABSTRACTS TO ANALYZE (sentences numbered [1], [2], etc.)
+        [PMID: 35486828] (2023)
+        Title: Orexin receptor signaling in sleep-wake regulation
+        Abstract: [1] Orexin-A and orexin-B are neuropeptides that regulate arousal and wakefulness. [2] These peptides bind to two G-protein coupled receptors, HCRTR1 and HCRTR2. [3] HCRTR2 shows higher affinity for orexin-A than orexin-B. [4] Loss of orexin signaling causes narcolepsy in humans and animal models. [5] Dual orexin receptor antagonists have emerged as treatments for insomnia.
+
+        ---
+
+        [PMID: 34577062] (2022)
+        Title: HCRTR2 mutations in familial narcolepsy
+        Abstract: [1] Narcolepsy type 1 is characterized by loss of hypocretin-producing neurons. [2] We identified rare HCRTR2 variants in three families with narcolepsy. [3] Functional assays showed these mutations reduce receptor activation by 60-80%. [4] This confirms HCRTR2 dysfunction as a direct cause of narcolepsy.
+
+        Return a JSON object with "relationships" array. Each relationship must include:
+        - entity1, entity2, relationship, confidence
+        - evidence_sentence_indices: array of integers (sentence numbers, NOT the text)
+        - pmid
+
         Returns:
             Tuple of (system_prompt, user_prompt)
         """
