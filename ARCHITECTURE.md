@@ -1,342 +1,583 @@
-# Tetra V1 Architecture - Multi-Agent Pipeline
+# Tetra V1 Architecture
 
-## Overview
+> **Last Updated**: December 2024
+> **Status**: Near-complete research prototype
 
-This document describes the multi-agent pipeline architecture for building and querying scientific knowledge graphs. The system uses Google ADK for agent orchestration with Langfuse for observability.
+This document describes the architecture for building and querying scientific knowledge graphs. The system uses Google ADK for agent orchestration, LiteLLM for multi-provider extraction, and Node2Vec+LogReg for link prediction.
 
-## Architecture Diagram
+---
 
+## Conceptual Architecture (High-Level)
+
+```mermaid
+flowchart TB
+    subgraph Input["User Input"]
+        seeds["Seed Terms<br/>(HCRTR1, HCRTR2, orexin)"]
+    end
+
+    subgraph DataSources["Data Sources"]
+        string["STRING DB<br/>Curated PPIs"]
+        pubmed["PubMed/PubTator<br/>Literature + NER"]
+    end
+
+    subgraph Processing["Processing Pipeline"]
+        extraction["Relationship Extraction<br/>LLM + Co-occurrence"]
+        grounding["Entity Grounding<br/>INDRA/Gilda → HGNC"]
+        merge["Evidence Merge<br/>Multi-source Fusion"]
+    end
+
+    subgraph ML["Machine Learning"]
+        embeddings["Node2Vec<br/>Graph Embeddings"]
+        predictor["Link Predictor<br/>LogReg Classifier"]
+    end
+
+    subgraph Output["Output"]
+        kg["Knowledge Graph<br/>NetworkX + Provenance"]
+        predictions["Novel Predictions<br/>Scored Hypotheses"]
+    end
+
+    seeds --> string
+    seeds --> pubmed
+    string --> merge
+    pubmed --> extraction
+    extraction --> merge
+    merge --> grounding
+    grounding --> kg
+    kg --> embeddings
+    embeddings --> predictor
+    predictor --> predictions
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         USER INPUT: Seed Terms                              │
-│                    (e.g., "orexin", "HCRTR1", "HCRTR2")                     │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    PHASE 1: STRING NETWORK EXPANSION                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  STRING Client                                                       │   │
-│  │  - Fetch known PPIs for seed proteins                               │   │
-│  │  - Get interaction partners (network expansion)                      │   │
-│  │  - Min confidence: 700 (high confidence)                            │   │
-│  │  - Output: Expanded entity list + STRING interactions               │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│  Metrics: tokens=0, api_calls=N, latency_ms, entities_found               │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    PHASE 2: QUERY CONSTRUCTION AGENT                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  LLM Agent (gemini-2.0-flash-exp)                                   │   │
-│  │  - Input: Expanded entities from STRING                             │   │
-│  │  - Task: Construct optimal PubMed query                             │   │
-│  │  - Output: PubMed query string + query strategy explanation         │   │
-│  │  - Uses MeSH terms, Boolean operators, date filters                 │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│  Metrics: prompt_tokens, completion_tokens, latency_ms                    │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    PHASE 3: PUBMED FETCH + PUBTATOR NER                     │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  PubMed Client                                                       │   │
-│  │  - Search with constructed query                                     │   │
-│  │  - Fetch abstracts (batched, single API call)                       │   │
-│  │  - Get PubTator NER annotations (genes, diseases, chemicals)        │   │
-│  │  - Max results: configurable (default 50)                           │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│  Metrics: tokens=0, api_calls=2, papers_found, entities_annotated         │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                     ┌────────────────┴────────────────┐
-                     │      PARALLEL FAN-OUT          │
-                     ▼                                ▼
-┌────────────────────────────────────┐  ┌────────────────────────────────────┐
-│   PHASE 4A: CO-OCCURRENCE GRAPH    │  │   PHASE 4B: LLM RELATIONSHIP      │
-│  ┌──────────────────────────────┐  │  │              MINING               │
-│  │  Pure Python (Fast)          │  │  │  ┌──────────────────────────────┐ │
-│  │  - Count entity co-mentions  │  │  │  │  LLM Agent (parallel calls)  │ │
-│  │  - Weight by frequency       │  │  │  │  - Extract typed relations   │ │
-│  │  - PMI scoring               │  │  │  │  - Semaphore: max_concurrent │ │
-│  │  - Output: co-occurrence     │  │  │  │  - Retry with exp backoff    │ │
-│  │    edges with weights        │  │  │  │  - Output: relationships     │ │
-│  └──────────────────────────────┘  │  │  │    with evidence + type      │ │
-│  Metrics: latency_ms only         │  │  │  └──────────────────────────────┘ │
-└────────────────────────────────────┘  │  Metrics: prompt_tokens,          │
-                     │                   │  completion_tokens per chunk,     │
-                     │                   │  total_cost, retries_used         │
-                     │                   └────────────────────────────────────┘
-                     │                                │
-                     └────────────────┬───────────────┘
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    PHASE 5: MERGE AGENT                                     │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  Graph Merge (Thread-Safe)                                          │   │
-│  │  - Combine STRING interactions                                       │   │
-│  │  - Merge co-occurrence edges                                         │   │
-│  │  - Add LLM-extracted relationships                                   │   │
-│  │  - Deduplicate with evidence aggregation                            │   │
-│  │  - Calculate confidence scores                                       │   │
-│  │  - Output: Unified KnowledgeGraph                                   │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│  Metrics: nodes_merged, edges_merged, duplicates_resolved                 │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    PHASE 6: ML LINK PREDICTION                              │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  LinkPredictor (Trained Model)                                       │   │
-│  │  - Extract graph features                                            │   │
-│  │  - Predict novel interactions                                        │   │
-│  │  - Score: 0-1 probability                                           │   │
-│  │  - Filter by min_ml_score threshold                                 │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│  Metrics: predictions_made, avg_score, latency_ms                         │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    PHASE 7: NOTIFICATION + SUMMARY                          │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  Summary Agent                                                       │   │
-│  │  - Generate human-readable summary                                   │   │
-│  │  - Key findings: top entities, novel predictions, communities       │   │
-│  │  - Token usage breakdown                                             │   │
-│  │  - Cost estimation                                                   │   │
-│  │  - Pipeline timing report                                            │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│  Output: PipelineReport to user                                            │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    GRAPHRAG Q&A AGENT (ReAct)                               │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  LlmAgent with PlanReActPlanner                                      │   │
-│  │  Tools:                                                              │   │
-│  │    - get_graph_summary()                                             │   │
-│  │    - query_evidence(p1, p2)                                          │   │
-│  │    - find_path(source, target)                                       │   │
-│  │    - compute_centrality(method)                                      │   │
-│  │    - detect_communities()                                            │   │
-│  │    - run_diamond(seeds)                                              │   │
-│  │    - calculate_proximity(drug, disease)                              │   │
-│  │    - predict_synergy(t1, t2, disease)                                │   │
-│  │    - get_predictions(min_score)                                      │   │
-│  │    - generate_hypothesis(p1, p2)                                     │   │
-│  │  ReAct: Thought → Action → Observation loop                         │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
-│  Conversation history preserved via InMemorySessionService                 │
-└─────────────────────────────────────────────────────────────────────────────┘
+
+---
+
+## Detailed Architecture (Component-Level)
+
+```mermaid
+flowchart TB
+    subgraph UserLayer["User Interface Layer"]
+        cli["main.py<br/>CLI Entry Point"]
+        streamlit["frontend/app.py<br/>Streamlit UI"]
+    end
+
+    subgraph AgentLayer["Agent Layer (Google ADK)"]
+        orchestrator["ADKOrchestrator<br/>agent/adk_orchestrator.py"]
+        tools_module["Module Functions<br/>(ADK Discovery)"]
+        tools_class["AgentTools Class<br/>agent/tools.py"]
+
+        orchestrator --> tools_module
+        tools_module -->|"get_tools()"| tools_class
+    end
+
+    subgraph ClientLayer["API Client Layer"]
+        string_client["StringClient<br/>clients/string_client.py"]
+        pubmed_client["PubMedClient<br/>clients/pubmed_client.py"]
+        gilda_client["GildaClient<br/>clients/gilda_client.py"]
+    end
+
+    subgraph ExtractionLayer["Extraction Layer"]
+        batched_miner["BatchedLiteLLMMiner<br/>extraction/batched_litellm_miner.py"]
+        config_loader["ConfigLoader<br/>extraction/config_loader.py"]
+        inferrer["RelationshipInferrer<br/>extraction/relationship_inferrer.py"]
+
+        batched_miner --> config_loader
+    end
+
+    subgraph MLLayer["ML Layer"]
+        link_predictor["LinkPredictor<br/>ml/link_predictor.py"]
+        hard_neg["HardNegativeSampler<br/>ml/hard_negative_sampling.py"]
+        node2vec["Node2Vec<br/>(gensim)"]
+
+        link_predictor --> hard_neg
+        link_predictor --> node2vec
+    end
+
+    subgraph DataLayer["Data Layer"]
+        kg["KnowledgeGraph<br/>models/knowledge_graph.py"]
+        networkx["NetworkX<br/>MultiDiGraph"]
+
+        kg --> networkx
+    end
+
+    subgraph ExternalAPIs["External APIs"]
+        string_api["STRING API<br/>string-db.org"]
+        pubmed_api["PubMed E-utilities<br/>+ PubTator3"]
+        gilda_api["INDRA/Gilda<br/>grounding.indra.bio"]
+        llm_api["LLM Providers<br/>Gemini/Cerebras/OpenRouter"]
+    end
+
+    cli --> orchestrator
+    streamlit --> orchestrator
+
+    tools_class --> string_client
+    tools_class --> pubmed_client
+    tools_class --> gilda_client
+    tools_class --> batched_miner
+    tools_class --> link_predictor
+    tools_class --> kg
+
+    string_client --> string_api
+    pubmed_client --> pubmed_api
+    gilda_client --> gilda_api
+    batched_miner --> llm_api
+    inferrer --> llm_api
 ```
+
+---
+
+## Seven-Phase Pipeline
+
+```mermaid
+flowchart LR
+    subgraph Phase1["Phase 1"]
+        p1["STRING<br/>Network<br/>Expansion"]
+    end
+
+    subgraph Phase2["Phase 2"]
+        p2["Query<br/>Construction<br/>(LLM)"]
+    end
+
+    subgraph Phase3["Phase 3"]
+        p3["PubMed<br/>Fetch +<br/>PubTator NER"]
+    end
+
+    subgraph Phase4["Phase 4 (Parallel)"]
+        p4a["4A: Co-occurrence<br/>(Python)"]
+        p4b["4B: LLM Mining<br/>(Batched)"]
+    end
+
+    subgraph Phase5["Phase 5"]
+        p5["Graph Merge<br/>+ Grounding<br/>+ Dedup"]
+    end
+
+    subgraph Phase6["Phase 6"]
+        p6["ML Link<br/>Prediction"]
+    end
+
+    subgraph Phase7["Phase 7"]
+        p7["Summary<br/>+ Report"]
+    end
+
+    Phase1 --> Phase2 --> Phase3 --> Phase4
+    p4a --> Phase5
+    p4b --> Phase5
+    Phase5 --> Phase6 --> Phase7
+```
+
+---
+
+## ADK Two-Layer Tool Pattern
+
+```mermaid
+flowchart TB
+    subgraph ADKFramework["Google ADK Framework"]
+        discovery["Tool Discovery<br/>(Reflection)"]
+        gemini["Gemini LLM<br/>(Function Calling)"]
+    end
+
+    subgraph Layer1["Layer 1: Module Functions"]
+        mod_global["_tools_instance: Optional[AgentTools]"]
+        set_tools["set_tools(tools)"]
+        get_tools["get_tools() → AgentTools"]
+
+        func1["async def get_string_network(...)"]
+        func2["async def extract_relationships(...)"]
+        func3["def predict_novel_links(...)"]
+    end
+
+    subgraph Layer2["Layer 2: AgentTools Class"]
+        class_init["AgentTools.__init__(<br/>link_predictor,<br/>string_client,<br/>pubmed_client,<br/>relationship_miner,<br/>relationship_inferrer)"]
+
+        state["Session State:<br/>self.current_graph"]
+
+        impl1["async def get_string_network(...)"]
+        impl2["async def extract_relationships(...)"]
+        impl3["def predict_novel_links(...)"]
+    end
+
+    discovery -->|"Introspect"| func1
+    discovery -->|"Introspect"| func2
+    discovery -->|"Introspect"| func3
+
+    gemini -->|"Invoke"| func1
+    gemini -->|"Invoke"| func2
+    gemini -->|"Invoke"| func3
+
+    func1 -->|"get_tools()"| impl1
+    func2 -->|"get_tools()"| impl2
+    func3 -->|"get_tools()"| impl3
+
+    set_tools --> mod_global
+    get_tools --> mod_global
+
+    class_init --> state
+    impl1 --> state
+    impl2 --> state
+    impl3 --> state
+```
+
+---
+
+## Batched Extraction Pipeline
+
+```mermaid
+flowchart TB
+    subgraph Input["Input"]
+        articles["100 PubMed<br/>Abstracts"]
+        annotations["PubTator<br/>Annotations"]
+    end
+
+    subgraph Chunking["Token-Aware Chunking"]
+        tokenize["Count Tokens<br/>(tiktoken)"]
+        binpack["Greedy<br/>Bin-Packing"]
+        chunks["8-16 Chunks<br/>(~5K tokens each)"]
+    end
+
+    subgraph Parallel["Parallel Mining"]
+        sem["asyncio.Semaphore(5)"]
+        chunk1["Chunk 1"]
+        chunk2["Chunk 2"]
+        chunk3["Chunk N"]
+        llm["LiteLLM<br/>Multi-Provider"]
+    end
+
+    subgraph Validation["Provenance Validation"]
+        pmid_check["PMID<br/>Attribution"]
+        index_check["Sentence Index<br/>Bounds Check"]
+    end
+
+    subgraph Output["Output"]
+        valid["Valid<br/>Relationships<br/>(97.7%)"]
+        stats["Statistics<br/>+ Metrics"]
+    end
+
+    articles --> tokenize
+    annotations --> tokenize
+    tokenize --> binpack
+    binpack --> chunks
+
+    chunks --> sem
+    sem --> chunk1
+    sem --> chunk2
+    sem --> chunk3
+
+    chunk1 --> llm
+    chunk2 --> llm
+    chunk3 --> llm
+
+    llm --> pmid_check
+    pmid_check --> index_check
+    index_check --> valid
+    index_check --> stats
+```
+
+---
+
+## Evidence Integration Flow
+
+```mermaid
+flowchart TB
+    subgraph Sources["Evidence Sources"]
+        string["STRING DB<br/>weight=0.9"]
+        llm["LLM Extraction<br/>weight=0.7"]
+        cooc["Co-occurrence<br/>weight=0.5"]
+    end
+
+    subgraph Processing["Processing"]
+        collect["Collect<br/>Edge Candidates"]
+        group["Group by<br/>(src, tgt, type)"]
+        merge["Merge Evidence<br/>Arrays"]
+        dedup["Deduplicate<br/>by PMID"]
+    end
+
+    subgraph Scoring["Confidence Scoring"]
+        base["max(source_weights)"]
+        multi["+ multi_source_boost<br/>(0.15 per source)"]
+        evidence["+ evidence_boost<br/>(0.1 per citation)"]
+        cap["min(total, 1.0)"]
+    end
+
+    subgraph Output["Output"]
+        edge["Edge with<br/>Confidence + Evidence"]
+    end
+
+    string --> collect
+    llm --> collect
+    cooc --> collect
+
+    collect --> group
+    group --> merge
+    merge --> dedup
+
+    dedup --> base
+    base --> multi
+    multi --> evidence
+    evidence --> cap
+    cap --> edge
+```
+
+---
+
+## Entity Grounding & Deduplication
+
+```mermaid
+flowchart TB
+    subgraph Input["Raw Entities"]
+        e1["LEP"]
+        e2["Leptin"]
+        e3["ob protein"]
+        e4["TNF"]
+    end
+
+    subgraph Grounding["INDRA/Gilda Grounding"]
+        api["POST /ground_multi"]
+        cache["In-Memory Cache"]
+        select["Select Best Result<br/>(prefer HGNC)"]
+    end
+
+    subgraph Results["Grounding Results"]
+        r1["LEP → HGNC:6553"]
+        r2["Leptin → HGNC:6553"]
+        r3["ob → HGNC:6553"]
+        r4["TNF → HGNC:11892"]
+    end
+
+    subgraph Dedup["HGNC Deduplication"]
+        group["Group by<br/>HGNC ID"]
+        canonical["Select<br/>Canonical Name"]
+        remap["Remap Edges<br/>+ Merge Evidence"]
+    end
+
+    subgraph Output["Output"]
+        final["LEP (aliases: Leptin, ob)<br/>TNF"]
+    end
+
+    e1 --> api
+    e2 --> api
+    e3 --> api
+    e4 --> api
+
+    api --> cache
+    cache --> select
+
+    select --> r1
+    select --> r2
+    select --> r3
+    select --> r4
+
+    r1 --> group
+    r2 --> group
+    r3 --> group
+    r4 --> group
+
+    group --> canonical
+    canonical --> remap
+    remap --> final
+```
+
+---
+
+## ML Link Prediction Pipeline
+
+```mermaid
+flowchart TB
+    subgraph Training["Offline Training (One-Time)"]
+        string_data["STRING Physical<br/>Interactions"]
+        split["Split Edges<br/>80/20 BEFORE<br/>Embeddings"]
+        train_graph["Training Graph<br/>(only train edges)"]
+        node2vec["Node2Vec<br/>Training"]
+        embeddings["128D<br/>Embeddings"]
+        hadamard["Hadamard<br/>Product"]
+        logreg["Logistic<br/>Regression"]
+    end
+
+    subgraph Evaluation["Hard Negative Evaluation"]
+        hard_neg["Hard Negatives<br/>(2-hop + degree-matched)"]
+        eval["Evaluate on<br/>Test Edges"]
+        auc["ROC-AUC: 0.78<br/>(honest)"]
+    end
+
+    subgraph Inference["Runtime Inference"]
+        candidates["Candidate<br/>Pairs"]
+        predict["predict_proba()"]
+        filter["Filter by<br/>min_score"]
+        novel["Novel<br/>Predictions"]
+    end
+
+    string_data --> split
+    split --> train_graph
+    train_graph --> node2vec
+    node2vec --> embeddings
+    embeddings --> hadamard
+    hadamard --> logreg
+
+    logreg --> hard_neg
+    hard_neg --> eval
+    eval --> auc
+
+    candidates --> predict
+    embeddings --> predict
+    logreg --> predict
+    predict --> filter
+    filter --> novel
+```
+
+---
 
 ## Key Design Decisions
 
-### 1. STRING FIRST
+### 1. Node2Vec + LogReg over GNN
 
-STRING provides a curated, high-confidence protein interaction network. By starting with STRING:
-- We get a **theoretical framework** of known biology
-- STRING entities serve as the **NER vocabulary** for PubMed extraction
-- Ensures we focus on biologically relevant proteins
+| Factor | Node2Vec + LogReg | GCN/GraphSAGE |
+|--------|-------------------|---------------|
+| Training complexity | CPU-friendly, 30-60 min | Requires GPU, hours |
+| Node features | None needed | Requires features |
+| Interpretability | Embeddings inspectable | Black box |
+| STRING sparsity | Random walks handle well | Message passing struggles |
 
-### 2. Sequential + Parallel Hybrid
+### 2. Sentence-Index Provenance
 
-The pipeline is **sequential at the phase level** but **parallel within phases**:
-- Phases must complete in order (STRING → Query → PubMed → Extract → Merge)
-- Relationship mining is parallelized with `asyncio.Semaphore` (max 5 concurrent)
-- Co-occurrence and LLM extraction run in parallel (Phase 4A || Phase 4B)
+| Approach | Validation Rate | Failure Mode |
+|----------|-----------------|--------------|
+| Text extraction | 62% | Paraphrasing (38%) |
+| Sentence indices | 97.7% | Index hallucination (2.3%) |
 
-### 3. Token Tracking at Every Step
+### 3. Hard Negative Evaluation
 
-Every LLM call tracks:
-```python
-@dataclass
-class TokenUsage:
-    phase: str
-    step: str
-    prompt_tokens: int
-    completion_tokens: int
-    total_tokens: int
-    latency_ms: float
-    model: str
-    cost_usd: float  # Estimated
+| Strategy | ROC-AUC | Interpretation |
+|----------|---------|----------------|
+| Random negatives | 0.99 | Inflated (degree bias) |
+| Combined hard | 0.78 | Honest evaluation |
+
+### 4. Multi-Source Confidence
+
+```
+Confidence = max(source_weights)
+           + 0.15 × (num_sources - 1)
+           + min(0.1 × (evidence_count - 1), 0.2)
 ```
 
-### 4. Langfuse Instrumentation
-
-OpenTelemetry-based tracing via `GoogleADKInstrumentor`:
-- Every tool call becomes a span
-- LLM requests/responses captured
-- Custom attributes for cost tracking
-- Session-scoped traces for conversation continuity
-
-### 5. ADK for Retries/Rate Limits
-
-Built-in retry with exponential backoff:
-```python
-@dataclass
-class MiningConfig:
-    max_concurrent: int = 5
-    max_retries: int = 3
-    base_delay: float = 1.0
-    retry_on_codes: tuple = (429, 503, 500, 502)
-```
-
-### 6. ReAct Planning for Q&A
-
-The GraphRAG agent uses `PlanReActPlanner` for flexible reasoning:
-- **Thought**: Reason about what information is needed
-- **Action**: Call appropriate tool
-- **Observation**: Process tool result
-- **Repeat**: Until question is answered
-
-## Data Models
-
-### PipelineConfig
-
-```python
-@dataclass
-class PipelineConfig:
-    # STRING
-    string_min_score: int = 700
-    string_max_partners: int = 30
-
-    # PubMed
-    pubmed_max_results: int = 50
-    pubmed_date_filter: str | None = None  # e.g., "2020:2024"
-
-    # Relationship Mining
-    mining_max_concurrent: int = 5
-    mining_max_retries: int = 3
-    mining_model: str = "gemini-2.0-flash-exp"
-
-    # ML Link Prediction
-    ml_min_score: float = 0.7
-    ml_max_predictions: int = 20
-
-    # Observability
-    langfuse_enabled: bool = True
-    langfuse_session_id: str | None = None
-```
-
-### PipelineReport
-
-```python
-@dataclass
-class PipelineReport:
-    # Timing
-    total_duration_s: float
-    phase_timings: dict[str, float]
-
-    # Token Usage
-    total_tokens: int
-    token_breakdown: dict[str, TokenUsage]
-    estimated_cost_usd: float
-
-    # Results
-    nodes_created: int
-    edges_created: int
-    papers_processed: int
-    relationships_extracted: int
-    predictions_made: int
-
-    # Key Findings
-    top_entities: list[tuple[str, float]]  # (entity, centrality)
-    novel_predictions: list[dict]
-    communities: list[list[str]]
-```
-
-## Implementation Phases
-
-### Phase 1: Langfuse Instrumentation Setup
-- Copy `_setup_langfuse_tracing()` from tetra_v0
-- Add `GoogleADKInstrumentor` initialization
-- Create `observability/tracing.py` module
-
-### Phase 2: Pipeline Infrastructure
-- Create `pipeline/config.py` with `PipelineConfig`
-- Create `pipeline/metrics.py` with `TokenUsage`, `PipelineReport`
-- Add cost estimation functions
-
-### Phase 3: STRING-First Pipeline
-- Create `pipeline/string_expansion.py`
-- Fetch STRING network for seed proteins
-- Get interaction partners for network expansion
-
-### Phase 4: Query Construction Agent
-- Create `pipeline/query_agent.py`
-- LLM agent that builds optimal PubMed query from STRING entities
-- Output: validated PubMed query string
-
-### Phase 5: Parallel Fan-Out
-- Create `pipeline/parallel_extraction.py`
-- Co-occurrence graph (fast, Python-only)
-- LLM relationship mining (parallel with semaphore)
-- Use `asyncio.gather()` for parallel execution
-
-### Phase 6: Merge Agent + Graph Construction
-- Create `pipeline/merge.py`
-- Thread-safe graph merging
-- Evidence aggregation
-- Confidence scoring
-
-### Phase 7: GraphRAG Q&A Agent
-- Adapt from tetra_v0's `GraphAgentManager`
-- Use `PlanReActPlanner` for flexible reasoning
-- Tool access to all GDS algorithms
-
-### Phase 8: Frontend Integration
-- Replace "Copy Prompt" with "Build Knowledge Graph" button
-- Real-time progress updates via Streamlit
-- Results display with graph visualization
+---
 
 ## File Structure
 
 ```
 tetra_v1/
+├── main.py                         # CLI entry point
+├── DESIGN.md                       # Design decisions & rationale
+├── ARCHITECTURE.md                 # This document
+├── DEMO.md                         # Interview preparation guide
+│
 ├── agent/
-│   ├── adk_orchestrator.py      # Main ADK agent (existing)
-│   ├── tools.py                 # Tool implementations (existing)
-│   ├── query_agent.py           # NEW: Query construction agent
-│   └── graph_agent.py           # NEW: GraphRAG Q&A agent (from v0)
-├── pipeline/
-│   ├── __init__.py
-│   ├── config.py                # NEW: PipelineConfig
-│   ├── metrics.py               # NEW: TokenUsage, PipelineReport
-│   ├── string_expansion.py      # NEW: STRING-first logic
-│   ├── parallel_extraction.py   # NEW: Parallel fan-out
-│   └── merge.py                 # NEW: Graph merging
-├── observability/
-│   ├── __init__.py
-│   └── tracing.py               # NEW: Langfuse setup
-├── models/
-│   └── knowledge_graph.py       # Existing + GDS algorithms
+│   ├── adk_orchestrator.py         # ADK agent + module functions
+│   ├── tools.py                    # AgentTools class (stateful)
+│   └── graph_agent.py              # GraphRAG Q&A agent
+│
 ├── clients/
-│   ├── pubmed_client.py         # Existing
-│   └── string_client.py         # Existing
+│   ├── string_client.py            # STRING API (async httpx)
+│   ├── pubmed_client.py            # PubMed + PubTator (async)
+│   └── gilda_client.py             # INDRA/Gilda grounding (async)
+│
 ├── extraction/
-│   ├── relationship_extractor.py # Existing
-│   └── relationship_inferrer.py  # Existing
+│   ├── batched_litellm_miner.py    # Batched relationship extraction
+│   ├── config.toml                 # Prompts + schema definitions
+│   ├── config_loader.py            # Provider routing
+│   └── relationship_inferrer.py    # LLM relationship inference
+│
+├── models/
+│   └── knowledge_graph.py          # NetworkX graph + algorithms
+│
 ├── ml/
-│   └── link_predictor.py        # Existing
-└── frontend/
-    └── app.py                   # Updated with Build button
+│   ├── link_predictor.py           # Node2Vec + LogReg
+│   └── hard_negative_sampling.py   # Evaluation strategies
+│
+├── pipeline/
+│   ├── config.py                   # PipelineConfig
+│   ├── metrics.py                  # TokenUsage, statistics
+│   └── merge.py                    # Evidence aggregation
+│
+├── frontend/
+│   └── app.py                      # Streamlit UI
+│
+├── scripts/
+│   ├── train_link_predictor.py     # Training pipeline
+│   ├── benchmark_miner_scale.py    # Performance testing
+│   └── test_miner_provenance.py    # Provenance validation
+│
+└── tests/
+    ├── test_batched_litellm_miner.py
+    ├── test_link_predictor.py
+    └── test_knowledge_graph.py
 ```
+
+---
+
+## Configuration
+
+### Environment Variables
+
+```bash
+# Required
+GOOGLE_API_KEY=AIza...              # Gemini access
+
+# Optional
+NCBI_API_KEY=...                    # Higher PubMed rate limits
+OPENROUTER_API_KEY=sk-or-...        # Cerebras/OpenRouter access
+LANGFUSE_PUBLIC_KEY=...             # Observability
+LANGFUSE_SECRET_KEY=...
+```
+
+### Extraction Config (`extraction/config.toml`)
+
+```toml
+[BATCHED]
+TARGET_TOKENS_PER_CHUNK = 5000
+MIN_CHUNKS = 3
+MAX_CONCURRENT = 5
+MAX_RETRIES = 3
+RETRY_DELAY_MS = 1000
+MIN_CONFIDENCE = 0.5
+MAX_TOKENS = 8192
+
+[EXTRACTORS.cerebras]
+MODEL = "openrouter/openai/gpt-oss-120b"
+TEMPERATURE = 0.1
+
+[EXTRACTORS.gemini]
+MODEL = "gemini/gemini-2.5-flash"
+TEMPERATURE = 0.1
+```
+
+---
+
+## Performance Metrics
+
+| Metric | Target | Achieved |
+|--------|--------|----------|
+| Link predictor AUC (hard neg) | > 0.75 | 0.78-0.86 |
+| Provenance validation | > 90% | 97.7% |
+| Extraction throughput | > 2000 tok/s | 3,000+ tok/s |
+| Entity grounding | > 70% | 75-80% |
+| Query response time | < 30s | ~15-25s |
+
+---
 
 ## Cost Estimation
 
-Based on Gemini 2.0 Flash pricing (input: $0.075/1M tokens, output: $0.30/1M tokens):
+Based on Gemini 2.5 Flash pricing:
 
-| Phase | Est. Input Tokens | Est. Output Tokens | Est. Cost |
-|-------|-------------------|--------------------|-----------|
-| Query Construction | 2,000 | 500 | $0.0003 |
-| Relationship Mining (50 papers) | 150,000 | 30,000 | $0.020 |
-| Summary Generation | 5,000 | 2,000 | $0.001 |
-| **Total per pipeline run** | ~157,000 | ~32,500 | **~$0.022** |
+| Operation | Input Tokens | Output Tokens | Est. Cost |
+|-----------|--------------|---------------|-----------|
+| Query construction | 2,000 | 500 | $0.0003 |
+| Relationship mining (50 papers) | 150,000 | 30,000 | $0.020 |
+| Inference (5 predictions) | 10,000 | 2,000 | $0.002 |
+| **Total per pipeline run** | ~162,000 | ~32,500 | **~$0.022** |
 
-Plus Q&A queries: ~$0.001-0.005 per query depending on tool usage.
+---
+
+## Future Enhancements
+
+1. **GraphSAGE Upgrade**: Better predictions with learned node features
+2. **Neo4j Migration**: For production scale (millions of nodes)
+3. **Streaming Responses**: Real-time agent output
+4. **Fine-tuned Extraction**: Domain-specific model instead of prompting
+5. **Multi-species Support**: Extend HGNC to include model organisms

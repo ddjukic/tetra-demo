@@ -25,6 +25,20 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Optional, Protocol
 
+# =============================================================================
+# Langfuse Observability Setup (MUST be before ADK imports)
+# =============================================================================
+# OpenTelemetry instrumentation must be configured before importing google.adk
+# for the GoogleADKInstrumentor to properly intercept ADK agent operations.
+
+from observability.tracing import setup_langfuse_tracing
+
+_LANGFUSE_ENABLED = setup_langfuse_tracing()
+
+# =============================================================================
+# ADK Imports (after Langfuse setup)
+# =============================================================================
+
 from google.adk.agents import LlmAgent
 from google.adk.planners import PlanReActPlanner
 from google.adk.runners import Runner
@@ -35,6 +49,11 @@ from google.genai import types
 from models.knowledge_graph import KnowledgeGraph
 
 logger = logging.getLogger(__name__)
+
+if _LANGFUSE_ENABLED:
+    logger.info("GraphRAG Q&A Agent: Langfuse tracing enabled")
+else:
+    logger.debug("GraphRAG Q&A Agent: Langfuse tracing disabled (set LANGFUSE_SECRET_KEY and LANGFUSE_PUBLIC_KEY to enable)")
 
 
 # =============================================================================
@@ -929,6 +948,200 @@ def predict_batch_interactions(
 
 
 @requires_graph
+def run_link_predictions(
+    tool_context: ToolContext,
+    min_score: float = 0.3,
+    max_predictions: int = 50
+) -> dict[str, Any]:
+    """
+    Run ML link predictor on all protein pairs and add predictions to the graph.
+
+    This tool evaluates ALL protein pairs not currently connected in the graph,
+    runs the ML predictor on them, and adds high-scoring predictions as new
+    edges with ml_score metadata. After running this, use get_predictions()
+    to retrieve the results.
+
+    Predictions are categorized as:
+    - enrichment: Known STRING interactions not yet in graph (high confidence)
+    - novel_prediction: ML predictions NOT in STRING (truly novel hypotheses)
+
+    Args:
+        tool_context: ADK tool context (injected by framework)
+        min_score: Minimum ML score threshold (0-1, default 0.3)
+        max_predictions: Maximum predictions to add to graph (default 50)
+
+    Returns:
+        Dictionary with:
+        - status: "success" or "error"
+        - enrichment_count: Number of STRING-backed edges added
+        - novel_count: Number of novel predictions added
+        - total_pairs_evaluated: Total candidate pairs checked
+        - top_predictions: List of top predictions added
+    """
+    from models.knowledge_graph import RelationshipType, EvidenceSource
+
+    predictor = get_link_predictor()
+    graph = _get_graph(tool_context)
+
+    if predictor is None:
+        return {
+            "status": "error",
+            "message": "No ML predictor loaded. The predictor may not be initialized.",
+            "enrichment_count": 0,
+            "novel_count": 0,
+            "total_pairs_evaluated": 0,
+            "top_predictions": [],
+        }
+
+    # Get all protein/gene entities
+    proteins = [
+        entity_id
+        for entity_id, data in graph.entities.items()
+        if data.get("type") in ["protein", "gene", "unknown"]
+    ]
+
+    if len(proteins) < 2:
+        return {
+            "status": "error",
+            "message": f"Not enough proteins for prediction (found {len(proteins)})",
+            "enrichment_count": 0,
+            "novel_count": 0,
+            "total_pairs_evaluated": 0,
+            "top_predictions": [],
+        }
+
+    # Generate candidate pairs not already in graph
+    candidate_pairs = []
+    for i, p1 in enumerate(proteins):
+        for p2 in proteins[i + 1:]:
+            # Check if edge exists (in either direction)
+            existing = graph.get_relationship(p1, p2)
+            if not existing:
+                candidate_pairs.append((p1, p2))
+
+    if not candidate_pairs:
+        return {
+            "status": "success",
+            "message": "All protein pairs already have edges in the graph",
+            "enrichment_count": 0,
+            "novel_count": 0,
+            "total_pairs_evaluated": 0,
+            "top_predictions": [],
+        }
+
+    logger.info(f"Running ML predictions on {len(candidate_pairs)} candidate pairs")
+
+    # Run predictions
+    try:
+        results = predictor.predict(candidate_pairs)
+    except Exception as e:
+        logger.error(f"ML prediction failed: {e}")
+        return {
+            "status": "error",
+            "message": f"ML prediction failed: {str(e)}",
+            "enrichment_count": 0,
+            "novel_count": 0,
+            "total_pairs_evaluated": len(candidate_pairs),
+            "top_predictions": [],
+        }
+
+    # Categorize results
+    enrichment_results = []  # in_string=True
+    novel_results = []  # in_string=False, score >= threshold
+
+    for result in results:
+        if result.get("error"):
+            continue
+
+        ml_score = result.get("ml_score")
+        if ml_score is None:
+            continue
+
+        in_string = result.get("in_string", False)
+
+        if in_string:
+            # Known STRING interaction - add as enrichment
+            enrichment_results.append(result)
+        elif ml_score >= min_score:
+            # Novel prediction above threshold
+            novel_results.append(result)
+
+    # Sort by score
+    enrichment_results.sort(key=lambda x: x.get("ml_score", 0), reverse=True)
+    novel_results.sort(key=lambda x: x.get("ml_score", 0), reverse=True)
+
+    # Add to graph (limit to max_predictions total)
+    added_enrichment = []
+    added_novel = []
+
+    # Add enrichment edges (half of max_predictions)
+    max_enrichment = max_predictions // 2
+    for result in enrichment_results[:max_enrichment]:
+        graph.add_relationship(
+            source=result["protein1"],
+            target=result["protein2"],
+            rel_type=RelationshipType.INTERACTS_WITH,
+            ml_score=result["ml_score"],
+            evidence=[{
+                "source_type": EvidenceSource.ML_PREDICTED.value,
+                "source_id": "link_predictor",
+                "confidence": result["ml_score"],
+            }],
+            link_category="enrichment",
+        )
+        added_enrichment.append({
+            "protein1": result["protein1"],
+            "protein2": result["protein2"],
+            "ml_score": round(result["ml_score"], 4),
+            "in_string": True,
+            "category": "enrichment",
+        })
+
+    # Add novel predictions (remaining half)
+    max_novel = max_predictions - len(added_enrichment)
+    for result in novel_results[:max_novel]:
+        graph.add_relationship(
+            source=result["protein1"],
+            target=result["protein2"],
+            rel_type=RelationshipType.HYPOTHESIZED,
+            ml_score=result["ml_score"],
+            evidence=[{
+                "source_type": EvidenceSource.ML_PREDICTED.value,
+                "source_id": "link_predictor",
+                "confidence": result["ml_score"],
+            }],
+            link_category="novel_prediction",
+        )
+        added_novel.append({
+            "protein1": result["protein1"],
+            "protein2": result["protein2"],
+            "ml_score": round(result["ml_score"], 4),
+            "in_string": False,
+            "category": "novel_prediction",
+        })
+
+    # Combine for top predictions
+    all_added = added_enrichment + added_novel
+    all_added.sort(key=lambda x: x["ml_score"], reverse=True)
+
+    logger.info(
+        f"Added {len(added_enrichment)} enrichment edges and "
+        f"{len(added_novel)} novel predictions to graph"
+    )
+
+    return {
+        "status": "success",
+        "message": f"Added {len(added_enrichment)} enrichment edges and {len(added_novel)} novel predictions",
+        "enrichment_count": len(added_enrichment),
+        "novel_count": len(added_novel),
+        "total_pairs_evaluated": len(candidate_pairs),
+        "total_enrichment_available": len(enrichment_results),
+        "total_novel_available": len(novel_results),
+        "top_predictions": all_added[:20],
+    }
+
+
+@requires_graph
 def generate_hypothesis(
     tool_context: ToolContext,
     protein1: str,
@@ -1314,7 +1527,8 @@ class GraphAgentManager:
     def __init__(
         self,
         graph: KnowledgeGraph | None = None,
-        model: str = "gemini-2.5-flash"
+        model: str = "gemini-2.5-flash",
+        link_predictor: LinkPredictorProtocol | None = None,
     ):
         """
         Initialize the GraphRAG agent manager.
@@ -1323,9 +1537,15 @@ class GraphAgentManager:
             graph: Optional KnowledgeGraph to use. If None, graph must be
                    set later using set_graph() or set_active_graph().
             model: Gemini model to use (default: gemini-2.5-flash)
+            link_predictor: Optional link predictor for ML predictions.
+                           If provided, sets the module-level predictor.
         """
         if graph:
             set_active_graph(graph)
+
+        if link_predictor:
+            set_link_predictor(link_predictor)
+            logger.info("Link predictor initialized in GraphAgentManager")
 
         self.model = model
         self.agent = create_graph_agent(model)
@@ -1514,7 +1734,14 @@ class GraphAgentManager:
 # Module Exports
 # =============================================================================
 
+def is_langfuse_enabled() -> bool:
+    """Check if Langfuse tracing is enabled for this module."""
+    return _LANGFUSE_ENABLED
+
+
 __all__ = [
+    # Observability
+    "is_langfuse_enabled",
     # Graph cache functions
     "set_active_graph",
     "get_active_graph",
