@@ -16,8 +16,10 @@
 #   --project PROJECT_ID    GCP project ID (required or set GCP_PROJECT env)
 #   --region REGION         GCP region (default: us-central1)
 #   --service NAME          Cloud Run service name (default: tetra-kg-agent)
-#   --setup-secrets         Create/update secrets in Secret Manager
+#   --setup-secrets         Create/update secrets interactively in Secret Manager
+#   --secrets-from-env      Load secrets from local .env file (non-interactive)
 #   --local-build           Build locally instead of Cloud Build
+#   --skip-build            Skip build, just deploy existing image
 #   --allow-unauthenticated Allow public access (default: requires auth)
 #   --dry-run               Show commands without executing
 #   --help                  Show this help message
@@ -34,17 +36,22 @@ SERVICE_NAME="${SERVICE_NAME:-tetra-kg-agent}"
 AR_REPO="${AR_REPO:-tetra-repo}"
 IMAGE_NAME="${IMAGE_NAME:-tetra-kg-agent}"
 
-# Cloud Run settings
+# Cloud Run settings (Gen 2)
 MEMORY="${MEMORY:-4Gi}"
 CPU="${CPU:-2}"
 MIN_INSTANCES="${MIN_INSTANCES:-0}"
 MAX_INSTANCES="${MAX_INSTANCES:-10}"
 TIMEOUT="${TIMEOUT:-300}"
 CONCURRENCY="${CONCURRENCY:-80}"
+EXECUTION_ENV="${EXECUTION_ENV:-gen2}"
+CPU_BOOST="${CPU_BOOST:-true}"
+SESSION_AFFINITY="${SESSION_AFFINITY:-true}"
 
 # Feature flags
 SETUP_SECRETS=false
+SECRETS_FROM_ENV=false
 LOCAL_BUILD=false
+SKIP_BUILD=false
 ALLOW_UNAUTHENTICATED=false
 DRY_RUN=false
 
@@ -107,8 +114,16 @@ while [[ $# -gt 0 ]]; do
             SETUP_SECRETS=true
             shift
             ;;
+        --secrets-from-env)
+            SECRETS_FROM_ENV=true
+            shift
+            ;;
         --local-build)
             LOCAL_BUILD=true
+            shift
+            ;;
+        --skip-build)
+            SKIP_BUILD=true
             shift
             ;;
         --allow-unauthenticated)
@@ -160,6 +175,10 @@ log_info "Service name: $SERVICE_NAME"
 
 # Set the project for all gcloud commands
 run_cmd gcloud config set project "$GCP_PROJECT"
+
+# Get the script's directory and project root (used throughout)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # ========================== Enable APIs ==========================
 
@@ -253,42 +272,83 @@ if [ "$SETUP_SECRETS" = true ]; then
     log_success "Secrets configured"
 fi
 
+# Load secrets from .env file (non-interactive)
+if [ "$SECRETS_FROM_ENV" = true ]; then
+    log_info "Loading secrets from .env file..."
+
+    ENV_FILE="$PROJECT_ROOT/.env"
+    if [ ! -f "$ENV_FILE" ]; then
+        # Try script directory parent
+        ENV_FILE="$(dirname "$SCRIPT_DIR")/.env"
+    fi
+
+    if [ -f "$ENV_FILE" ]; then
+        log_info "Found .env file: $ENV_FILE"
+
+        # Read each secret from .env and create/update in Secret Manager
+        for secret_name in GOOGLE_API_KEY OPENROUTER_API_KEY NCBI_API_KEY LANGFUSE_PUBLIC_KEY LANGFUSE_SECRET_KEY; do
+            # Extract value from .env file
+            secret_value=$(grep -E "^${secret_name}=" "$ENV_FILE" 2>/dev/null | cut -d'=' -f2- | tr -d '"' | tr -d "'" || true)
+
+            if [ -n "$secret_value" ] && [ "$secret_value" != "" ]; then
+                if ! gcloud secrets describe "$secret_name" &>/dev/null; then
+                    log_info "Creating secret: $secret_name"
+                    echo -n "$secret_value" | run_cmd gcloud secrets create "$secret_name" \
+                        --data-file=- \
+                        --replication-policy="automatic"
+                else
+                    log_info "Updating secret: $secret_name"
+                    echo -n "$secret_value" | run_cmd gcloud secrets versions add "$secret_name" \
+                        --data-file=-
+                fi
+                log_success "Secret '$secret_name' configured"
+            else
+                log_warning "Secret '$secret_name' not found in .env or empty, skipping"
+            fi
+        done
+
+        log_success "Secrets loaded from .env"
+    else
+        log_error ".env file not found. Create one from .env.example"
+        exit 1
+    fi
+fi
+
 # ========================== Build Image ==========================
 
-log_info "Building Docker image..."
-
-# Get the script's directory and navigate to project root
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_ROOT"
 
-if [ "$LOCAL_BUILD" = true ]; then
+if [ "$SKIP_BUILD" = true ]; then
+    log_info "Skipping build (--skip-build specified)"
+    log_info "Using existing image: ${IMAGE_URI}:latest"
+elif [ "$LOCAL_BUILD" = true ]; then
     # Local Docker build + push
     log_info "Building locally with Docker..."
     run_cmd docker build -t "${IMAGE_URI}:latest" .
     run_cmd docker push "${IMAGE_URI}:latest"
+    log_success "Image built and pushed: ${IMAGE_URI}:latest"
 else
     # Cloud Build (recommended - faster, no local Docker needed)
-    log_info "Building with Cloud Build..."
+    log_info "Building with Cloud Build (this may take 5-10 minutes)..."
     run_cmd gcloud builds submit \
         --tag "${IMAGE_URI}:latest" \
         --timeout=1800s \
         --machine-type=e2-highcpu-8 \
         .
+    log_success "Image built and pushed: ${IMAGE_URI}:latest"
 fi
-
-log_success "Image built and pushed: ${IMAGE_URI}:latest"
 
 # ========================== Deploy to Cloud Run ==========================
 
 log_info "Deploying to Cloud Run..."
 
-# Build the deployment command
+# Build the deployment command (Cloud Run Gen 2)
 DEPLOY_CMD=(
     gcloud run deploy "$SERVICE_NAME"
     --image "${IMAGE_URI}:latest"
     --region "$GCP_REGION"
     --platform managed
+    --execution-environment "$EXECUTION_ENV"
     --memory "$MEMORY"
     --cpu "$CPU"
     --min-instances "$MIN_INSTANCES"
@@ -296,7 +356,18 @@ DEPLOY_CMD=(
     --timeout "$TIMEOUT"
     --concurrency "$CONCURRENCY"
     --port 8080
+    --cpu-throttling
 )
+
+# Add CPU boost for faster cold starts (Gen 2 feature)
+if [ "$CPU_BOOST" = true ]; then
+    DEPLOY_CMD+=(--cpu-boost)
+fi
+
+# Add session affinity for Streamlit (stateful app needs sticky sessions)
+if [ "$SESSION_AFFINITY" = true ]; then
+    DEPLOY_CMD+=(--session-affinity)
+fi
 
 # Add secrets as environment variables
 # Only add secrets that exist
