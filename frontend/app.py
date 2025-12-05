@@ -528,7 +528,6 @@ def render_chat_interface():
     Ask questions about your knowledge graph. The agent can:
     - Explore graph structure and find paths
     - Compute centrality and detect communities
-    - Run drug discovery algorithms (DIAMOnD, proximity, synergy)
     - Generate hypotheses for predicted interactions
     """)
 
@@ -594,7 +593,6 @@ with tab_chat:
         - "Find the path between BRCA1 and TP53"
         - "What evidence supports the BRCA1-MDM2 interaction?"
         - "Detect communities in the network"
-        - "Run DIAMOnD starting from BRCA1, BRCA2"
         """)
     else:
         # Initialize agent manager if not exists
@@ -717,12 +715,13 @@ with tab_explore:
                     direction = rel_data.get("direction", "unknown")
                     rel_type = rel_data.get("relation_type", "interacts_with")
                     ml_score = rel_data.get("ml_score")
-                    evidence_count = len(rel_data.get("evidence", []))
+                    evidence_list = rel_data.get("evidence", [])
+                    evidence_count = len(evidence_list)
 
                     if direction == "outgoing":
-                        arrow = "->"
+                        arrow = "→"
                     else:
-                        arrow = "<-"
+                        arrow = "←"
 
                     info_parts = []
                     if ml_score:
@@ -732,46 +731,36 @@ with tab_explore:
 
                     info_str = f" ({', '.join(info_parts)})" if info_parts else ""
 
-                    st.markdown(f"- {selected_entity} {arrow} **{neighbor_id}** [{rel_type}]{info_str}")
+                    # Create interaction header
+                    interaction_label = f"{selected_entity} {arrow} **{neighbor_id}** [{rel_type}]{info_str}"
+
+                    # If there's evidence with text snippets, show in expander
+                    evidence_with_text = [ev for ev in evidence_list if ev.get("text_snippet")]
+
+                    if evidence_with_text:
+                        with st.expander(interaction_label, expanded=False):
+                            # Group evidence by PMID for cleaner display
+                            by_pmid: dict[str, list[str]] = {}
+                            for ev in evidence_with_text:
+                                pmid = ev.get("source_id", "Unknown")
+                                text = ev.get("text_snippet", "")
+                                if text:
+                                    if pmid not in by_pmid:
+                                        by_pmid[pmid] = []
+                                    by_pmid[pmid].append(text)
+
+                            for pmid, sentences in by_pmid.items():
+                                if pmid and pmid != "Unknown":
+                                    st.markdown(f"**[PMID:{pmid}](https://pubmed.ncbi.nlm.nih.gov/{pmid})**")
+                                else:
+                                    st.markdown("**Source: Unknown**")
+                                for sentence in sentences:
+                                    st.markdown(f"- _{sentence}_")
+                    else:
+                        # No text snippets, just show the line
+                        st.markdown(f"- {interaction_label}")
             else:
                 st.info("No interactions found for this entity.")
-
-    st.divider()
-
-    # ML Prediction Tool
-    st.subheader("Predict Interaction")
-
-    if link_predictor:
-        col1, col2 = st.columns(2)
-        with col1:
-            protein1 = st.text_input("Protein 1 (e.g., BRCA1)", key="pred_protein1")
-        with col2:
-            protein2 = st.text_input("Protein 2 (e.g., TP53)", key="pred_protein2")
-
-        if st.button("Predict", disabled=not (protein1 and protein2)):
-            if protein1 and protein2:
-                with st.spinner("Predicting..."):
-                    result = link_predictor.predict([(protein1, protein2)])
-                    if result:
-                        pred = result[0]
-                        if pred.get("error"):
-                            st.error(pred["error"])
-                        else:
-                            ml_score = pred.get("ml_score", 0.0)
-                            in_string = pred.get("in_string", False)
-
-                            col1, col2 = st.columns(2)
-                            col1.metric("ML Prediction Score", f"{ml_score:.3f}")
-                            col2.metric("In STRING Database", "Yes" if in_string else "No")
-
-                            if ml_score > 0.7:
-                                st.success("High confidence prediction!")
-                            elif ml_score > 0.5:
-                                st.info("Moderate confidence prediction.")
-                            else:
-                                st.warning("Low confidence prediction.")
-    else:
-        st.warning("Link predictor not available.")
 
 
 # =============================================================================

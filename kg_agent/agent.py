@@ -638,83 +638,6 @@ def predict_novel_links(
     }
 
 
-def run_diamond_module(
-    seed_genes: list[str],
-    max_iterations: int = 200,
-    tool_context: ToolContext = None,
-) -> dict:
-    """
-    Run DIAMOnD algorithm to detect disease modules from seed genes.
-
-    Based on Ghiassian et al. (2015) for identifying disease-associated
-    gene modules through network connectivity analysis.
-
-    Args:
-        seed_genes: Known disease-associated genes (e.g., from GWAS).
-        max_iterations: Maximum genes to add to module. Default 200.
-
-    Returns:
-        Disease module genes and ranked expansion candidates.
-    """
-    orchestrator = get_orchestrator()
-    graph = orchestrator.graph
-
-    if graph is None:
-        return {"status": "error", "message": "No graph built."}
-
-    result = graph.run_diamond(seed_genes, max_iterations)
-
-    return {
-        "seed_genes": result.seed_genes,
-        "module_genes": result.module_genes[:20],
-        "module_size": result.module_size,
-        "iterations_run": result.iterations_run,
-        "top_candidates": [
-            {"gene": gene, "score": round(score, 4)}
-            for gene, score in result.ranked_candidates[:10]
-        ],
-    }
-
-
-def calculate_drug_disease_proximity(
-    drug_targets: list[str],
-    disease_genes: list[str],
-    tool_context: ToolContext = None,
-) -> dict:
-    """
-    Calculate network proximity between drug targets and disease genes.
-
-    Based on Guney et al. (2016) for predicting drug efficacy through
-    network-based drug-disease relationships.
-
-    Args:
-        drug_targets: List of drug target genes/proteins.
-        disease_genes: List of disease-associated genes.
-
-    Returns:
-        Proximity metrics with statistical significance.
-    """
-    orchestrator = get_orchestrator()
-    graph = orchestrator.graph
-
-    if graph is None:
-        return {"status": "error", "message": "No graph built."}
-
-    result = graph.calculate_network_proximity(
-        drug_targets, disease_genes, n_random=100
-    )
-
-    return {
-        "drug_targets": result.drug_targets,
-        "disease_genes": result.disease_genes,
-        "observed_distance": round(result.observed_distance, 4) if result.observed_distance != float('inf') else None,
-        "z_score": round(result.z_score, 4),
-        "p_value": round(result.p_value, 4),
-        "is_significant": result.is_significant,
-        "interpretation": result.interpretation,
-    }
-
-
 def get_capabilities(tool_context: ToolContext = None) -> dict:
     """Get a description of what this agent can do."""
     return {
@@ -726,8 +649,6 @@ def get_capabilities(tool_context: ToolContext = None) -> dict:
             "Compute centrality metrics (PageRank, betweenness, etc.)",
             "Detect communities/modules using Louvain algorithm",
             "Predict novel protein-protein interactions using ML",
-            "Run DIAMOnD disease module detection",
-            "Calculate drug-disease network proximity",
         ],
         "data_sources": [
             "STRING (protein-protein interactions)",

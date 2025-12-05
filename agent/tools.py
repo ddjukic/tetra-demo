@@ -1343,143 +1343,6 @@ class AgentTools:
             "interpretation": f"Found path of length {result.distance} with {result.path_count} total paths."
         }
 
-    def run_diamond_module(
-        self,
-        seed_genes: list[str],
-        max_iterations: int = 200
-    ) -> dict[str, Any]:
-        """
-        Run DIAMOnD algorithm to detect disease modules from seed genes.
-
-        Based on Ghiassian et al. (2015) for identifying disease-associated
-        gene modules through network connectivity analysis.
-
-        Args:
-            seed_genes: Known disease-associated genes (e.g., from GWAS)
-            max_iterations: Maximum genes to add to module
-
-        Returns:
-            Dictionary with module genes and ranked expansion candidates.
-        """
-        if self.current_graph is None:
-            return {"error": "No knowledge graph built. Call build_knowledge_graph first."}
-
-        result = self.current_graph.run_diamond(seed_genes, max_iterations)
-
-        return {
-            "seed_genes": result.seed_genes,
-            "module_genes": result.module_genes[:20],
-            "module_size": result.module_size,
-            "iterations_run": result.iterations_run,
-            "top_candidates": [
-                {"gene": gene, "score": round(score, 4)}
-                for gene, score in result.ranked_candidates[:10]
-            ],
-            "interpretation": f"Expanded from {len(result.seed_genes)} seeds to {result.module_size} genes."
-        }
-
-    def calculate_drug_disease_proximity(
-        self,
-        drug_targets: list[str],
-        disease_genes: list[str]
-    ) -> dict[str, Any]:
-        """
-        Calculate network proximity between drug targets and disease genes.
-
-        Based on Guney et al. (2016) for predicting drug efficacy through
-        network-based drug-disease relationships.
-
-        Args:
-            drug_targets: List of drug target genes/proteins
-            disease_genes: List of disease-associated genes
-
-        Returns:
-            Dictionary with proximity metrics and statistical significance.
-        """
-        if self.current_graph is None:
-            return {"error": "No knowledge graph built. Call build_knowledge_graph first."}
-
-        result = self.current_graph.calculate_network_proximity(
-            drug_targets, disease_genes, n_random=100
-        )
-
-        return {
-            "drug_targets": result.drug_targets,
-            "disease_genes": result.disease_genes,
-            "observed_distance": round(result.observed_distance, 4) if result.observed_distance != float('inf') else None,
-            "expected_distance": round(result.expected_distance, 4) if result.expected_distance != float('inf') else None,
-            "z_score": round(result.z_score, 4),
-            "p_value": round(result.p_value, 4),
-            "is_significant": result.is_significant,
-            "interpretation": result.interpretation
-        }
-
-    def predict_drug_synergy(
-        self,
-        target1: str,
-        target2: str,
-        disease_genes: list[str]
-    ) -> dict[str, Any]:
-        """
-        Predict synergy potential for two drug targets in combination therapy.
-
-        Based on Cheng et al. (2019) for network-based drug combination prediction.
-
-        Args:
-            target1: First drug target
-            target2: Second drug target
-            disease_genes: Disease-associated genes for context
-
-        Returns:
-            Dictionary with synergy scores and interpretation.
-        """
-        if self.current_graph is None:
-            return {"error": "No knowledge graph built. Call build_knowledge_graph first."}
-
-        result = self.current_graph.predict_synergy(target1, target2, disease_genes)
-
-        return {
-            "target1": result.target1,
-            "target2": result.target2,
-            "synergy_score": round(result.synergy_score, 4),
-            "target_separation": result.target_separation,
-            "module_coverage": round(result.module_coverage, 4),
-            "complementarity": round(result.complementarity, 4),
-            "interpretation": result.interpretation
-        }
-
-    def analyze_target_robustness(
-        self,
-        target: str,
-        disease_genes: list[str]
-    ) -> dict[str, Any]:
-        """
-        Analyze network robustness impact of targeting a specific node.
-
-        Evaluates therapeutic potential by measuring disease impact vs
-        global network disruption.
-
-        Args:
-            target: Drug target to analyze
-            disease_genes: Disease-associated genes
-
-        Returns:
-            Dictionary with therapeutic index and safety assessment.
-        """
-        if self.current_graph is None:
-            return {"error": "No knowledge graph built. Call build_knowledge_graph first."}
-
-        result = self.current_graph.analyze_robustness(target, disease_genes)
-
-        return {
-            "target": result.target,
-            "disease_impact": round(result.disease_impact, 4),
-            "global_impact": round(result.global_impact, 4),
-            "therapeutic_index": round(result.therapeutic_index, 4),
-            "compensatory_paths": result.compensatory_paths,
-            "interpretation": result.interpretation
-        }
-
     def get_capabilities(self) -> dict[str, Any]:
         """Get a description of available capabilities."""
         return {
@@ -1498,10 +1361,6 @@ class AgentTools:
                 "Compute centrality metrics (PageRank, betweenness, degree, closeness)",
                 "Detect communities/modules using Louvain algorithm",
                 "Find shortest paths between entities",
-                "Run DIAMOnD disease module detection (Ghiassian et al. 2015)",
-                "Calculate drug-disease network proximity (Guney et al. 2016)",
-                "Predict drug synergy for combination therapy (Cheng et al. 2019)",
-                "Analyze target robustness and therapeutic index",
             ],
             "data_sources": [
                 "STRING (protein-protein interactions)",
@@ -1515,10 +1374,6 @@ class AgentTools:
             "algorithms": [
                 "PageRank, Betweenness, Degree, Closeness centrality",
                 "Louvain community detection",
-                "DIAMOnD disease module expansion",
-                "Network proximity with z-score significance",
-                "Synergy prediction with complementarity scoring",
-                "Robustness analysis with therapeutic index",
             ],
         }
 

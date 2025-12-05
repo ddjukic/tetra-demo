@@ -564,168 +564,6 @@ def detect_communities(tool_context: ToolContext) -> dict[str, Any]:
 
 
 @requires_graph
-def run_diamond(
-    tool_context: ToolContext,
-    seed_genes: list[str],
-    max_iterations: int = 200
-) -> dict[str, Any]:
-    """
-    Run DIAMOnD algorithm to detect disease modules from seed genes.
-
-    Based on Ghiassian et al. (2015) for identifying disease-associated
-    gene modules through network connectivity analysis.
-
-    Args:
-        tool_context: ADK tool context (injected by framework)
-        seed_genes: Known disease-associated genes (e.g., from GWAS or known biomarkers)
-        max_iterations: Maximum genes to add to the module (default: 200)
-
-    Returns:
-        Dictionary with:
-        - seed_genes: Input seed genes that were found in graph
-        - module_genes: Genes added to the disease module
-        - module_size: Total size of the module
-        - top_candidates: Highest-scoring candidates for module membership
-        - interpretation: Summary of module expansion
-    """
-    graph = _get_graph(tool_context)
-    result = graph.run_diamond(seed_genes, max_iterations)
-
-    return {
-        "seed_genes": result.seed_genes,
-        "module_genes": result.module_genes[:20],
-        "module_size": result.module_size,
-        "iterations_run": result.iterations_run,
-        "top_candidates": [
-            {"gene": gene, "score": round(score, 4)}
-            for gene, score in result.ranked_candidates[:10]
-        ],
-        "interpretation": f"Expanded from {len(result.seed_genes)} seeds to {result.module_size} genes."
-    }
-
-
-@requires_graph
-def calculate_proximity(
-    tool_context: ToolContext,
-    drug_targets: list[str],
-    disease_genes: list[str]
-) -> dict[str, Any]:
-    """
-    Calculate network proximity between drug targets and disease genes.
-
-    Based on Guney et al. (2016) for predicting drug efficacy through
-    network-based drug-disease relationships.
-
-    Args:
-        tool_context: ADK tool context (injected by framework)
-        drug_targets: List of drug target genes/proteins
-        disease_genes: List of disease-associated genes
-
-    Returns:
-        Dictionary with:
-        - observed_distance: Actual network distance
-        - expected_distance: Expected distance by random chance
-        - z_score: Statistical significance (negative = closer than random)
-        - p_value: Probability value
-        - is_significant: Whether the proximity is statistically significant
-        - interpretation: Explanation of the result
-    """
-    graph = _get_graph(tool_context)
-    result = graph.calculate_network_proximity(drug_targets, disease_genes, n_random=100)
-
-    return {
-        "drug_targets": result.drug_targets,
-        "disease_genes": result.disease_genes,
-        "observed_distance": round(result.observed_distance, 4) if result.observed_distance != float('inf') else None,
-        "expected_distance": round(result.expected_distance, 4) if result.expected_distance != float('inf') else None,
-        "z_score": round(result.z_score, 4),
-        "p_value": round(result.p_value, 4),
-        "is_significant": result.is_significant,
-        "interpretation": result.interpretation
-    }
-
-
-@requires_graph
-def predict_synergy(
-    tool_context: ToolContext,
-    target1: str,
-    target2: str,
-    disease_genes: list[str]
-) -> dict[str, Any]:
-    """
-    Predict synergy potential for two drug targets in combination therapy.
-
-    Based on Cheng et al. (2019) for network-based drug combination prediction.
-    Evaluates whether targeting both proteins would have complementary effects.
-
-    Args:
-        tool_context: ADK tool context (injected by framework)
-        target1: First drug target (gene/protein name)
-        target2: Second drug target (gene/protein name)
-        disease_genes: Disease-associated genes for context
-
-    Returns:
-        Dictionary with:
-        - synergy_score: Overall synergy potential (0-1, higher is better)
-        - target_separation: Network distance between targets
-        - module_coverage: Fraction of disease module reached by both targets
-        - complementarity: How non-overlapping the target neighborhoods are
-        - interpretation: Explanation of synergy potential
-    """
-    graph = _get_graph(tool_context)
-    result = graph.predict_synergy(target1, target2, disease_genes)
-
-    return {
-        "target1": result.target1,
-        "target2": result.target2,
-        "synergy_score": round(result.synergy_score, 4),
-        "target_separation": result.target_separation,
-        "module_coverage": round(result.module_coverage, 4),
-        "complementarity": round(result.complementarity, 4),
-        "interpretation": result.interpretation
-    }
-
-
-@requires_graph
-def analyze_robustness(
-    tool_context: ToolContext,
-    target: str,
-    disease_genes: list[str]
-) -> dict[str, Any]:
-    """
-    Analyze network robustness impact of targeting a specific node.
-
-    Evaluates therapeutic potential by measuring disease impact vs
-    global network disruption. A good target disrupts disease pathways
-    while minimizing effects on healthy cellular functions.
-
-    Args:
-        tool_context: ADK tool context (injected by framework)
-        target: Drug target to analyze
-        disease_genes: Disease-associated genes
-
-    Returns:
-        Dictionary with:
-        - disease_impact: Fraction of disease pathways affected
-        - global_impact: Fraction of global network affected
-        - therapeutic_index: Ratio of disease to global impact (higher is better)
-        - compensatory_paths: Number of alternative pathways that could compensate
-        - interpretation: Safety and efficacy assessment
-    """
-    graph = _get_graph(tool_context)
-    result = graph.analyze_robustness(target, disease_genes)
-
-    return {
-        "target": result.target,
-        "disease_impact": round(result.disease_impact, 4),
-        "global_impact": round(result.global_impact, 4),
-        "therapeutic_index": round(result.therapeutic_index, 4),
-        "compensatory_paths": result.compensatory_paths,
-        "interpretation": result.interpretation
-    }
-
-
-@requires_graph
 def get_predictions(
     tool_context: ToolContext,
     min_score: float = 0.5
@@ -1384,7 +1222,7 @@ You help researchers explore and analyze relationships between proteins, genes, 
 
 1. **Graph Exploration**:
    - Summarize the graph (get_graph_summary)
-   - Query evidence between entities (query_evidence)
+   - Query evidence between entities (query_evidence) - Returns evidence WITH text_snippet sentences
    - Find paths between entities (find_path)
    - Get entity neighborhoods (get_entity_neighborhood)
 
@@ -1392,13 +1230,7 @@ You help researchers explore and analyze relationships between proteins, genes, 
    - Compute centrality metrics (compute_centrality) - PageRank, betweenness, degree, closeness
    - Detect communities/clusters (detect_communities)
 
-3. **Drug Discovery Algorithms**:
-   - DIAMOnD disease module detection (run_diamond)
-   - Network proximity analysis (calculate_proximity)
-   - Drug synergy prediction (predict_synergy)
-   - Target robustness analysis (analyze_robustness)
-
-4. **ML Link Predictions** (PyTorch Geometric):
+3. **ML Link Predictions** (PyTorch Geometric):
    - Predict interaction between two proteins (predict_interaction) - Uses PyG Node2Vec model
    - Batch predict multiple protein pairs (predict_batch_interactions)
    - Get novel link predictions from graph (get_predictions)
@@ -1428,13 +1260,21 @@ For each query, follow this structured reasoning:
 - Always start by understanding the graph structure with get_graph_summary if you haven't already.
 - When asked about specific entities, check if they exist using query_evidence or get_entity_neighborhood.
 - For "important" or "central" proteins, use compute_centrality with pagerank or betweenness.
-- For drug discovery questions, combine multiple tools (e.g., DIAMOnD + proximity + synergy).
 - **For novel interaction predictions**, use predict_interaction to get ML confidence scores.
 - **For hypothesis generation**, use generate_hypothesis which includes ML predictions automatically.
 - Always explain the biological significance of your findings.
 - Distinguish between experimentally validated relationships and ML predictions.
 - Suggest follow-up analyses when relevant.
 - Be precise about statistical significance and limitations.
+
+## Evidence and Provenance
+
+When users ask about evidence or supporting sentences for a relationship:
+- Use **query_evidence** to get ALL relationship data between two entities
+- The returned "relationships" dict contains "evidence" lists for each relationship type
+- Each evidence entry has a **"text_snippet"** field containing the actual sentence from literature
+- Evidence also includes "source_id" (PMID), "source_type" (string/literature/ml_predicted), and "confidence"
+- **ALWAYS present the text_snippet sentences** when users ask for evidence or provenance
 
 ## Example Queries and Approaches
 
@@ -1444,17 +1284,17 @@ For each query, follow this structured reasoning:
 "Is there a connection between BRCA1 and TP53?"
 -> Use query_evidence first, then predict_interaction to get ML score if no direct relationship.
 
-"Would targeting both EGFR and KRAS be synergistic for cancer?"
--> Use predict_synergy with relevant disease genes, analyze_robustness for each target.
-
-"Find disease module genes starting from known Alzheimer's genes."
--> Use run_diamond with the known genes as seeds, then compute_centrality on the module.
-
 "Predict if CDK1 interacts with AURKA"
 -> Use predict_interaction to get ML-based interaction probability and model agreement.
 
 "Generate a hypothesis for potential CDK2-CCNE1 interaction"
 -> Use generate_hypothesis which includes ML predictions, network context, and suggested experiments.
+
+"What evidence supports the interaction between HCRT and HCRTR1?"
+-> Use query_evidence(protein1="HCRT", protein2="HCRTR1")
+-> Look at the "evidence" list in each relationship type
+-> Extract and present the "text_snippet" fields - these are the actual sentences from papers
+-> Include the PMID (source_id) so users can read the original paper
 
 Remember: You are helping scientists make discoveries. Be thorough, accurate, and highlight actionable insights.
 """
@@ -1492,11 +1332,6 @@ def create_graph_agent(model: str = "gemini-2.5-flash") -> LlmAgent:
             # Importance analysis
             compute_centrality,
             detect_communities,
-            # Drug discovery algorithms
-            run_diamond,
-            calculate_proximity,
-            predict_synergy,
-            analyze_robustness,
             # ML predictions (PyG)
             predict_interaction,
             predict_batch_interactions,
