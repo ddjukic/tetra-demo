@@ -359,23 +359,25 @@ tab_research, tab_chat, tab_graph, tab_explore = st.tabs(["Research", "Chat", "G
 with tab_research:
     st.subheader("What would you like to investigate today?")
 
-    # Single unified query input
+    # Single unified query input - use key for state persistence across tabs
     user_query = st.text_area(
         "Research Query",
         placeholder="BRCA1 cancer",
         help="Enter proteins/genes and research context. Examples: 'HCRTR1 HCRTR2 sleep disorders', 'TP53 DNA damage response', 'insulin diabetes signaling'",
         height=80,
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        key="research_query"
     )
 
-    # Max papers - always visible
+    # Max papers - use key for state persistence
     max_papers = st.number_input(
         "Max Papers",
         min_value=100,
         max_value=1000,
         value=200,
         step=100,
-        help="Number of papers to fetch from PubMed"
+        help="Number of papers to fetch from PubMed",
+        key="max_papers"
     )
 
     # Build button
@@ -414,100 +416,108 @@ with tab_research:
 
             # Store in session state
             st.session_state.knowledge_graph = graph
+            st.session_state.pipeline_input = pipeline_input  # Store for persistent display
 
             # Clear agent manager to reinitialize with new graph
             if "agent_manager" in st.session_state:
                 del st.session_state.agent_manager
 
-            # Show summary
+            # Show success message
             summary = graph.to_summary()
             st.success(f"Knowledge graph built: {summary.get('node_count', 0)} nodes, {summary.get('edge_count', 0)} edges")
             st.info("Navigate to the **Chat** tab to query your knowledge graph!")
-
-            # Build details accordion - chronological pipeline execution
-            with st.expander("Build Details", expanded=True):
-                # 1. STRING Network
-                st.subheader("1. STRING Network")
-                if pipeline_input and pipeline_input.metadata and "string_extension" in pipeline_input.metadata:
-                    ext = pipeline_input.metadata["string_extension"]
-                    st.write(f"**Seed Proteins:** {', '.join(ext.get('original_seeds', []))}")
-                    st.write(f"**Network Extension:** {ext.get('extend_network', 0)} hops")
-                    st.write(f"**Proteins Found:** {ext.get('expanded_proteins', 0)}")
-                    st.write(f"**Interactions Found:** {ext.get('total_interactions', 0)}")
-                elif pipeline_input and pipeline_input.seed_proteins:
-                    st.write(f"**Seed Proteins:** {', '.join(pipeline_input.seed_proteins)}")
-                    st.write(f"**Interactions Found:** {len(pipeline_input.string_interactions)}")
-                else:
-                    st.write("No STRING network data available")
-
-                st.divider()
-
-                # 2. PubMed Search
-                st.subheader("2. PubMed Search")
-                if pipeline_input and pipeline_input.pubmed_query:
-                    st.code(pipeline_input.pubmed_query, language=None)
-                else:
-                    st.write("No PubMed query available")
-
-                papers_count = len(pipeline_input.articles) if pipeline_input else 0
-                st.write(f"**Papers Fetched:** {papers_count}")
-
-                # 3. Papers List (collapsible)
-                if pipeline_input and pipeline_input.articles:
-                    with st.expander(f"View {len(pipeline_input.articles)} Papers"):
-                        for article in pipeline_input.articles[:20]:  # Show first 20
-                            pmid = article.get('pmid', '')
-                            title = article.get('title') or 'No title'  # Handle None values
-                            year = article.get('year', '')
-                            title_display = title[:80] + "..." if len(title) > 80 else title
-                            st.markdown(f"- **[PMID:{pmid}](https://pubmed.ncbi.nlm.nih.gov/{pmid})** ({year}): {title_display}")
-                        if len(pipeline_input.articles) > 20:
-                            st.caption(f"... and {len(pipeline_input.articles) - 20} more papers")
-
-                st.divider()
-
-                # 4. Graph Statistics (existing functionality)
-                st.subheader("3. Graph Statistics")
-
-                # Entity types breakdown
-                entity_types = summary.get("entity_types", {})
-                if entity_types:
-                    st.markdown("**Entity Types:**")
-                    for etype, count in sorted(entity_types.items(), key=lambda x: -x[1]):
-                        st.markdown(f"- {etype}: {count}")
-
-                # Relationship types breakdown
-                rel_types = summary.get("relationship_types", {})
-                if rel_types:
-                    st.markdown("**Relationship Types:**")
-                    for rtype, count in sorted(rel_types.items(), key=lambda x: -x[1]):
-                        st.markdown(f"- {rtype}: {count}")
-
-                st.divider()
-
-                # Evidence and ML stats
-                col1, col2, col3 = st.columns(3)
-                col1.metric("Total Nodes", summary.get("node_count", 0))
-                col2.metric("Total Edges", summary.get("edge_count", 0))
-                col3.metric("ML Predictions", summary.get("ml_predicted_edges", 0))
-
-                # Evidence sources
-                evidence_sources = summary.get("evidence_sources", {})
-                if evidence_sources:
-                    st.markdown("**Evidence Sources:**")
-                    for source, count in sorted(evidence_sources.items(), key=lambda x: -x[1]):
-                        st.markdown(f"- {source}: {count}")
-
-                # Novel predictions
-                novel = summary.get("novel_predictions", 0)
-                if novel > 0:
-                    st.info(f"Novel predictions (ML-only, no literature evidence): {novel}")
 
         except Exception as e:
             st.error(f"Pipeline failed: {str(e)}")
             import traceback
             with st.expander("Error Details"):
                 st.code(traceback.format_exc())
+
+    # ==========================================================================
+    # Build Details - displayed persistently from session state
+    # ==========================================================================
+    if "knowledge_graph" in st.session_state and st.session_state.knowledge_graph:
+        graph = st.session_state.knowledge_graph
+        summary = graph.to_summary()
+        pipeline_input = st.session_state.get("pipeline_input")
+
+        with st.expander("Build Details", expanded=False):
+            # 1. STRING Network
+            st.subheader("1. STRING Network")
+            if pipeline_input and pipeline_input.metadata and "string_extension" in pipeline_input.metadata:
+                ext = pipeline_input.metadata["string_extension"]
+                st.write(f"**Seed Proteins:** {', '.join(ext.get('original_seeds', []))}")
+                st.write(f"**Network Extension:** {ext.get('extend_network', 0)} hops")
+                st.write(f"**Proteins Found:** {ext.get('expanded_proteins', 0)}")
+                st.write(f"**Interactions Found:** {ext.get('total_interactions', 0)}")
+            elif pipeline_input and pipeline_input.seed_proteins:
+                st.write(f"**Seed Proteins:** {', '.join(pipeline_input.seed_proteins)}")
+                st.write(f"**Interactions Found:** {len(pipeline_input.string_interactions)}")
+            else:
+                st.write("No STRING network data available")
+
+            st.divider()
+
+            # 2. PubMed Search
+            st.subheader("2. PubMed Search")
+            if pipeline_input and pipeline_input.pubmed_query:
+                st.code(pipeline_input.pubmed_query, language=None)
+            else:
+                st.write("No PubMed query available")
+
+            papers_count = len(pipeline_input.articles) if pipeline_input else 0
+            st.write(f"**Papers Fetched:** {papers_count}")
+
+            # 3. Papers List (collapsible)
+            if pipeline_input and pipeline_input.articles:
+                with st.expander(f"View {len(pipeline_input.articles)} Papers"):
+                    for article in pipeline_input.articles[:20]:  # Show first 20
+                        pmid = article.get('pmid', '')
+                        title = article.get('title') or 'No title'  # Handle None values
+                        year = article.get('year', '')
+                        title_display = title[:80] + "..." if len(title) > 80 else title
+                        st.markdown(f"- **[PMID:{pmid}](https://pubmed.ncbi.nlm.nih.gov/{pmid})** ({year}): {title_display}")
+                    if len(pipeline_input.articles) > 20:
+                        st.caption(f"... and {len(pipeline_input.articles) - 20} more papers")
+
+            st.divider()
+
+            # 4. Graph Statistics
+            st.subheader("3. Graph Statistics")
+
+            # Entity types breakdown
+            entity_types = summary.get("entity_types", {})
+            if entity_types:
+                st.markdown("**Entity Types:**")
+                for etype, count in sorted(entity_types.items(), key=lambda x: -x[1]):
+                    st.markdown(f"- {etype}: {count}")
+
+            # Relationship types breakdown
+            rel_types = summary.get("relationship_types", {})
+            if rel_types:
+                st.markdown("**Relationship Types:**")
+                for rtype, count in sorted(rel_types.items(), key=lambda x: -x[1]):
+                    st.markdown(f"- {rtype}: {count}")
+
+            st.divider()
+
+            # Evidence and ML stats
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Total Nodes", summary.get("node_count", 0))
+            col2.metric("Total Edges", summary.get("edge_count", 0))
+            col3.metric("ML Predictions", summary.get("ml_predicted_edges", 0))
+
+            # Evidence sources
+            evidence_sources = summary.get("evidence_sources", {})
+            if evidence_sources:
+                st.markdown("**Evidence Sources:**")
+                for source, count in sorted(evidence_sources.items(), key=lambda x: -x[1]):
+                    st.markdown(f"- {source}: {count}")
+
+            # Novel predictions
+            novel = summary.get("novel_predictions", 0)
+            if novel > 0:
+                st.info(f"Novel predictions (ML-only, no literature evidence): {novel}")
 
 
 
