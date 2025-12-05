@@ -75,6 +75,101 @@ _ENTITY_SYNONYMS: dict[str, str] = {
     "prepro-orexin": "HCRT",
     "preproorexin": "HCRT",
     "hcrt": "HCRT",
+
+    # Amyloid Precursor Protein / Amyloid Beta variants (NCBI: 351)
+    "amyloid beta": "APP",
+    "amyloidbeta": "APP",
+    "amyloid-beta": "APP",
+    "amyloid-β": "APP",
+    "aβ": "APP",
+    "abeta": "APP",
+    "a-beta": "APP",
+    "beta-amyloid": "APP",
+    "β-amyloid": "APP",
+    "beta amyloid": "APP",
+    "amyloid beta peptide": "APP",
+    "amyloid beta protein": "APP",
+    "amyloid precursor protein": "APP",
+    "amyloid-beta peptide": "APP",
+    "aβ peptide": "APP",
+    "aβ42": "APP",
+    "aβ40": "APP",
+    "abeta42": "APP",
+    "abeta40": "APP",
+
+    # Tau / MAPT variants (NCBI: 4137)
+    "tau": "MAPT",
+    "tau protein": "MAPT",
+    "microtubule-associated protein tau": "MAPT",
+    "microtubule associated protein tau": "MAPT",
+    "p-tau": "MAPT",
+    "ptau": "MAPT",
+    "phospho-tau": "MAPT",
+    "phosphorylated tau": "MAPT",
+    "hyperphosphorylated tau": "MAPT",
+    "tau tangles": "MAPT",
+    "neurofibrillary tangles": "MAPT",
+
+    # APOE variants (NCBI: 348)
+    "apoe": "APOE",
+    "apoe4": "APOE",
+    "apoe ε4": "APOE",
+    "apoe epsilon4": "APOE",
+    "apoe epsilon 4": "APOE",
+    "apoe-ε4": "APOE",
+    "apoe-4": "APOE",
+    "apoe3": "APOE",
+    "apoe2": "APOE",
+    "apolipoprotein e": "APOE",
+    "apolipoprotein e4": "APOE",
+    "apo e": "APOE",
+    "apo-e": "APOE",
+
+    # Common disease name variants
+    "alzheimer's disease": "Alzheimer disease",
+    "alzheimers disease": "Alzheimer disease",
+    "alzheimer": "Alzheimer disease",
+    "alzheimers": "Alzheimer disease",
+    "ad": "Alzheimer disease",
+
+    "parkinson's disease": "Parkinson disease",
+    "parkinsons disease": "Parkinson disease",
+    "parkinson": "Parkinson disease",
+    "pd": "Parkinson disease",
+
+    "huntington's disease": "Huntington disease",
+    "huntingtons disease": "Huntington disease",
+    "huntington": "Huntington disease",
+    "hd": "Huntington disease",
+
+    # Common chemical synonyms
+    "vitamin e": "alpha-tocopherol",
+    "vit e": "alpha-tocopherol",
+    "tocopherol": "alpha-tocopherol",
+
+    # BRCA genes
+    "brca-1": "BRCA1",
+    "brca 1": "BRCA1",
+    "brca-2": "BRCA2",
+    "brca 2": "BRCA2",
+
+    # Common receptor variants
+    "insulin receptor": "INSR",
+    "ir": "INSR",
+    "igf-1r": "IGF1R",
+    "igf1 receptor": "IGF1R",
+    "igf-1 receptor": "IGF1R",
+
+    # TREM2 variants
+    "trem-2": "TREM2",
+    "triggering receptor expressed on myeloid cells 2": "TREM2",
+
+    # GSK3B variants
+    "gsk-3β": "GSK3B",
+    "gsk-3b": "GSK3B",
+    "gsk3β": "GSK3B",
+    "gsk3 beta": "GSK3B",
+    "glycogen synthase kinase 3 beta": "GSK3B",
 }
 
 
@@ -208,7 +303,16 @@ class KGPipeline:
         # Step 4: Prune co-occurrence-only nodes
         pruned_graph = self._prune_cooccurrence_only_nodes(full_graph)
 
-        # Step 5: Compute stats after pruning
+        # Step 5: Entity deduplication (merge duplicates by various criteria)
+        dedup_stats = self._deduplicate_entities(pruned_graph)
+        if dedup_stats.get("total_merged", 0) > 0:
+            logger.info(
+                f"Entity deduplication: merged {dedup_stats['total_merged']} entities "
+                f"({dedup_stats.get('ncbi_merged', 0)} by NCBI ID, "
+                f"{dedup_stats.get('case_merged', 0)} by case)"
+            )
+
+        # Step 6: Compute stats after pruning and deduplication
         stats_after = self._compute_graph_stats(pruned_graph)
 
         nodes_pruned = stats_before.node_count - stats_after.node_count
@@ -521,6 +625,68 @@ class KGPipeline:
             )
 
         return graph
+
+    def _deduplicate_entities(self, graph: KnowledgeGraph) -> dict[str, Any]:
+        """
+        Deduplicate entities in the graph by merging duplicates.
+
+        Applies multiple deduplication strategies in order:
+        1. By NCBI ID - merge entities with same NCBI gene/protein ID
+        2. By case-insensitive matching - merge "Tau" with "tau", etc.
+
+        Args:
+            graph: KnowledgeGraph to deduplicate (modified in place).
+
+        Returns:
+            Statistics about the deduplication:
+                - total_merged: Total entities merged
+                - ncbi_merged: Entities merged by NCBI ID
+                - case_merged: Entities merged by case-insensitive match
+        """
+        stats = {
+            "total_merged": 0,
+            "ncbi_merged": 0,
+            "case_merged": 0,
+        }
+
+        # Step 1: Deduplicate by NCBI ID (most reliable)
+        try:
+            ncbi_result = graph.deduplicate_by_ncbi_id()
+            ncbi_merged = ncbi_result.get("original_count", 0) - ncbi_result.get("final_count", 0)
+            stats["ncbi_merged"] = ncbi_merged
+            stats["total_merged"] += ncbi_merged
+
+            if ncbi_merged > 0:
+                logger.debug(
+                    f"NCBI deduplication: merged {ncbi_merged} entities into "
+                    f"{len(ncbi_result.get('merged_groups', []))} groups"
+                )
+                for group in ncbi_result.get("merged_groups", [])[:5]:
+                    logger.debug(
+                        f"  NCBI {group['ncbi_id']}: {group['canonical']} <- {group['merged']}"
+                    )
+        except Exception as e:
+            logger.warning(f"NCBI deduplication failed: {e}")
+
+        # Step 2: Deduplicate by case-insensitive matching
+        try:
+            case_result = graph.deduplicate_by_case_insensitive()
+            case_merged = case_result.get("original_count", 0) - case_result.get("final_count", 0)
+            stats["case_merged"] = case_merged
+            stats["total_merged"] += case_merged
+
+            if case_merged > 0:
+                logger.debug(
+                    f"Case-insensitive deduplication: merged {case_merged} entities"
+                )
+                for group in case_result.get("merged_groups", [])[:5]:
+                    logger.debug(
+                        f"  '{group['normalized']}': {group['canonical']} <- {group['merged']}"
+                    )
+        except Exception as e:
+            logger.warning(f"Case-insensitive deduplication failed: {e}")
+
+        return stats
 
     def _compute_graph_stats(self, graph: KnowledgeGraph) -> GraphStatistics:
         """Compute statistics for a graph."""

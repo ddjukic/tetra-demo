@@ -895,13 +895,14 @@ class KnowledgeGraph:
         entity_types: list[str] | None = None,
         min_score: float = 0.5,
     ) -> dict[str, Any]:
-        """Ground all protein/gene entities using INDRA/Gilda.
+        """Ground all protein/gene/disease entities using INDRA/Gilda.
 
         Batch-grounds entities and updates their metadata with grounding info.
+        Supports HGNC for genes/proteins, DOID/MESH for diseases.
 
         Args:
             gilda_client: GildaClient instance for API calls.
-            entity_types: Types to ground (default: ['protein', 'gene']).
+            entity_types: Types to ground (default: ['protein', 'gene', 'disease']).
             min_score: Minimum grounding score to accept.
 
         Returns:
@@ -910,10 +911,16 @@ class KnowledgeGraph:
                 - grounded: Number successfully grounded
                 - ungrounded: Number that failed grounding
                 - hgnc_grounded: Number grounded to HGNC specifically
+                - doid_grounded: Number grounded to DOID specifically
+                - mesh_grounded: Number grounded to MESH specifically
                 - grounding_map: Dict mapping entity_id to grounding result
         """
         if entity_types is None:
-            entity_types = [EntityType.PROTEIN.value, EntityType.GENE.value]
+            entity_types = [
+                EntityType.PROTEIN.value,
+                EntityType.GENE.value,
+                EntityType.DISEASE.value,
+            ]
 
         # Collect entities to ground
         entities_to_ground = [
@@ -941,6 +948,8 @@ class KnowledgeGraph:
         # Update entities with grounding info
         grounded_count = 0
         hgnc_count = 0
+        doid_count = 0
+        mesh_count = 0
         grounding_map: dict[str, dict[str, Any] | None] = {}
 
         for entity_id, text in zip(entities_to_ground, texts_to_ground):
@@ -953,10 +962,18 @@ class KnowledgeGraph:
                 self.entities[entity_id]["grounded_entry_name"] = grounding.entry_name
                 self.entities[entity_id]["grounding_score"] = grounding.score
 
-                # Set hgnc_id if grounded to HGNC
+                # Set hgnc_id if grounded to HGNC (for genes/proteins)
                 if grounding.db == "HGNC":
                     self.entities[entity_id]["hgnc_id"] = grounding.full_id
                     hgnc_count += 1
+                # Set doid_id if grounded to DOID (for diseases)
+                elif grounding.db == "DOID":
+                    self.entities[entity_id]["doid_id"] = grounding.full_id
+                    doid_count += 1
+                # Set mesh_id if grounded to MESH (alternative for diseases)
+                elif grounding.db == "MESH":
+                    self.entities[entity_id]["mesh_id"] = grounding.full_id
+                    mesh_count += 1
 
                 # Update graph node attributes
                 self.graph.nodes[entity_id].update({
@@ -967,6 +984,10 @@ class KnowledgeGraph:
                 })
                 if grounding.db == "HGNC":
                     self.graph.nodes[entity_id]["hgnc_id"] = grounding.full_id
+                elif grounding.db == "DOID":
+                    self.graph.nodes[entity_id]["doid_id"] = grounding.full_id
+                elif grounding.db == "MESH":
+                    self.graph.nodes[entity_id]["mesh_id"] = grounding.full_id
 
                 grounded_count += 1
                 grounding_map[entity_id] = {
@@ -984,6 +1005,8 @@ class KnowledgeGraph:
             "grounded": grounded_count,
             "ungrounded": len(entities_to_ground) - grounded_count,
             "hgnc_grounded": hgnc_count,
+            "doid_grounded": doid_count,
+            "mesh_grounded": mesh_count,
             "grounding_map": grounding_map,
         }
 
@@ -1084,6 +1107,302 @@ class KnowledgeGraph:
             "edges_remapped": edges_remapped,
         }
 
+    def deduplicate_by_doid(self) -> dict[str, Any]:
+        """Merge disease entities that share the same DOID ID.
+
+        Entities with identical DOID IDs are considered synonyms and merged.
+        For example, "Alzheimer disease" and "Alzheimer's disease" with the
+        same DOID:10652 will be merged into a single canonical entity.
+
+        Returns:
+            Dictionary with deduplication statistics:
+                - original_count: Entity count before deduplication
+                - final_count: Entity count after deduplication
+                - merged_groups: List of merged entity groups
+                - edges_remapped: Number of edges remapped to canonical IDs
+        """
+        # Group entities by DOID ID
+        doid_groups: dict[str, list[str]] = {}
+        for entity_id, data in self.entities.items():
+            doid_id = data.get("doid_id")
+            if doid_id:
+                if doid_id not in doid_groups:
+                    doid_groups[doid_id] = []
+                doid_groups[doid_id].append(entity_id)
+
+        original_count = len(self.entities)
+        merged_groups: list[dict[str, Any]] = []
+        edges_remapped = 0
+
+        # Process each group that has more than one entity
+        for doid_id, entity_ids in doid_groups.items():
+            if len(entity_ids) <= 1:
+                continue
+
+            # Find canonical entity (prefer DOID entry_name match)
+            canonical_id = None
+            canonical_entry = None
+
+            for eid in entity_ids:
+                entry_name = self.entities[eid].get("grounded_entry_name", "")
+                if entry_name:
+                    canonical_entry = entry_name
+                    # If entity_id matches entry_name (case-insensitive), it's canonical
+                    if eid.lower().replace("'", "").replace(" ", "_") == entry_name.lower().replace("'", "").replace(" ", "_"):
+                        canonical_id = eid
+                        break
+
+            # If no exact match, prefer the entry_name as new canonical
+            if canonical_id is None and canonical_entry:
+                # Check if entry_name exists as an entity
+                if canonical_entry in self.entities:
+                    canonical_id = canonical_entry
+                else:
+                    # Pick first entity alphabetically
+                    canonical_id = sorted(entity_ids)[0]
+            elif canonical_id is None:
+                canonical_id = sorted(entity_ids)[0]
+
+            aliases_to_merge = [eid for eid in entity_ids if eid != canonical_id]
+
+            if not aliases_to_merge:
+                continue
+
+            merged_groups.append({
+                "doid_id": doid_id,
+                "canonical": canonical_id,
+                "merged": aliases_to_merge,
+            })
+
+            # Merge aliases into canonical entity
+            canonical_data = self.entities[canonical_id]
+            existing_aliases = set(canonical_data.get("aliases", []))
+
+            for alias_id in aliases_to_merge:
+                # Add alias ID and its aliases to canonical
+                existing_aliases.add(alias_id)
+                alias_data = self.entities.get(alias_id, {})
+                for a in alias_data.get("aliases", []):
+                    existing_aliases.add(a)
+
+                # Remap edges involving this alias
+                edges_remapped += self._remap_edges(alias_id, canonical_id)
+
+                # Remove alias entity
+                del self.entities[alias_id]
+                if alias_id in self.graph:
+                    self.graph.remove_node(alias_id)
+
+            # Update canonical with merged aliases
+            canonical_data["aliases"] = list(existing_aliases)
+            self.graph.nodes[canonical_id]["aliases"] = str(list(existing_aliases))
+
+        return {
+            "original_count": original_count,
+            "final_count": len(self.entities),
+            "merged_groups": merged_groups,
+            "edges_remapped": edges_remapped,
+        }
+
+    def deduplicate_by_ncbi_id(self) -> dict[str, Any]:
+        """Merge entities that share the same NCBI ID (entity_ncbi_id).
+
+        This is particularly useful for genes/proteins where different names
+        refer to the same entity. For example:
+        - "amyloid beta", "APP", "amyloid precursor protein" all have NCBI ID 351
+        - "Tau", "tau", "MAPT" all have NCBI ID 4137
+
+        The canonical entity is chosen by:
+        1. Prefer official gene symbols (uppercase, short names like "APP", "MAPT")
+        2. Otherwise pick the shortest name
+
+        Returns:
+            Dictionary with deduplication statistics:
+                - original_count: Entity count before deduplication
+                - final_count: Entity count after deduplication
+                - merged_groups: List of merged entity groups
+                - edges_remapped: Number of edges remapped to canonical IDs
+        """
+        # Group entities by NCBI ID (skip empty/invalid IDs)
+        ncbi_groups: dict[str, list[str]] = {}
+        invalid_ids = {"", "-", "None", "null", None}
+
+        for entity_id, data in self.entities.items():
+            ncbi_id = data.get("entity_ncbi_id")
+            if ncbi_id and str(ncbi_id) not in invalid_ids:
+                ncbi_key = str(ncbi_id)
+                if ncbi_key not in ncbi_groups:
+                    ncbi_groups[ncbi_key] = []
+                ncbi_groups[ncbi_key].append(entity_id)
+
+        original_count = len(self.entities)
+        merged_groups: list[dict[str, Any]] = []
+        edges_remapped = 0
+
+        # Process each group that has more than one entity
+        for ncbi_id, entity_ids in ncbi_groups.items():
+            if len(entity_ids) <= 1:
+                continue
+
+            # Find canonical entity
+            # Priority: official gene symbols (uppercase, 2-6 chars) > shortest name
+            def score_entity(eid: str) -> tuple[int, int, str]:
+                # Lower score = better canonical candidate
+                is_official = eid.isupper() and 2 <= len(eid) <= 6
+                return (0 if is_official else 1, len(eid), eid.lower())
+
+            sorted_entities = sorted(entity_ids, key=score_entity)
+            canonical_id = sorted_entities[0]
+            aliases_to_merge = sorted_entities[1:]
+
+            merged_groups.append({
+                "ncbi_id": ncbi_id,
+                "canonical": canonical_id,
+                "merged": aliases_to_merge,
+            })
+
+            # Merge aliases into canonical entity
+            canonical_data = self.entities[canonical_id]
+            existing_aliases = set(canonical_data.get("aliases", []))
+            if isinstance(existing_aliases, str):
+                try:
+                    import json
+                    existing_aliases = set(json.loads(existing_aliases))
+                except Exception:
+                    existing_aliases = set()
+
+            for alias_id in aliases_to_merge:
+                # Add alias ID and its aliases to canonical
+                existing_aliases.add(alias_id)
+                alias_data = self.entities.get(alias_id, {})
+                alias_aliases = alias_data.get("aliases", [])
+                if isinstance(alias_aliases, str):
+                    try:
+                        import json
+                        alias_aliases = json.loads(alias_aliases)
+                    except Exception:
+                        alias_aliases = []
+                for a in alias_aliases:
+                    existing_aliases.add(a)
+
+                # Remap edges involving this alias
+                edges_remapped += self._remap_edges(alias_id, canonical_id)
+
+                # Remove alias entity
+                if alias_id in self.entities:
+                    del self.entities[alias_id]
+                if alias_id in self.graph:
+                    self.graph.remove_node(alias_id)
+
+            # Update canonical with merged aliases
+            canonical_data["aliases"] = list(existing_aliases)
+            if canonical_id in self.graph.nodes:
+                self.graph.nodes[canonical_id]["aliases"] = str(list(existing_aliases))
+
+        return {
+            "original_count": original_count,
+            "final_count": len(self.entities),
+            "merged_groups": merged_groups,
+            "edges_remapped": edges_remapped,
+        }
+
+    def deduplicate_by_case_insensitive(self) -> dict[str, Any]:
+        """Merge entities that differ only by case or minor punctuation.
+
+        Handles cases like:
+        - "cholesterol" vs "Cholesterol"
+        - "Alzheimer disease" vs "Alzheimer's disease"
+
+        The canonical entity is chosen by preferring:
+        1. Title case or proper capitalization
+        2. The more common form (by edge count)
+
+        Returns:
+            Dictionary with deduplication statistics.
+        """
+        # Build normalized -> original mapping
+        normalized_groups: dict[str, list[str]] = {}
+
+        def normalize(s: str) -> str:
+            # Normalize: lowercase, remove apostrophes, normalize spaces
+            return s.lower().replace("'", "").replace("-", " ").strip()
+
+        for entity_id in self.entities.keys():
+            norm = normalize(entity_id)
+            if norm not in normalized_groups:
+                normalized_groups[norm] = []
+            normalized_groups[norm].append(entity_id)
+
+        original_count = len(self.entities)
+        merged_groups: list[dict[str, Any]] = []
+        edges_remapped = 0
+
+        for norm_key, entity_ids in normalized_groups.items():
+            if len(entity_ids) <= 1:
+                continue
+
+            # Choose canonical: prefer title case, then by edge count
+            def score_entity(eid: str) -> tuple[int, int, str]:
+                # Count edges for this entity
+                edge_count = sum(
+                    1 for (s, t, _) in self.relationships.keys()
+                    if s == eid or t == eid
+                )
+                is_title = eid[0].isupper() if eid else False
+                # Lower score = better (prefer title case, more edges)
+                return (0 if is_title else 1, -edge_count, eid)
+
+            sorted_entities = sorted(entity_ids, key=score_entity)
+            canonical_id = sorted_entities[0]
+            aliases_to_merge = sorted_entities[1:]
+
+            merged_groups.append({
+                "normalized": norm_key,
+                "canonical": canonical_id,
+                "merged": aliases_to_merge,
+            })
+
+            # Merge aliases into canonical entity
+            canonical_data = self.entities[canonical_id]
+            existing_aliases = set(canonical_data.get("aliases", []))
+            if isinstance(existing_aliases, str):
+                try:
+                    import json
+                    existing_aliases = set(json.loads(existing_aliases))
+                except Exception:
+                    existing_aliases = set()
+
+            for alias_id in aliases_to_merge:
+                existing_aliases.add(alias_id)
+                alias_data = self.entities.get(alias_id, {})
+                alias_aliases = alias_data.get("aliases", [])
+                if isinstance(alias_aliases, str):
+                    try:
+                        import json
+                        alias_aliases = json.loads(alias_aliases)
+                    except Exception:
+                        alias_aliases = []
+                for a in alias_aliases:
+                    existing_aliases.add(a)
+
+                edges_remapped += self._remap_edges(alias_id, canonical_id)
+
+                if alias_id in self.entities:
+                    del self.entities[alias_id]
+                if alias_id in self.graph:
+                    self.graph.remove_node(alias_id)
+
+            canonical_data["aliases"] = list(existing_aliases)
+            if canonical_id in self.graph.nodes:
+                self.graph.nodes[canonical_id]["aliases"] = str(list(existing_aliases))
+
+        return {
+            "original_count": original_count,
+            "final_count": len(self.entities),
+            "merged_groups": merged_groups,
+            "edges_remapped": edges_remapped,
+        }
+
     def _remap_edges(self, old_id: str, new_id: str) -> int:
         """Remap all edges from old_id to new_id.
 
@@ -1148,9 +1467,16 @@ class KnowledgeGraph:
         total = 0
         grounded = 0
         hgnc_grounded = 0
+        doid_grounded = 0
+        mesh_grounded = 0
         by_db: dict[str, int] = {}
 
-        groundable_types = {EntityType.PROTEIN.value, EntityType.GENE.value}
+        # Include proteins, genes, and diseases for grounding
+        groundable_types = {
+            EntityType.PROTEIN.value,
+            EntityType.GENE.value,
+            EntityType.DISEASE.value,
+        }
 
         for entity_id, data in self.entities.items():
             if data.get("type") not in groundable_types:
@@ -1163,12 +1489,18 @@ class KnowledgeGraph:
                 by_db[db] = by_db.get(db, 0) + 1
                 if db == "HGNC":
                     hgnc_grounded += 1
+                elif db == "DOID":
+                    doid_grounded += 1
+                elif db == "MESH":
+                    mesh_grounded += 1
 
         return {
             "total_groundable": total,
             "grounded": grounded,
             "ungrounded": total - grounded,
             "hgnc_grounded": hgnc_grounded,
+            "doid_grounded": doid_grounded,
+            "mesh_grounded": mesh_grounded,
             "by_database": by_db,
         }
 

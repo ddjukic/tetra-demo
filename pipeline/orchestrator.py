@@ -98,6 +98,24 @@ class KGOrchestrator:
         self._graph: KnowledgeGraph | None = None
         self._accumulated_input: PipelineInput | None = None
 
+    async def close(self) -> None:
+        """
+        Close all async clients.
+
+        Should be called when done with the orchestrator to prevent
+        "Task was destroyed but it is pending" warnings.
+        """
+        await self._string_client.close()
+        await self._pubmed_client.close()
+
+    async def __aenter__(self) -> "KGOrchestrator":
+        """Async context manager entry."""
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Async context manager exit - ensures clients are closed."""
+        await self.close()
+
     @property
     def graph(self) -> KnowledgeGraph | None:
         """Get the current knowledge graph."""
@@ -112,6 +130,7 @@ class KGOrchestrator:
         self,
         user_query: str,
         max_articles: int = 50,
+        run_link_prediction: bool = True,
     ) -> tuple[KnowledgeGraph, PipelineInput]:
         """
         Build a new knowledge graph from a user query.
@@ -121,10 +140,13 @@ class KGOrchestrator:
         Steps:
         1. DataFetchAgent collects data (STRING, PubMed) using LLM reasoning
         2. KGPipeline processes data (extraction, graph building) deterministically
+        3. (Optional) Run ML link prediction to add novel predictions
 
         Args:
             user_query: Natural language query describing what to build.
             max_articles: Maximum number of articles to fetch.
+            run_link_prediction: Whether to run ML link prediction after building.
+                Default True. Set to False to skip link prediction.
 
         Returns:
             Tuple of (KnowledgeGraph, PipelineInput) containing the built graph
@@ -155,12 +177,198 @@ class KGOrchestrator:
             f"{result.graph.to_summary()['edge_count']} edges"
         )
 
+        # Step 3: Run link prediction (optional but enabled by default)
+        if run_link_prediction:
+            link_pred_result = self._run_link_prediction()
+            if link_pred_result.get("status") == "success":
+                enrichment_count = link_pred_result.get("stats", {}).get("enrichment_count", 0)
+                novel_count = link_pred_result.get("stats", {}).get("novel_prediction_count", 0)
+                if enrichment_count > 0 or novel_count > 0:
+                    logger.info(
+                        f"Link prediction: {enrichment_count} enrichment edges, "
+                        f"{novel_count} novel predictions added"
+                    )
+
         # Save graph to disk if configured
         if self._config.save_graph:
             saved_path = self._save_graph(user_query)
             logger.info(f"Graph saved to: {saved_path}")
 
         return self._graph, self._accumulated_input
+
+    def _run_link_prediction(
+        self,
+        min_ml_score: float = 0.5,
+        max_enrichment: int = 50,
+        max_novel: int = 50,
+    ) -> dict:
+        """
+        Run link prediction on the current graph.
+
+        This method applies the ML link predictor to find:
+        1. Enrichment edges: Known STRING interactions not yet in the graph
+        2. Novel predictions: ML-predicted interactions not in STRING
+
+        Args:
+            min_ml_score: Minimum ML score for novel predictions.
+            max_enrichment: Maximum enrichment edges to add.
+            max_novel: Maximum novel predictions to add.
+
+        Returns:
+            Result dictionary with status, predictions, and stats.
+        """
+        from models.knowledge_graph import RelationshipType, EvidenceSource
+
+        if self._graph is None:
+            return {"status": "error", "message": "No graph built"}
+
+        # Try to load link predictor
+        try:
+            # Try PyG first
+            pyg_path = Path(__file__).parent.parent / "models" / "pyg_link_predictor.pkl"
+            gensim_path = Path(__file__).parent.parent / "models" / "gensim_link_predictor.pkl"
+            link_predictor = None
+
+            if pyg_path.exists():
+                try:
+                    from ml.pyg_link_predictor import PyGLinkPredictor
+                    link_predictor = PyGLinkPredictor.load(str(pyg_path))
+                except ImportError:
+                    pass
+
+            if link_predictor is None and gensim_path.exists():
+                try:
+                    from ml.link_predictor import LinkPredictor
+                    link_predictor = LinkPredictor.load(str(gensim_path))
+                except Exception:
+                    pass
+
+            if link_predictor is None:
+                return {"status": "skipped", "message": "No link predictor model found"}
+
+        except Exception as e:
+            logger.warning(f"Failed to load link predictor: {e}")
+            return {"status": "error", "message": f"Link predictor load failed: {e}"}
+
+        # Get all protein/gene entities from the graph
+        proteins = [
+            entity_id
+            for entity_id, data in self._graph.entities.items()
+            if data.get("type") in ["protein", "gene"]
+        ]
+
+        if len(proteins) < 2:
+            return {
+                "status": "skipped",
+                "message": "Not enough proteins for prediction",
+                "stats": {"total_pairs_evaluated": 0, "enrichment_count": 0, "novel_prediction_count": 0},
+            }
+
+        # Generate candidate pairs not already in graph
+        candidate_pairs = []
+        for i, p1 in enumerate(proteins):
+            for p2 in proteins[i + 1:]:
+                existing = self._graph.get_relationship(p1, p2)
+                reverse_existing = self._graph.get_relationship(p2, p1)
+                if not existing and not reverse_existing:
+                    candidate_pairs.append((p1, p2))
+
+        if not candidate_pairs:
+            return {
+                "status": "success",
+                "message": "All protein pairs already have relationships",
+                "enrichment": [],
+                "novel_predictions": [],
+                "stats": {"total_pairs_evaluated": 0, "enrichment_count": 0, "novel_prediction_count": 0},
+            }
+
+        # Run predictions
+        try:
+            predictions = link_predictor.predict(candidate_pairs)
+        except Exception as e:
+            return {"status": "error", "message": f"Prediction failed: {e}"}
+
+        # Separate enrichment vs novel predictions
+        enrichment_results = []
+        novel_results = []
+        proteins_not_in_string = 0
+
+        for pred in predictions:
+            if pred.get("error"):
+                if "Unknown protein" in str(pred.get("error", "")):
+                    proteins_not_in_string += 1
+                continue
+
+            ml_score = pred.get("ml_score", 0.0)
+            in_string = pred.get("in_string", False)
+
+            if in_string:
+                enrichment_results.append({
+                    "protein1": pred["protein1"],
+                    "protein2": pred["protein2"],
+                    "ml_score": round(ml_score, 4),
+                    "in_string": True,
+                })
+            elif ml_score >= min_ml_score:
+                novel_results.append({
+                    "protein1": pred["protein1"],
+                    "protein2": pred["protein2"],
+                    "ml_score": round(ml_score, 4),
+                    "in_string": False,
+                })
+
+        # Sort by score
+        enrichment_results.sort(key=lambda x: x["ml_score"], reverse=True)
+        novel_results.sort(key=lambda x: x["ml_score"], reverse=True)
+
+        # Limit results
+        top_enrichment = enrichment_results[:max_enrichment]
+        top_novel = novel_results[:max_novel]
+
+        # Add enrichment edges to graph
+        for pred in top_enrichment:
+            self._graph.add_relationship(
+                source=pred["protein1"],
+                target=pred["protein2"],
+                rel_type=RelationshipType.INTERACTS_WITH,
+                ml_score=pred["ml_score"],
+                link_category="enrichment",
+                evidence=[{
+                    "source_type": EvidenceSource.STRING.value,
+                    "source_id": "string_enrichment",
+                    "confidence": pred["ml_score"],
+                }],
+            )
+
+        # Add novel predictions to graph
+        for pred in top_novel:
+            self._graph.add_relationship(
+                source=pred["protein1"],
+                target=pred["protein2"],
+                rel_type=RelationshipType.HYPOTHESIZED,
+                ml_score=pred["ml_score"],
+                link_category="novel_prediction",
+                evidence=[{
+                    "source_type": EvidenceSource.ML_PREDICTED.value,
+                    "source_id": "link_predictor",
+                    "confidence": pred["ml_score"],
+                }],
+            )
+
+        return {
+            "status": "success",
+            "message": f"Added {len(top_enrichment)} enrichment edges and {len(top_novel)} novel predictions",
+            "enrichment": top_enrichment,
+            "novel_predictions": top_novel,
+            "stats": {
+                "total_pairs_evaluated": len(candidate_pairs),
+                "enrichment_count": len(top_enrichment),
+                "novel_prediction_count": len(top_novel),
+                "proteins_not_in_string": proteins_not_in_string,
+                "total_enrichment_available": len(enrichment_results),
+                "total_novel_available": len(novel_results),
+            },
+        }
 
     async def expand(
         self,
