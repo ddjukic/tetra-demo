@@ -176,8 +176,12 @@ class DataFetchAgent:
         Construct an optimal PubMed query using LLM.
 
         Uses the LLM-based query construction agent from pipeline.query_agent
-        to build an intelligent PubMed search query based on the expanded
-        protein list and user's research focus.
+        to build an intelligent PubMed search query. The LLM parses the user
+        query to extract:
+        - Proteins/genes (if any)
+        - Disease terms (converts to MeSH)
+        - Organism (mice, human, rat, etc.)
+        - Date ranges (2024, recent, etc.)
 
         Falls back to deterministic construction if LLM fails.
 
@@ -187,19 +191,13 @@ class DataFetchAgent:
         Returns:
             PubMed query string.
         """
-        # Get proteins from current input
+        # Get proteins from current input (may be empty)
         proteins = []
         if self._current_input and self._current_input.seed_proteins:
             proteins = self._current_input.seed_proteins
 
-        if not proteins:
-            # Fallback if no proteins available
-            logger.warning("No proteins available for query construction, using simple query")
-            query = f'({user_query}) AND humans[MeSH Terms] AND 2020:2025[pdat]'
-            self._current_input.pubmed_query = query
-            return query
-
-        # Try LLM-based query construction
+        # Always use LLM for query construction - it handles empty proteins
+        # and parses organism/date/disease from user query
         try:
             logger.info(
                 f"Using LLM to construct PubMed query for {len(proteins)} proteins"

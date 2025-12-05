@@ -48,29 +48,49 @@ logger = logging.getLogger(__name__)
 
 QUERY_CONSTRUCTION_PROMPT = '''You are a biomedical literature search expert specializing in PubMed queries.
 
-Given a list of proteins/genes from the STRING database, construct an optimal PubMed query to find relevant literature about their interactions and functions.
+Construct an optimal PubMed query based on the user's research focus. Parse the input carefully to identify:
+- **Proteins/genes**: Use gene symbols directly (e.g., BRCA1, TP53)
+- **Diseases**: Convert to proper MeSH terms (e.g., "alzheimers" → "Alzheimer Disease"[MeSH Terms])
+- **Organisms**: Detect species mentions and use correct MeSH (e.g., "mice" → "Mice"[MeSH Terms], NOT "humans")
+- **Date ranges**: Parse year mentions (e.g., "2024" → "2024[pdat]", "recent" → last 2 years)
 
-## Rules:
-1. Use MeSH terms when appropriate (e.g., "humans[MeSH Terms]", "proteins[MeSH Terms]")
-2. Use [pdat] for date filters when specified (e.g., "2020:2024[pdat]")
-3. Group related proteins with OR in parentheses
-4. Use AND to combine protein groups with context terms
-5. Keep query under 500 characters for API compatibility
-6. Focus on mechanistic/functional relationships between proteins
-7. Prioritize high-impact proteins (those appearing multiple times in interactions)
-8. Include gene symbols without aliases to keep query concise
+## Critical Rules:
+1. **Parse organism from research focus** - if user says "mice", use "Mice"[MeSH Terms], NOT humans
+2. **Parse dates from research focus** - if user says "2024", use "2024[pdat]"
+3. Use proper MeSH terms for diseases (e.g., "Alzheimer Disease"[MeSH Terms], "Breast Neoplasms"[MeSH Terms])
+4. Group related terms with OR, combine groups with AND
+5. Keep query under 500 characters
+6. If proteins are provided, include the most relevant ones (max 8)
+7. Add context terms that enhance specificity
+
+## Common MeSH Mappings:
+- alzheimer/alzheimers → "Alzheimer Disease"[MeSH Terms]
+- parkinson → "Parkinson Disease"[MeSH Terms]
+- cancer → use specific type or "Neoplasms"[MeSH Terms]
+- diabetes → "Diabetes Mellitus"[MeSH Terms]
+- mice/mouse → "Mice"[MeSH Terms]
+- rat/rats → "Rats"[MeSH Terms]
+- human/humans → "Humans"[MeSH Terms]
+- zebrafish → "Zebrafish"[MeSH Terms]
 
 ## Input:
-Proteins: {proteins}
-Research focus: {focus}
-{date_filter}
-{species_filter}
+Proteins from STRING network: {proteins}
+User's research focus: {focus}
+Default date filter (use if no date in focus): {date_filter}
+Default species filter (override if species in focus): {species_filter}
 
 ## Output:
 Return ONLY the PubMed query string. No explanation, no markdown, just the raw query.
 
-Example output format:
-(BRCA1 OR BRCA2 OR TP53) AND (DNA repair OR DNA damage) AND humans[MeSH Terms] AND 2020:2024[pdat]
+## Examples:
+Input: "alzheimers mice 2024", proteins: []
+Output: "Alzheimer Disease"[MeSH Terms] AND "Mice"[MeSH Terms] AND 2024[pdat]
+
+Input: "BRCA1 breast cancer", proteins: [BRCA1, BRCA2, TP53]
+Output: (BRCA1 OR BRCA2 OR TP53) AND "Breast Neoplasms"[MeSH Terms] AND "Humans"[MeSH Terms]
+
+Input: "orexin signaling pathway", proteins: [HCRTR1, HCRTR2, HCRT]
+Output: (HCRTR1 OR HCRTR2 OR HCRT) AND (orexin OR hypocretin) AND "Humans"[MeSH Terms] AND 2020:2025[pdat]
 '''
 
 
@@ -160,7 +180,6 @@ async def construct_pubmed_query(
             - token_usage: Metrics from the LLM call
 
     Raises:
-        ValueError: If proteins list is empty.
         RuntimeError: If GOOGLE_API_KEY is not set.
 
     Example:
@@ -172,9 +191,7 @@ async def construct_pubmed_query(
         ... )
         >>> print(f"Query ({len(result.query)} chars): {result.query}")
     """
-    # Input validation
-    if not proteins:
-        raise ValueError("proteins list cannot be empty")
+    # Note: proteins can be empty - the LLM will construct query from research_focus alone
 
     # Check for API key
     api_key = os.environ.get("GOOGLE_API_KEY")
@@ -190,7 +207,7 @@ async def construct_pubmed_query(
 
     logger.info(
         "Constructing PubMed query for %d proteins with focus: %s",
-        len(proteins),
+        len(proteins) if proteins else 0,
         research_focus[:50] + "..." if len(research_focus) > 50 else research_focus,
     )
 
@@ -220,8 +237,11 @@ async def construct_pubmed_query(
         else "Species filter: humans[MeSH Terms]"
     )
 
+    # Format proteins list (show "None" if empty so LLM knows to parse from focus)
+    proteins_text = ", ".join(proteins) if proteins else "None (construct query from research focus only)"
+
     prompt = QUERY_CONSTRUCTION_PROMPT.format(
-        proteins=", ".join(proteins),
+        proteins=proteins_text,
         focus=research_focus,
         date_filter=date_filter_text,
         species_filter=species_filter_text,
