@@ -49,13 +49,13 @@ st.set_page_config(
 # =============================================================================
 
 def run_async(coro):
-    """Run async function in Streamlit."""
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        return loop.run_until_complete(coro)
-    finally:
-        loop.close()
+    """
+    Run async function in Streamlit.
+
+    Uses asyncio.run() which properly handles task cleanup before closing
+    the event loop, preventing "Task was destroyed but it is pending" warnings.
+    """
+    return asyncio.run(coro)
 
 
 # =============================================================================
@@ -398,12 +398,16 @@ with tab_research:
                 langfuse_session_id=str(uuid.uuid4()),
             )
 
+            async def build_kg_with_cleanup():
+                """Build KG using async context manager for proper client cleanup."""
+                async with KGOrchestrator(config=config) as orchestrator:
+                    return await orchestrator.build(
+                        user_query=query_text,
+                        max_articles=max_papers,
+                    )
+
             with st.spinner("Building knowledge graph...", show_time=True):
-                orchestrator = KGOrchestrator(config=config)
-                graph, pipeline_input = run_async(orchestrator.build(
-                    user_query=query_text,
-                    max_articles=max_papers,
-                ))
+                graph, pipeline_input = run_async(build_kg_with_cleanup())
 
                 # Set graph for Q&A agent
                 set_active_graph(graph)
@@ -453,7 +457,7 @@ with tab_research:
                     with st.expander(f"View {len(pipeline_input.articles)} Papers"):
                         for article in pipeline_input.articles[:20]:  # Show first 20
                             pmid = article.get('pmid', '')
-                            title = article.get('title', 'No title')
+                            title = article.get('title') or 'No title'  # Handle None values
                             year = article.get('year', '')
                             title_display = title[:80] + "..." if len(title) > 80 else title
                             st.markdown(f"- **[PMID:{pmid}](https://pubmed.ncbi.nlm.nih.gov/{pmid})** ({year}): {title_display}")
@@ -511,6 +515,68 @@ with tab_research:
 # Tab 1: Chat Interface
 # =============================================================================
 
+
+@st.fragment
+def render_chat_interface():
+    """
+    Chat interface fragment for isolated reruns.
+
+    Uses @st.fragment decorator to prevent full page reruns when messages
+    are added, which fixes the text input box position shifting issue.
+    """
+    st.markdown("""
+    Ask questions about your knowledge graph. The agent can:
+    - Explore graph structure and find paths
+    - Compute centrality and detect communities
+    - Run drug discovery algorithms (DIAMOnD, proximity, synergy)
+    - Generate hypotheses for predicted interactions
+    """)
+
+    # Display chat history in a container
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+            # Show tool calls if available
+            if message.get("tool_calls"):
+                with st.expander("Tools Used"):
+                    for tc in message["tool_calls"]:
+                        st.code(f"{tc['name']}({tc.get('args', {})})")
+
+    # Chat input - only manage state, never render inline (let loop handle display)
+    if prompt := st.chat_input("Ask about your knowledge graph..."):
+        # Add user message to state
+        st.session_state.messages.append({"role": "user", "content": prompt})
+
+        # Query backend and add response to state
+        with st.spinner("Thinking..."):
+            try:
+                result = run_async(
+                    st.session_state.agent_manager.query(
+                        user_id="streamlit_user",
+                        session_id=st.session_state.session_id,
+                        query=prompt,
+                    )
+                )
+
+                # Store assistant message with tool calls
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": result["response"],
+                    "tool_calls": result.get("tool_calls", []),
+                })
+
+            except Exception as e:
+                error_msg = f"Error: {str(e)}"
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": error_msg,
+                })
+
+        # Rerun fragment - loop above will render all messages in correct order
+        st.rerun(scope="fragment")
+
+
 with tab_chat:
     if "knowledge_graph" not in st.session_state:
         st.info("Build a knowledge graph first using the Research tab.")
@@ -534,70 +600,16 @@ with tab_chat:
         # Initialize agent manager if not exists
         if "agent_manager" not in st.session_state:
             from agent.graph_agent import GraphAgentManager
+            # Load link predictor and pass to agent manager
+            predictor = load_link_predictor()
             st.session_state.agent_manager = GraphAgentManager(
                 graph=st.session_state.knowledge_graph,
-                model="gemini-2.5-flash"
+                model="gemini-2.5-flash",
+                link_predictor=predictor,
             )
 
-        st.markdown("""
-        Ask questions about your knowledge graph. The agent can:
-        - Explore graph structure and find paths
-        - Compute centrality and detect communities
-        - Run drug discovery algorithms (DIAMOnD, proximity, synergy)
-        - Generate hypotheses for predicted interactions
-        """)
-
-        # Display chat history
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
-
-                # Show tool calls if available
-                if message.get("tool_calls"):
-                    with st.expander("Tools Used"):
-                        for tc in message["tool_calls"]:
-                            st.code(f"{tc['name']}({tc.get('args', {})})")
-
-        # Chat input
-        if prompt := st.chat_input("Ask about your knowledge graph..."):
-            # Add user message
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
-
-            # Get agent response
-            with st.chat_message("assistant"):
-                with st.spinner("Thinking..."):
-                    try:
-                        result = run_async(
-                            st.session_state.agent_manager.query(
-                                user_id="streamlit_user",
-                                session_id=st.session_state.session_id,
-                                query=prompt,
-                            )
-                        )
-
-                        st.markdown(result["response"])
-
-                        if result.get("tool_calls"):
-                            with st.expander("Tools Used"):
-                                for tc in result["tool_calls"]:
-                                    st.code(f"{tc['name']}({tc.get('args', {})})")
-
-                        # Store message with tool calls
-                        st.session_state.messages.append({
-                            "role": "assistant",
-                            "content": result["response"],
-                            "tool_calls": result.get("tool_calls", []),
-                        })
-
-                    except Exception as e:
-                        error_msg = f"Error: {str(e)}"
-                        st.error(error_msg)
-                        st.session_state.messages.append({
-                            "role": "assistant",
-                            "content": error_msg,
-                        })
+        # Render chat interface as a fragment (isolated reruns)
+        render_chat_interface()
 
 
 # =============================================================================
