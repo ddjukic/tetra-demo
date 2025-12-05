@@ -32,14 +32,18 @@ COPY main.py ./
 # Create models directory if not exists
 RUN mkdir -p models
 
-# Expose ports
-# 8501 = Streamlit frontend
-# 8000 = FastAPI (if added later)
-EXPOSE 8501 8000
+# Expose port (Cloud Run uses PORT env var, default to 8080)
+EXPOSE 8080
 
-# Health check
+# Set environment variables for Streamlit
+ENV STREAMLIT_SERVER_PORT=8080
+ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
+ENV STREAMLIT_SERVER_HEADLESS=true
+ENV STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+
+# Health check (uses PORT env var for flexibility)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8501/_stcore/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8080}/_stcore/health || exit 1
 
-# Default command: run Streamlit frontend
-CMD ["uv", "run", "streamlit", "run", "frontend/app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Default command: run Streamlit frontend with dynamic port (Cloud Run sets PORT)
+CMD uv run streamlit run frontend/app.py --server.port=${PORT:-8080} --server.address=0.0.0.0

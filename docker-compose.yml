@@ -7,10 +7,14 @@ services:
       dockerfile: Dockerfile
     container_name: tetra-kg-agent
     ports:
-      - "8501:8501"
+      - "8080:8080"
     environment:
+      - PORT=8080
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - NCBI_API_KEY=${NCBI_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
     volumes:
       # Mount models directory for hot-swapping models
       - ./models:/app/models:ro
@@ -18,7 +22,7 @@ services:
       - ./data:/app/data:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/_stcore/health"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -64,3 +64,14 @@ scripts/
 
 # Tests (not needed in runtime)
 tests/
+
+# Generated outputs (large files)
+graphs/
+results/
+
+# Wandb artifacts
+wandb/
+
+# Notebooks
+*.ipynb
+.ipynb_checkpoints/
